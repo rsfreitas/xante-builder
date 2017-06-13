@@ -30,6 +30,8 @@
 
 class XanteProject;
 class XTreeView;
+class XDialogItem;
+class XDialogMenu;
 
 class XMainDialog : public QWidget
 {
@@ -44,7 +46,8 @@ class XMainDialog : public QWidget
 
     private:
         XanteProject *project = nullptr;
-//        QLabel *lb;
+        XDialogItem *dialog_item;
+        XDialogMenu *dialog_menu;
 };
 
 #endif

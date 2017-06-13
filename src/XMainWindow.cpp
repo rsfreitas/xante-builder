@@ -63,7 +63,7 @@ void XMainWindow::new_project()
         editing_project = true;
         control_menu_options(true);
         project = project_wizard.get_project();
-        printf("%s: create new JTF\n", __FUNCTION__);
+        dialog->set_current_project(project);
     }
 }
 
@@ -76,8 +76,10 @@ void XMainWindow::open_project()
                                                     tr("Project files (*.pjx)"),
                                                     &selected_filter, options);
 
-    if (filename.isEmpty() == false)
+    if (filename.isEmpty() == false) {
         project = new XanteProject(filename);
+        dialog->set_current_project(project);
+    }
 }
 
 void XMainWindow::save_project()
@@ -119,21 +121,21 @@ void XMainWindow::create_menu(void)
 {
     QMenu *m_main = menuBar()->addMenu(tr("&Project"));
     ac_new_project = m_main->addAction(tr("&New project"), this,
-                                                &XMainWindow::new_project);
+                                       &XMainWindow::new_project);
 
     ac_new_project->setStatusTip(tr("Creates a new libxante project."));
 
     m_main->addSeparator();
     ac_open = m_main->addAction(tr("&Open project"), this,
-                                         &XMainWindow::open_project);
+                                &XMainWindow::open_project);
 
     ac_open->setStatusTip(tr("Opens a previously created project file."));
     ac_save = m_main->addAction(tr("&Save project"), this,
-                                         &XMainWindow::save_project);
+                                &XMainWindow::save_project);
 
     ac_save->setStatusTip(tr("Saves the project."));
     ac_close = m_main->addAction(tr("&Close project"), this,
-                                          &XMainWindow::close_project);
+                                 &XMainWindow::close_project);
 
     ac_close->setStatusTip(tr("Closes the project."));
     m_main->addSeparator();
@@ -142,12 +144,12 @@ void XMainWindow::create_menu(void)
 
     QMenu *m_actions = menuBar()->addMenu(tr("&JTF"));
     ac_jtf_main_info = m_actions->addAction(tr("&Informations"), this,
-                                                     &XMainWindow::edit_jtf_info);
+                                            &XMainWindow::edit_jtf_info);
 
     ac_jtf_main_info->setStatusTip(tr("Edits the JTF main informations."));
     m_actions->addSeparator();
     ac_test_jtf = m_actions->addAction(tr("&Test"), this,
-                                                &XMainWindow::jtf_test);
+                                       &XMainWindow::jtf_test);
 
     ac_test_jtf->setStatusTip(tr("Puts the current JTF configuration into a "
                                  "test."));

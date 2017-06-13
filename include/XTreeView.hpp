@@ -28,23 +28,23 @@
 
 #include <QTreeView>
 
-enum xtreeview_events {
-    XTreeViewItemDblClicked = 1001,
-    XTreeModelMenuSelected,
-    XTreeViewMenuInserted,
-    XTreeViewItemInserted,
-    XTreeViewItemRemoved,
-    XTreeViewItemPaste,
-    XTreeViewItemCut,
-    XTreeViewItemSelected,
-    XTreeViewMenuRenamed
-};
-
 class XTreeView : public QTreeView
 {
     Q_OBJECT
 
     public:
+        enum Events {
+            XTreeViewItemDblClicked = 1001,
+            XTreeModelMenuSelected,
+            XTreeViewMenuInserted,
+            XTreeViewItemInserted,
+            XTreeViewItemRemoved,
+            XTreeViewItemPaste,
+            XTreeViewItemCut,
+            XTreeViewItemSelected,
+            XTreeViewMenuRenamed
+        };
+
         XTreeView(QWidget *parent = 0);
         ~XTreeView();
 };

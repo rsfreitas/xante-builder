@@ -47,6 +47,8 @@ enum xante_mode {
 #include "XMainDialog.hpp"
 #include "XTreeView.hpp"
 #include "XTreeModel.hpp"
+#include "XDialogItem.hpp"
+#include "XDialogMenu.hpp"
 
 #endif
 

@@ -23,60 +23,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/*
- * TODO:
- *
- * - Criar classes diferentes para tratar quando estiver editando um menu ou
- *   um item.
- *
- */
+#include <QWidget>
+#include <QSplitter>
+#include <QHBoxLayout>
 
 #include "xante_builder.hpp"
-
-static const char *cb_menu_event_name[] = {
-    "selected",
-    "exit"
-};
-
-static const char *cb_item_event_name[] = {
-    "selected",
-    "value_confirmed",
-    "value_changed",
-    "exit"
-};
-
-static const char *cb_access_mode_name[] = {
-    "hidden",
-    "view",
-    "edit"
-};
-
-static const char *cb_item_type_name[] = {
-    NULL,
-    "menu",
-    "input-int",
-    "input-float",
-    "input-date",
-    "input-string",
-    "input-passwd",
-    "input-time",
-    "calendar",
-    "timebox",
-    "radio-checklist",
-    "checklist",
-    "yesno",
-    "dynamic-menu",
-    "delete-dynamic-menu",
-    "add-dynamic-menu"
-};
-
-static const char *cb_menu_type_name[] = {
-};
 
 XMainDialog::XMainDialog(QWidget *parent)
     : QWidget(parent)
 {
-    /* Splitter horizontal */
+    dialog_item = new XDialogItem(this);
+    dialog_menu = new XDialogMenu(this);
+    tree = new XTreeView(this);
+
+    QSplitter *splitter = new QSplitter(this);
+    splitter->setOrientation(Qt::Horizontal);
+    splitter->addWidget(tree);
+    splitter->addWidget(dialog_menu);
+
+    QHBoxLayout *layout = new QHBoxLayout;
+    layout->addWidget(splitter);
+    setLayout(layout);
 }
 
 void XMainDialog::set_current_project(XanteProject *project)

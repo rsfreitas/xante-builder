@@ -1,2 +1,4 @@
 # xante-builder
-A libxante project builder application
+
+An application to build libxante projects.
+

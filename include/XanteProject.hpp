@@ -45,6 +45,7 @@ class XanteProject {
         QString get_project_name(void);
         bool create(void);
         bool save(void);
+        const XanteJTF &get_jtf(void);
 
     private:
         XanteJTF *jtf = nullptr;

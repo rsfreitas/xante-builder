@@ -17,7 +17,8 @@ HEADERS += ../include/XMainWindow.hpp   \
         ../include/XTreeView.hpp        \
         ../include/XTreeModel.hpp       \
         ../include/XDialogMenu.hpp      \
-        ../include/XDialogItem.hpp
+        ../include/XDialogItem.hpp      \
+        ../include/XDialogJTFInfo.hpp
 
 SOURCES += main.cpp         \
         XanteConfig.cpp     \
@@ -29,5 +30,6 @@ SOURCES += main.cpp         \
         XTreeView.cpp       \
         XTreeModel.cpp      \
         XDialogMenu.cpp     \
-        XDialogItem.cpp
+        XDialogItem.cpp     \
+        XDialogJTFInfo.cpp
 

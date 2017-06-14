@@ -100,6 +100,13 @@ void XMainWindow::close_project()
 
 void XMainWindow::edit_jtf_info()
 {
+//    if (editing_project == false)
+//        return;
+
+    XDialogJTFInfo dlg(project, this);
+
+    if (dlg.exec()) {
+    }
 }
 
 void XMainWindow::jtf_test()
@@ -172,7 +179,7 @@ void XMainWindow::control_menu_options(bool enable)
     ac_open->setEnabled(!enable);
     ac_save->setEnabled(enable);
     ac_close->setEnabled(enable);
-    ac_jtf_main_info->setEnabled(enable);
+//    ac_jtf_main_info->setEnabled(enable);
     ac_test_jtf->setEnabled(enable);
 }
 

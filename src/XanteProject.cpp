@@ -108,3 +108,8 @@ bool XanteProject::save(void)
     return true;
 }
 
+const XanteJTF &XanteProject::get_jtf(void)
+{
+    return *jtf;
+}
+

@@ -49,6 +49,7 @@ enum xante_mode {
 #include "XTreeModel.hpp"
 #include "XDialogItem.hpp"
 #include "XDialogMenu.hpp"
+#include "XDialogJTFInfo.hpp"
 
 #endif
 

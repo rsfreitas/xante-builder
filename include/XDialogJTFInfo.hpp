@@ -43,17 +43,23 @@ class XDialogJTFInfo : public QDialog
         XDialogJTFInfo(XanteProject *project, QWidget *parent = 0);
         ~XDialogJTFInfo();
 
+    private slots:
+        void confirm_ok(void);
+        void confirm_cancel(void);
+
     private:
         XanteProject *project = nullptr;
 
         /* UI */
-        QComboBox *cb_main_menu;
+        QComboBox *cb_main_menu, *cb_beta;
         QLineEdit *le_application_name, *le_description, *le_company,
                   *le_plugin, *le_cfg_pathname, *le_log_pathname,
                   *le_version, *le_revision, *le_build;
 
         void create_widgets(void);
+        void reject(void);
         QHBoxLayout *create_main_menu_chooser(void);
+        QHBoxLayout *create_beta_chooser(void);
         QHBoxLayout *create_buttons(void);
         QGroupBox *create_information_widgets(void);
 };

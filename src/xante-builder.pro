@@ -7,7 +7,7 @@ TARGET = xante-builder
 DEPENDPATH += ../include src
 INCLUDEPATH += ../include
 
-QT += widgets
+QT += widgets core
 LIBS +=
 
 # Input

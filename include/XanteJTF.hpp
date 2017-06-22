@@ -32,25 +32,50 @@
 class XanteItem
 {
     public:
-        XanteItem();
-        ~XanteItem();
+        class Builder;
+        XanteItem() {}
+        XanteItem(QString application_name, QString menu_name, QJsonObject item);
+        XanteItem(QString application_name, QString menu_name, QString name);
         void write(QJsonObject &root) const;
 
     private:
-        QString name, object_id;
+        QString application_name, menu_name, name, object_id;
         enum xante_mode mode;
+};
+
+class XanteItem::Builder
+{
+    private:
+        QString application_name, menu_name, name;
+
+    public:
+        Builder(QString application_name, QString menu_name)
+            :
+                application_name(application_name),
+                menu_name(menu_name){}
+
+        Builder &set_name(const QString name)
+        {
+            this->name = name;
+            return *this;
+        }
+
+        XanteItem build() {
+            return XanteItem(this->application_name, this->menu_name, this->name);
+        }
 };
 
 class XanteMenu
 {
     public:
-        XanteMenu();
-        ~XanteMenu();
+        XanteMenu() {}
+        XanteMenu(QString application_name, QJsonObject menu);
+        XanteMenu(QString application_name, QString name);
         void write(QJsonObject &root) const;
 
     private:
+        QString application_name, name, object_id;
         QList<XanteItem> items;
-        QString name, object_id;
         enum xante_mode mode;
 };
 
@@ -58,19 +83,35 @@ class XanteJTF
 {
     public:
         class Builder;
+        XanteJTF(QString filename);
         XanteJTF(const QString application_name, const QString description,
                  const QString company, const QString plugin,
                  const QString cfg_pathname, const QString log_pathname,
                  const QString version, const int revision, const int build,
-                 const bool beta) :
-            application_name(application_name), description(description),
-            company(company), plugin(plugin), cfg_pathname(cfg_pathname),
-            log_pathname(log_pathname), version(version), revision(revision),
-            build(build), beta(beta) {}
+                 const bool beta)
+            :
+                application_name(application_name),
+                description(description),
+                company(company),
+                plugin(plugin),
+                cfg_pathname(cfg_pathname),
+                log_pathname(log_pathname),
+                version(version),
+                revision(revision),
+                build(build),
+                beta(beta)
+        {
+            build_default_menu();
+        }
+
+        static QString object_id_calc(QString application_name,
+                                      QString menu_name,
+                                      QString item_name = nullptr);
 
         bool save(QString filename);
-        void add_menu(XanteMenu menu);
-        void set_main_menu(QString menu_name);
+        void add_menu(XanteMenu menu) { menus.append(menu); }
+        void set_main_menu(QString menu_name) { main_menu = menu_name; }
+        const QString get_main_menu() { return main_menu; }
 
         /* JTF main information */
         const QString get_application_name() { return application_name; }
@@ -85,19 +126,25 @@ class XanteJTF
         bool get_beta() { return beta; }
 
     private:
-        const QString application_name, description, company, plugin,
-                      cfg_pathname, log_pathname, version;
+        QString application_name, description, company, plugin, cfg_pathname,
+                log_pathname, version;
 
-        const int revision, build;
-        const bool beta;
+        int revision, build;
+        bool beta;
         QList<XanteMenu> menus;
         QString main_menu;
         int file_revision = 1;
+        QJsonObject jtf_root;
 
         void write_jtf_data(QJsonObject &root);
         void write_jtf_ui(QJsonObject &root);
         void write_jtf_general(QJsonObject &root);
         void write_jtf_internal(QJsonObject &root);
+        void read_jtf_data(void);
+        void read_jtf_internal(void);
+        void read_jtf_general(void);
+        void read_jtf_ui(void);
+        void build_default_menu(void);
 };
 
 class XanteJTF::Builder

@@ -64,9 +64,28 @@ QHBoxLayout *XDialogJTFInfo::create_buttons(void)
     QHBoxLayout *h = new QHBoxLayout;
 
     QPushButton *btn_ok = new QPushButton(tr("Ok"));
+    connect(btn_ok, SIGNAL(clicked()), this, SLOT(confirm_ok()));
+
     QPushButton *btn_cancel = new QPushButton(tr("Cancel"));
+    connect(btn_cancel, SIGNAL(clicked()), this, SLOT(confirm_cancel()));
+
     h->addWidget(btn_ok);
     h->addWidget(btn_cancel);
+
+    return h;
+}
+
+QHBoxLayout *XDialogJTFInfo::create_beta_chooser(void)
+{
+    QHBoxLayout *h = new QHBoxLayout;
+
+    QLabel *l = new QLabel(tr("Beta:"));
+    cb_beta = new QComboBox;
+    l->setBuddy(cb_beta);
+    cb_beta->addItem(tr("Yes"));
+    cb_beta->addItem(tr("No"));
+    h->addWidget(l);
+    h->addWidget(cb_beta);
 
     return h;
 }
@@ -121,6 +140,7 @@ QGroupBox *XDialogJTFInfo::create_information_widgets(void)
         v->addLayout(h);
     }
 
+    v->addLayout(create_beta_chooser());
     gb->setLayout(v);
 
     return gb;
@@ -135,5 +155,20 @@ void XDialogJTFInfo::create_widgets(void)
     v->addLayout(create_buttons());
 
     setLayout(v);
+}
+
+void XDialogJTFInfo::confirm_ok(void)
+{
+    done(0);
+}
+
+void XDialogJTFInfo::confirm_cancel(void)
+{
+    done(-1);
+}
+
+void XDialogJTFInfo::reject(void)
+{
+    confirm_cancel();
 }
 

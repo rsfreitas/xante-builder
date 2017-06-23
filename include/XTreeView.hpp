@@ -28,25 +28,49 @@
 
 #include <QTreeView>
 
-enum xtreeview_events {
-    XTreeViewItemDblClicked = 1001,
-    XTreeModelMenuSelected,
-    XTreeViewMenuInserted,
-    XTreeViewItemInserted,
-    XTreeViewItemRemoved,
-    XTreeViewItemPaste,
-    XTreeViewItemCut,
-    XTreeViewItemSelected,
-    XTreeViewMenuRenamed
-};
+class XanteProject;
 
 class XTreeView : public QTreeView
 {
     Q_OBJECT
 
     public:
+        int current_selected_menu;
+        int current_selected_item;
+
         XTreeView(QWidget *parent = 0);
         ~XTreeView();
+        void set_current_project(XanteProject *project) { this->project = project; }
+        void control_actions(bool enable);
+
+    protected:
+        void mousePressEvent(QMouseEvent *event);
+        void mouseDoubleClickEvent(QMouseEvent *event);
+
+    private slots:
+        void add_menu();
+        void rename_menu();
+        void add_item();
+        void copy_item();
+        void paste_item();
+        void cut_item();
+        void remove_item();
+        void change_items_position();
+
+    signals:
+        void item_selected();
+        void menu_selected();
+        void content_changed();
+
+    private:
+        XanteProject *project = nullptr;
+        bool selected_line = false;
+        QMenu *menu;
+        QAction *ac_add_menu, *ac_rename_menu, *ac_add_item, *ac_copy,
+                *ac_paste, *ac_cut, *ac_remove, *ac_change;
+
+        void create_menu(void);
+        void display_selected_item(QModelIndex index);
 };
 
 #endif

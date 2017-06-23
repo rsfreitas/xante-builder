@@ -23,15 +23,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QCryptographicHash>
+#include <QByteArray>
+
 #include "xante_builder.hpp"
 
-XanteItem::XanteItem()
-{
-}
-
-XanteItem::~XanteItem()
-{
-}
+/*
+ *
+ * XanteItem
+ *
+ */
 
 void XanteItem::write(QJsonObject &root) const
 {
@@ -40,12 +44,63 @@ void XanteItem::write(QJsonObject &root) const
     root["mode"] = mode;
 }
 
-XanteMenu::XanteMenu()
+XanteItem::XanteItem(QString application_name, QString menu_name, QString name)
+    : application_name(application_name), menu_name(menu_name), name(name)
 {
+    object_id = XanteJTF::object_id_calc(application_name, menu_name, name);
+    mode = XANTE_ACCESS_EDIT;
 }
 
-XanteMenu::~XanteMenu()
+XanteItem::XanteItem(QString application_name, QString menu_name,
+    QJsonObject item)
+    : application_name(application_name), menu_name(menu_name)
 {
+    int tmp;
+
+    /* Load item from JSON */
+    name = item["name"].toString();
+    object_id = item["object_id"].toString();
+    tmp = item["mode"].toInt();
+    mode = (enum xante_mode)tmp;
+}
+
+/*
+ *
+ * XanteMenu
+ *
+ */
+
+XanteMenu::XanteMenu(QString application_name, QJsonObject menu)
+    : application_name(application_name)
+{
+    int tmp;
+
+    /* Load menu from JSON */
+    name = menu["name"].toString();
+    object_id = menu["object_id"].toString();
+    tmp = menu["mode"].toInt();
+    mode = (enum xante_mode)tmp;
+
+    QJsonArray jitems = menu["items"].toArray();
+
+    foreach(const QJsonValue &v, jitems) {
+        XanteItem it(application_name, name, v.toObject());
+        items.append(it);
+    }
+}
+
+XanteMenu::XanteMenu(QString application_name, QString name)
+    : application_name(application_name), name(name)
+{
+    object_id = XanteJTF::object_id_calc(application_name, name);
+    mode = XANTE_ACCESS_EDIT;
+
+    /* We always create an empty item for a new menu */
+    XanteItem it = XanteItem::Builder(application_name, name)
+                        .set_name(QString("Item"))
+                        .build();
+
+    items.append(it);
 }
 
 void XanteMenu::write(QJsonObject &root) const
@@ -63,6 +118,12 @@ void XanteMenu::write(QJsonObject &root) const
     root["object_id"] = object_id;
     root["items"] = jitems;
 }
+
+/*
+ *
+ * XanteJTF
+ *
+ */
 
 void XanteJTF::write_jtf_internal(QJsonObject &root)
 {
@@ -132,13 +193,93 @@ bool XanteJTF::save(QString filename)
     return true;
 }
 
-void XanteJTF::add_menu(XanteMenu menu)
+XanteJTF::XanteJTF(QString filename)
 {
-    menus.append(menu);
+    QFile file;
+    QString data;
+
+    file.setFileName(filename);
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+    data = file.readAll();
+    file.close();
+
+    QJsonDocument d = QJsonDocument::fromJson(data.toUtf8());
+    jtf_root = d.object();
+    read_jtf_data();
 }
 
-void XanteJTF::set_main_menu(QString menu_name)
+void XanteJTF::read_jtf_data(void)
 {
-    main_menu = menu_name;
+    read_jtf_internal();
+    read_jtf_general();
+    read_jtf_ui();
+}
+
+void XanteJTF::read_jtf_internal(void)
+{
+    QJsonValue value = jtf_root.value(QString("internal"));
+    QJsonObject internal = value.toObject();
+
+    file_revision = internal["jtf_revision"].toInt();
+    value = internal["application"];
+    QJsonObject application = value.toObject();
+
+    version = application["version"].toString();
+    revision = application["revision"].toInt();
+    build = application["build"].toInt();
+    beta = application["beta"].toBool();
+}
+
+void XanteJTF::read_jtf_general(void)
+{
+    QJsonValue value = jtf_root.value(QString("general"));
+    QJsonObject general = value.toObject();
+
+    application_name = general["name"].toString();
+    description = general["description"].toString();
+    company = general["company"].toString();
+    plugin = general["plugin"].toString();
+    cfg_pathname = general["config_pathname"].toString();
+    log_pathname = general["log_pathname"].toString();
+}
+
+void XanteJTF::read_jtf_ui(void)
+{
+    QJsonValue value = jtf_root.value(QString("ui"));
+    QJsonObject ui = value.toObject();
+    QJsonArray jmenus = ui["menus"].toArray();
+    main_menu = ui["main_menu"].toString();
+
+    foreach(const QJsonValue &v, jmenus) {
+        XanteMenu m(application_name, v.toObject());
+        menus.append(m);
+    }
+}
+
+/*
+ * Here we calculate an object's object_id property. It is composed of the
+ * application name and the menu name, if we're talking about a menu. If it
+ * is an item, the item's name is also used.
+ */
+QString XanteJTF::object_id_calc(QString application_name, QString menu_name,
+    QString item_name)
+{
+    QCryptographicHash hash(QCryptographicHash::Sha1);
+
+    hash.addData(application_name.toStdString().c_str(), menu_name.size());
+    hash.addData(menu_name.toStdString().c_str(), menu_name.size());
+
+    if (item_name != nullptr)
+        hash.addData(item_name.toStdString().c_str(), item_name.size());
+
+    QByteArray res = hash.result().toHex();
+
+    return QString(res);
+}
+
+void XanteJTF::build_default_menu(void)
+{
+    XanteMenu m(application_name, QString("Main"));
+    menus.append(m);
 }
 

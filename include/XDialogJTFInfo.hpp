@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Sat Jun 10 11:00:17 2017
+ * Created at: Tue Jun 13 16:27:19 2017
  * Project: xante-builder
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -23,37 +23,45 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _XMAINDIALOG_HPP
-#define _XMAINDIALOG_HPP          1
+#ifndef _XDIALOGJTFINFO_HPP
+#define _XDIALOGJTFINFO_HPP          1
 
+#include <QDialog>
 #include <QWidget>
 
+class QComboBox;
+class QLineEdit;
+class QGroupBox;
+class QHBoxLayout;
 class XanteProject;
-class XTreeView;
-class XTreeModel;
-class XDialogItem;
-class XDialogMenu;
 
-class XMainDialog : public QWidget
+class XDialogJTFInfo : public QDialog
 {
     Q_OBJECT
 
     public:
-        XMainDialog(QWidget *parent = 0);
-        ~XMainDialog() {}
-        void set_current_project(XanteProject *project);
-        void set_tree_content(XTreeModel *model, bool enable_menu);
+        XDialogJTFInfo(XanteProject *project, QWidget *parent = 0);
+        ~XDialogJTFInfo();
 
     private slots:
-        void dialog_item_selected();
-        void dialog_menu_selected();
-        void dialog_content_changed();
+        void confirm_ok(void);
+        void confirm_cancel(void);
 
     private:
         XanteProject *project = nullptr;
-        XDialogItem *dialog_item;
-        XDialogMenu *dialog_menu;
-        XTreeView *tree;
+
+        /* UI */
+        QComboBox *cb_main_menu, *cb_beta;
+        QLineEdit *le_application_name, *le_description, *le_company,
+                  *le_plugin, *le_cfg_pathname, *le_log_pathname,
+                  *le_version, *le_revision, *le_build;
+
+        void create_widgets(void);
+        void reject(void);
+        QHBoxLayout *create_main_menu_chooser(void);
+        QHBoxLayout *create_beta_chooser(void);
+        QHBoxLayout *create_buttons(void);
+        QGroupBox *create_information_widgets(void);
 };
 
 #endif

@@ -33,6 +33,7 @@ XanteProject::XanteProject(QString filename)
 {
     info = QFileInfo(filename);
     load_project_file();
+    jtf = new XanteJTF(jtf_filename);
 }
 
 XanteProject::XanteProject(QString project_name, QString path, XanteJTF *jtf)
@@ -106,5 +107,10 @@ bool XanteProject::save(void)
         return false;
 
     return true;
+}
+
+const XanteJTF &XanteProject::get_jtf(void)
+{
+    return *jtf;
 }
 

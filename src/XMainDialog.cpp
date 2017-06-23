@@ -33,13 +33,22 @@ XMainDialog::XMainDialog(QWidget *parent)
     : QWidget(parent)
 {
     dialog_item = new XDialogItem(this);
+    dialog_item->setEnabled(false);
     dialog_menu = new XDialogMenu(this);
+    dialog_menu->setEnabled(false);
+
     tree = new XTreeView(this);
+    connect(tree, SIGNAL(item_selected()), this, SLOT(dialog_item_selected()));
+    connect(tree, SIGNAL(menu_selected()), this, SLOT(dialog_menu_selected()));
+    connect(tree, SIGNAL(content_changed()), this,
+            SLOT(dialog_content_changed()));
 
     QSplitter *splitter = new QSplitter(this);
     splitter->setOrientation(Qt::Horizontal);
     splitter->addWidget(tree);
     splitter->addWidget(dialog_menu);
+    splitter->addWidget(dialog_item);
+    dialog_item->hide();
 
     QHBoxLayout *layout = new QHBoxLayout;
     layout->addWidget(splitter);
@@ -49,13 +58,28 @@ XMainDialog::XMainDialog(QWidget *parent)
 void XMainDialog::set_current_project(XanteProject *project)
 {
     this->project = project;
+    tree->set_current_project(project);
 }
 
-/*void XMainDialog::set_xante_menu_property_objects(void)
+void XMainDialog::set_tree_content(XTreeModel *model, bool enable_menu)
 {
+    tree->setModel(model);
+    tree->control_actions(enable_menu);
 }
 
-void XMainDialog::set_xante_item_property_objects(void)
+void XMainDialog::dialog_item_selected()
 {
-}*/
+    dialog_menu->hide();
+    dialog_item->show();
+}
+
+void XMainDialog::dialog_menu_selected()
+{
+    dialog_menu->show();
+    dialog_item->hide();
+}
+
+void XMainDialog::dialog_content_changed()
+{
+}
 

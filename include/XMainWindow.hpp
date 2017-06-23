@@ -66,7 +66,7 @@ class XMainWindow : public QMainWindow
 
         void create_menu_actions(void);
         void create_menu(void);
-        void control_menu_options(bool enable);
+        void control_window_widgets(bool enable);
 };
 
 #endif

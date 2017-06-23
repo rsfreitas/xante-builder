@@ -28,11 +28,26 @@
 
 #include <QTreeView>
 
+class XanteProject;
+
 class XTreeItem
 {
     public:
         XTreeItem(const QList<QVariant> &data, XTreeItem *parent = 0);
         ~XTreeItem();
+
+        void appendChild(XTreeItem *child);
+        XTreeItem *child(int row);
+        int childCount() const;
+        int columnCount() const;
+        QVariant data(int column) const;
+        int row() const;
+        XTreeItem *parent();
+
+    private:
+        QList<XTreeItem *> childItems;
+        QList<QVariant> itemData;
+        XTreeItem *parentItem;
 };
 
 class XTreeModel : public QAbstractItemModel
@@ -41,7 +56,24 @@ class XTreeModel : public QAbstractItemModel
 
     public:
         XTreeModel(QWidget *parent = 0);
+        XTreeModel(XanteProject *project, QWidget *parent = 0);
         ~XTreeModel();
+
+        QVariant data(const QModelIndex &index, int role) const;
+        QModelIndex index(int row, int column,
+                          const QModelIndex &parent = QModelIndex()) const;
+
+        QModelIndex parent(const QModelIndex &index) const;
+        int rowCount(const QModelIndex &parent = QModelIndex()) const;
+        int columnCount(const QModelIndex &parent = QModelIndex()) const;
+        QVariant headerData(int section, Qt::Orientation orientation,
+                            int rotel = Qt::DisplayRole) const;
+
+        void setup_model_data(XTreeItem *parent);
+
+    private:
+        XTreeItem *root_item;
+        XanteProject *project;
 };
 
 #endif

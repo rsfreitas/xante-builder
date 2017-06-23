@@ -30,6 +30,7 @@
 
 class XanteProject;
 class XTreeView;
+class XTreeModel;
 class XDialogItem;
 class XDialogMenu;
 
@@ -38,16 +39,21 @@ class XMainDialog : public QWidget
     Q_OBJECT
 
     public:
-        XTreeView *tree;
-
         XMainDialog(QWidget *parent = 0);
         ~XMainDialog() {}
         void set_current_project(XanteProject *project);
+        void set_tree_content(XTreeModel *model, bool enable_menu);
+
+    private slots:
+        void dialog_item_selected();
+        void dialog_menu_selected();
+        void dialog_content_changed();
 
     private:
         XanteProject *project = nullptr;
         XDialogItem *dialog_item;
         XDialogMenu *dialog_menu;
+        XTreeView *tree;
 };
 
 #endif

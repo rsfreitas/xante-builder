@@ -60,10 +60,9 @@ void XMainWindow::new_project()
     XProjectWizard project_wizard;
 
     if (project_wizard.exec()) {
-        editing_project = true;
-        control_menu_options(true);
         project = project_wizard.get_project();
         dialog->set_current_project(project);
+        control_window_widgets(true);
     }
 }
 
@@ -79,6 +78,7 @@ void XMainWindow::open_project()
     if (filename.isEmpty() == false) {
         project = new XanteProject(filename);
         dialog->set_current_project(project);
+        control_window_widgets(true);
     }
 }
 
@@ -92,7 +92,7 @@ void XMainWindow::close_project()
     if (editing_project == false)
         return;
 
-    control_menu_options(false);
+    control_window_widgets(false);
 
     if (project != nullptr)
         delete project;
@@ -100,8 +100,8 @@ void XMainWindow::close_project()
 
 void XMainWindow::edit_jtf_info()
 {
-//    if (editing_project == false)
-//        return;
+    if (editing_project == false)
+        return;
 
     XDialogJTFInfo dlg(project, this);
 
@@ -170,16 +170,27 @@ void XMainWindow::create_menu(void)
                                              &QApplication::aboutQt);
 
     ac_about_qt->setStatusTip(tr("Shows the current Qt version."));
-    control_menu_options(false);
+    control_window_widgets(false);
 }
 
-void XMainWindow::control_menu_options(bool enable)
+void XMainWindow::control_window_widgets(bool enable)
 {
+    XTreeModel *model;
+
+    editing_project = enable;
+
+    /* Enable/Disable widgets */
     ac_new_project->setEnabled(!enable);
     ac_open->setEnabled(!enable);
     ac_save->setEnabled(enable);
     ac_close->setEnabled(enable);
-//    ac_jtf_main_info->setEnabled(enable);
+    ac_jtf_main_info->setEnabled(enable);
     ac_test_jtf->setEnabled(enable);
+
+    /* Populate the tree view */
+    if (enable == true) {
+        model = new XTreeModel(project, this);
+        dialog->set_tree_content(model, enable);
+    }
 }
 

@@ -38,6 +38,9 @@ class XanteItem
         XanteItem(QString application_name, QString menu_name, QString name);
         void write(QJsonObject &root) const;
 
+        /* Item properties */
+        const QString get_name(void) { return name; }
+
     private:
         QString application_name, menu_name, name, object_id;
         enum xante_mode mode;
@@ -72,6 +75,11 @@ class XanteMenu
         XanteMenu(QString application_name, QJsonObject menu);
         XanteMenu(QString application_name, QString name);
         void write(QJsonObject &root) const;
+        int total_items(void) { return items.size(); }
+        XanteItem item_at(int index) { return items.at(index); }
+
+        /* Menu properties */
+        const QString get_name(void) { return name; }
 
     private:
         QString application_name, name, object_id;
@@ -124,6 +132,9 @@ class XanteJTF
         int get_revision() { return revision; }
         int get_build() { return build; }
         bool get_beta() { return beta; }
+
+        int total_menus(void) { return menus.size(); }
+        XanteMenu menu_at(int index) { return menus.at(index); }
 
     private:
         QString application_name, description, company, plugin, cfg_pathname,

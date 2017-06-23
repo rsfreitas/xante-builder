@@ -205,6 +205,7 @@ XanteJTF::XanteJTF(QString filename)
 
     QJsonDocument d = QJsonDocument::fromJson(data.toUtf8());
     jtf_root = d.object();
+    read_jtf_data();
 }
 
 void XanteJTF::read_jtf_data(void)

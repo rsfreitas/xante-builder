@@ -138,8 +138,9 @@ class XanteItem
         enum XanteItem::Type type;
         enum XanteItem::OptionType option_type;
         int string_length;
+        bool events_exist;
 
-        bool has_events(void) const { return events.size() != 0; }
+        bool has_events(void) const { return events_exist; }
         bool has_options(void) const { return (type >= XanteItem::Type::InputInt) &&
                                               (type <= XanteItem::Type::DeleteDynamicMenu); }
         bool has_input_ranges(void) const { return (type >= XanteItem::Type::InputInt) &&
@@ -200,8 +201,12 @@ class XanteMenu
         enum XanteMenu::Type get_type(void) const { return type; }
         enum XanteMenu::DynamicType get_dynamic_type(void) const { return dynamic_type; }
         enum XanteMode get_mode(void) const { return mode; }
-        bool has_events(void) const { return events.size() != 0; }
+        bool has_events(void) const { return events_exist; }
         int get_dynamic_copies(void) const { return dynamic_copies; }
+        const QStringList get_dynamic_options(void) const { return copies; }
+        const QString get_dynamic_origin_block(void) const { return dynamic_origin_block; }
+        const QString get_dynamic_origin_item(void) const { return dynamic_origin_item; }
+        const QString get_block_prefix(void) const { return dynamic_block_prefix; }
 
         void set_name(QString name);
         void set_type(enum XanteMenu::Type type) { this->type = type; }
@@ -243,9 +248,10 @@ class XanteMenu
         enum XanteMenu::DynamicType dynamic_type;
         int dynamic_copies;
         QVector<QString> events;
-        QList<QString> copies;
+        QStringList copies;
         QList<XanteItem> items;
         QMap<enum XanteMenu::Type, QString> type_description;
+        bool events_exist;
 
         void pre_load(void);
         void parse(QJsonObject menu);

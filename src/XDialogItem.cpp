@@ -430,6 +430,8 @@ void XDialogItem::setup_widgets(void)
 
 void XDialogItem::setup_widgets(XanteItem item)
 {
+    line_edit[XDialogItem::LineEdit::Name]->setText(item.get_name());
+    line_edit[XDialogItem::LineEdit::ObjectId]->setText(item.get_object_id());
 }
 
 void XDialogItem::select_item_type(int index)

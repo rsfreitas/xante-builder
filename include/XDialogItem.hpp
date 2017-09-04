@@ -130,18 +130,6 @@ class XDialogItem : public QWidget
         QVector<QComboBox *> combo_box;
         QVector<QListWidget *> list_widget;
 
-        QComboBox *cb_type, *cb_mode, *cb_menu_id;
-        QGroupBox *gb_events, *gb_help;
-        QCheckBox *chb_ev_selected, *chb_ev_exit, *chb_ev_value_confirmed,
-                  *chb_ev_value_changed;
-
-        QListWidget *l_options, *l_help_options;
-        QLineEdit *le_name, *le_object_id, *le_ev_selected, *le_ev_exit,
-                  *le_ev_value_confirmed, *le_ev_value_changed, *le_cfg_block,
-                  *le_cfg_item, *le_options, *le_input_str_length,
-                  *le_input_min, *le_input_max, *le_help_brief,
-                  *le_help_description, *le_default_value;
-
         QHBoxLayout *create_identification_widgets(void);
         QHBoxLayout *create_type_widgets(void);
         QHBoxLayout *create_item_details_widgets(void);

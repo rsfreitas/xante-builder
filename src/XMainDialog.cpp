@@ -55,10 +55,16 @@ XMainDialog::XMainDialog(QWidget *parent)
     setLayout(layout);
 }
 
+/*
+ * Here we fill every widget data with project content.
+ */
 void XMainDialog::set_current_project(XanteProject *project)
 {
     this->project = project;
     tree->set_current_project(project);
+    dialog_menu->set_current_project(project, tree->current_selected_menu);
+    dialog_item->set_current_project(project, tree->current_selected_menu,
+                                     tree->current_selected_item);
 }
 
 void XMainDialog::set_tree_content(XTreeModel *model, bool enable_menu)
@@ -71,15 +77,24 @@ void XMainDialog::dialog_item_selected()
 {
     dialog_menu->hide();
     dialog_item->show();
+    dialog_item->set_selection(tree->current_selected_menu,
+                               tree->current_selected_item);
 }
 
 void XMainDialog::dialog_menu_selected()
 {
     dialog_menu->show();
+    dialog_menu->set_selection(tree->current_selected_menu);
     dialog_item->hide();
 }
 
 void XMainDialog::dialog_content_changed()
 {
+}
+
+void XMainDialog::control_project_widgets(bool enable)
+{
+    dialog_menu->setEnabled(enable);
+    dialog_item->setEnabled(enable);
 }
 

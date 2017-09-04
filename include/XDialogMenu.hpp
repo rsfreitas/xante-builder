@@ -27,6 +27,9 @@
 #define _XDIALOGMENU_HPP          1
 
 #include <QWidget>
+#include <QVector>
+
+#include "XanteJTF.hpp"
 
 class QLineEdit;
 class QComboBox;
@@ -35,39 +38,76 @@ class QCheckBox;
 class QRadioButton;
 class QHBoxLayout;
 class QListWidget;
+class XanteProject;
 
 class XDialogMenu : public QWidget
 {
     Q_OBJECT
 
     public:
-        enum Type {
-            DEFAULT,
-            DYNAMIC
-        };
-
-        enum DynamicMenuType {
-            FixedSize,
-            FixedOptions,
-            DynamicOptions,
-
-            MaxType
-        };
-
         XDialogMenu(QWidget *parent = 0);
         ~XDialogMenu();
+        void set_current_project(XanteProject *project,
+                                 int selected_menu_index);
+
+        void set_selection(int selected_menu_index);
 
     public slots:
-        void onDmRadioToggled(bool checked);
+        void dynamic_radio_toggled(bool checked);
+        void select_menu_type(int index);
+        void add_dynamic_fixed_option(void);
+        void del_dynamic_fixed_option(void);
+
+    protected:
+        void hideEvent(QHideEvent *event) override;
 
     private:
+        enum LineEdit {
+            Name,
+            ObjectId,
+            EventSelected,
+            EventExit,
+            DynamicOriginBlock,
+            DynamicOriginItem,
+            DynamicNumberOfCopies,
+
+            MaxLineEdit
+        };
+
+        enum CheckBox {
+            EvSelected,
+            EvExit,
+
+            MaxCheckBox
+        };
+
+        enum ComboBox {
+            Type,
+            Mode,
+
+            MaxComboBox
+        };
+
+        enum GroupBox {
+            DynamicFixed,
+            DynamicOptions,
+            DynamicConfig,
+            Events,
+            Dynamic,
+
+            MaxGroupBox
+        };
+
+        XanteProject *project = nullptr;
+        int current_menu_index = -1;
+
         /* UI */
-        QComboBox *cb_type, *cb_mode;
-        QGroupBox *gb_events, *gb_dynamic;
-        QCheckBox *chb_ev_selected, *chb_ev_exit;
-        QListWidget *l_dm_options;
-        QLineEdit *le_name, *le_object_id, *le_ev_selected, *le_ev_exit,
-                  *le_dm_copies, *le_dm_origin_block, *le_dm_origin_item;
+        QVector<QLineEdit *> line_edit;
+        QVector<QCheckBox *> check_box;
+        QVector<QComboBox *> combo_box;
+        QVector<QGroupBox *> group_box;
+
+        QListWidget *dynamic_options;
 
         QHBoxLayout *create_identification_widgets(void);
         QHBoxLayout *create_type_widgets(void);
@@ -76,7 +116,9 @@ class XDialogMenu : public QWidget
         QGroupBox *create_dm_fixed_size_widgets(void);
         QGroupBox *create_dm_fixed_options_widgets(void);
         QGroupBox *create_dm_options_widgets(void);
-        void disable_all_widgets(void);
+
+        void setup_widgets(void);
+        void setup_widgets(XanteMenu menu);
 };
 
 #endif

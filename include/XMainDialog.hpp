@@ -43,6 +43,7 @@ class XMainDialog : public QWidget
         ~XMainDialog() {}
         void set_current_project(XanteProject *project);
         void set_tree_content(XTreeModel *model, bool enable_menu);
+        void control_project_widgets(bool enable);
 
     private slots:
         void dialog_item_selected();

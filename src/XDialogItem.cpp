@@ -34,19 +34,13 @@
 #include <QGridLayout>
 #include <QPushButton>
 #include <QListWidget>
-
+#include <QMap>
+#include <QPair>
+#include <QVector>
+#include <QMapIterator>
+#include <QInputDialog>
 
 #include "xante_builder.hpp"
-
-static const char *cb_item_event_name[] = {
-    "selected",
-    "value_confirmed",
-    "value_changed",
-    "exit"
-};
-
-#define ITEM_EVENT      \
-    (sizeof(cb_item_event_name) / sizeof(cb_item_event_name[0]))
 
 static const char *cb_access_mode_name[] = {
     "hidden",
@@ -81,81 +75,99 @@ static const char *cb_item_type_name[] = {
 
 QHBoxLayout *XDialogItem::create_identification_widgets(void)
 {
+    QLabel *label;
+    QLineEdit *edit;
     QHBoxLayout *h = new QHBoxLayout;
 
     /* name */
-    QLabel *lname = new QLabel(tr("Name:"));
-    le_name = new QLineEdit;
-    lname->setBuddy(le_name);
+    label = new QLabel(tr("Name:"));
+    edit = new QLineEdit;
+    label->setBuddy(edit);
+    line_edit[XDialogItem::LineEdit::Name] = edit;
+    h->addWidget(label);
+    h->addWidget(edit);
 
     /* object_id */
-    QLabel *lobject_id = new QLabel(tr("Object ID:"));
-    le_object_id = new QLineEdit;
-    lobject_id->setBuddy(le_object_id);
-
-    h->addWidget(lname);
-    h->addWidget(le_name);
-    h->addWidget(lobject_id);
-    h->addWidget(le_object_id);
+    label = new QLabel(tr("Object ID:"));
+    edit = new QLineEdit;
+    label->setBuddy(edit);
+    edit->setEnabled(false);
+    line_edit[XDialogItem::LineEdit::ObjectId] = edit;
+    h->addWidget(label);
+    h->addWidget(edit);
 
     return h;
 }
 
 QHBoxLayout *XDialogItem::create_type_widgets(void)
 {
+    QLabel *label;
+    QComboBox *cb;
     QHBoxLayout *h = new QHBoxLayout;
 
     /* type */
-    QLabel *ltype = new QLabel(tr("Item type:"));
-    cb_type = new QComboBox;
+    label = new QLabel(tr("Item type:"));
+    cb = new QComboBox;
+    label->setBuddy(cb);
 
     for (unsigned int i = 1; i < ITEM_TYPE; i++)
-        cb_type->addItem(QString(cb_item_type_name[i]));
+        cb->addItem(QString(cb_item_type_name[i]));
+
+    h->addWidget(label);
+    h->addWidget(cb);
+    connect(cb, SIGNAL(activated(int)), this, SLOT(select_item_type(int)));
+    combo_box[XDialogItem::ComboBox::Type] = cb;
 
     /* mode */
-    QLabel *lmode = new QLabel(tr("Access mode:"));
-    cb_mode = new QComboBox;
+    label = new QLabel(tr("Access mode:"));
+    cb = new QComboBox;
 
     for (unsigned int i = 0; i < ACCESS_MODE; i++)
-        cb_mode->addItem(QString(cb_access_mode_name[i]));
+        cb ->addItem(QString(cb_access_mode_name[i]));
+
+    h->addWidget(label);
+    h->addWidget(cb);
+    combo_box[XDialogItem::ComboBox::Mode] = cb;
 
     /* menu_id */
-    QLabel *lmenu = new QLabel(tr("Referenced menu:"));
-    cb_menu_id = new QComboBox;
+    label = new QLabel(tr("Referenced menu:"));
+    cb = new QComboBox;
 
-    h->addWidget(ltype);
-    h->addWidget(cb_type);
-    h->addWidget(lmode);
-    h->addWidget(cb_mode);
-    h->addWidget(lmenu);
-    h->addWidget(cb_menu_id);
+    h->addWidget(label);
+    h->addWidget(cb);
+    combo_box[XDialogItem::ComboBox::MenuReference] = cb;
 
     return h;
 }
 
 QGroupBox *XDialogItem::create_item_configuration_widgets(void)
 {
+    QLabel *label;
+    QLineEdit *edit;
     QGroupBox *g = new QGroupBox(tr("Configuration"));
     QHBoxLayout *h = new QHBoxLayout;
 
     /* default value */
-    QLabel *lvalue = new QLabel(tr("Default item value:"));
-    le_default_value = new QLineEdit;
-    lvalue->setBuddy(le_default_value);
-    h->addWidget(lvalue);
-    h->addWidget(le_default_value);
+    label = new QLabel(tr("Default item value:"));
+    edit = new QLineEdit;
+    label->setBuddy(edit);
+    h->addWidget(label);
+    h->addWidget(edit);
+    line_edit[XDialogItem::LineEdit::DefaultValue] = edit;
 
-    QLabel *lblock = new QLabel(tr("Block:"));
-    le_cfg_block = new QLineEdit;
-    lblock->setBuddy(le_cfg_block);
-    h->addWidget(lblock);
-    h->addWidget(le_cfg_block);
+    label = new QLabel(tr("Block:"));
+    edit = new QLineEdit;
+    label->setBuddy(edit);
+    h->addWidget(label);
+    h->addWidget(edit);
+    line_edit[XDialogItem::LineEdit::CfgBlock] = edit;
 
-    QLabel *litem = new QLabel(tr("Item:"));
-    le_cfg_item = new QLineEdit;
-    litem->setBuddy(le_cfg_item);
-    h->addWidget(litem);
-    h->addWidget(le_cfg_item);
+    label = new QLabel(tr("Item:"));
+    edit = new QLineEdit;
+    label->setBuddy(edit);
+    h->addWidget(label);
+    h->addWidget(edit);
+    line_edit[XDialogItem::LineEdit::CfgItem] = edit;
 
     g->setLayout(h);
 
@@ -164,29 +176,40 @@ QGroupBox *XDialogItem::create_item_configuration_widgets(void)
 
 QGroupBox *XDialogItem::create_item_options_widgets(void)
 {
+    QLabel *label;
+    QLineEdit *edit;
+    QListWidget *lwidget;
     QGroupBox *g = new QGroupBox(tr("Options"));
     QVBoxLayout *vbuttons = new QVBoxLayout,
                 *v = new QVBoxLayout;;
     QHBoxLayout *hdescription = new QHBoxLayout,
                 *hbuttons = new QHBoxLayout;
 
-    QLabel *ldescription = new QLabel(tr("Description:"));
-    le_options = new QLineEdit;
-    ldescription->setBuddy(le_options);
-    hdescription->addWidget(ldescription);
-    hdescription->addWidget(le_options);
+    QGroupBox *lo = new QGroupBox(tr("List:"));
+    label = new QLabel(tr("Description:"));
+    edit = new QLineEdit;
+    label->setBuddy(edit);
+    hdescription->addWidget(label);
+    hdescription->addWidget(edit);
+    line_edit[XDialogItem::LineEdit::Options] = edit;
 
     QPushButton *bt_add = new QPushButton(tr("Add"));
     QPushButton *bt_del = new QPushButton(tr("Remove"));
     vbuttons->addWidget(bt_add, 0, Qt::AlignBottom);
     vbuttons->addWidget(bt_del, 0, Qt::AlignTop);
+    connect(bt_add, SIGNAL(clicked()), this, SLOT(add_option()));
+    connect(bt_del, SIGNAL(clicked()), this, SLOT(del_option()));
 
-    l_options = new QListWidget;
-    hbuttons->addWidget(l_options);
+    lwidget = new QListWidget;
+    hbuttons->addWidget(lwidget);
     hbuttons->addLayout(vbuttons);
+    lo->setLayout(hbuttons);
+    list_widget[XDialogItem::ListWidget::OptionsLw] = lwidget;
+    group_box[XDialogItem::GroupBox::ListOptions] = lo;
 
     v->addLayout(hdescription);
-    v->addLayout(hbuttons);
+//    v->addLayout(hbuttons);
+    v->addWidget(lo);
     g->setLayout(v);
 
     return g;
@@ -194,6 +217,9 @@ QGroupBox *XDialogItem::create_item_options_widgets(void)
 
 QGroupBox *XDialogItem::create_item_help_widgets(void)
 {
+    QLabel *label;
+    QLineEdit *edit;
+    QListWidget *lwidget;
     QGroupBox *g = new QGroupBox(tr("Help details"));
     QVBoxLayout *v = new QVBoxLayout,
                 *vbuttons = new QVBoxLayout;
@@ -201,26 +227,29 @@ QGroupBox *XDialogItem::create_item_help_widgets(void)
                 *hdescription = new QHBoxLayout,
                 *hbrief = new QHBoxLayout;
 
-    QLabel *lbrief = new QLabel(tr("Brief:"));
-    le_help_brief = new QLineEdit;
-    lbrief->setBuddy(le_help_brief);
-    hbrief->addWidget(lbrief);
-    hbrief->addWidget(le_help_brief);
+    label = new QLabel(tr("Brief:"));
+    edit = new QLineEdit;
+    label->setBuddy(edit);
+    hbrief->addWidget(label);
+    hbrief->addWidget(edit);
+    line_edit[XDialogItem::LineEdit::HelpBrief] = edit;
 
-    QLabel *ldescription = new QLabel(tr("Description:"));
-    le_help_description = new QLineEdit;
-    ldescription->setBuddy(le_help_description);
-    hdescription->addWidget(ldescription);
-    hdescription->addWidget(le_help_description);
+    label = new QLabel(tr("Description:"));
+    edit = new QLineEdit;
+    label->setBuddy(edit);
+    hdescription->addWidget(label);
+    hdescription->addWidget(edit);
+    line_edit[XDialogItem::LineEdit::HelpDescription] = edit;
 
     QPushButton *bt_add = new QPushButton(tr("Add"));
     QPushButton *bt_del = new QPushButton(tr("Remove"));
     vbuttons->addWidget(bt_add, 0, Qt::AlignBottom);
     vbuttons->addWidget(bt_del, 0, Qt::AlignTop);
 
-    l_help_options = new QListWidget;
-    hbuttons->addWidget(l_help_options);
+    lwidget = new QListWidget;
+    hbuttons->addWidget(lwidget);
     hbuttons->addLayout(vbuttons);
+    list_widget[XDialogItem::ListWidget::HelpOptions] = lwidget;
 
     v->addLayout(hbrief);
     v->addLayout(hdescription);
@@ -228,6 +257,7 @@ QGroupBox *XDialogItem::create_item_help_widgets(void)
     g->setCheckable(true);
     g->setChecked(false);
     g->setLayout(v);
+    group_box[XDialogItem::GroupBox::Help] = g;
 
     return g;
 }
@@ -244,35 +274,40 @@ QHBoxLayout *XDialogItem::create_item_details_widgets(void)
 
 QGroupBox *XDialogItem::create_ranges_widgets(void)
 {
+    QLabel *label;
+    QLineEdit *edit;
+    QHBoxLayout *h;
     QGroupBox *g = new QGroupBox(tr("Input ranges"));
     QVBoxLayout *v = new QVBoxLayout;
-    QHBoxLayout *h;
 
     /* String length */
     h = new QHBoxLayout;
-    QLabel *lstr = new QLabel(tr("String length:"));
-    le_input_str_length = new QLineEdit;
-    lstr->setBuddy(le_input_str_length);
-    h->addWidget(lstr);
-    h->addWidget(le_input_str_length);
+    label = new QLabel(tr("String length:"));
+    edit = new QLineEdit;
+    label->setBuddy(edit);
+    h->addWidget(label);
+    h->addWidget(edit);
+    line_edit[XDialogItem::LineEdit::InputStringLength] = edit;
     v->addLayout(h);
 
     /* Min */
     h = new QHBoxLayout;
-    QLabel *lmin = new QLabel(tr("Min:"));
-    le_input_min = new QLineEdit;
-    lmin->setBuddy(le_input_min);
-    h->addWidget(lmin);
-    h->addWidget(le_input_min);
+    label = new QLabel(tr("Min:"));
+    edit = new QLineEdit;
+    label->setBuddy(edit);
+    h->addWidget(label);
+    h->addWidget(edit);
+    line_edit[XDialogItem::LineEdit::InputMin] = edit;
     v->addLayout(h);
 
     /* Max */
     h = new QHBoxLayout;
-    QLabel *lmax = new QLabel(tr("Max:"));
-    le_input_max = new QLineEdit;
-    lmax->setBuddy(le_input_min);
-    h->addWidget(lmax);
-    h->addWidget(le_input_max);
+    label = new QLabel(tr("Max:"));
+    edit = new QLineEdit;
+    label->setBuddy(edit);
+    h->addWidget(label);
+    h->addWidget(edit);
+    line_edit[XDialogItem::LineEdit::InputMax] = edit;
     v->addLayout(h);
 
     g->setLayout(v);
@@ -282,36 +317,48 @@ QGroupBox *XDialogItem::create_ranges_widgets(void)
 
 QGroupBox *XDialogItem::create_events_widgets(void)
 {
-    struct ev_widget_detail {
-        const char  *name;
-        QLineEdit   *le;
-        QCheckBox   *cb;
-    };
-
-    struct ev_widget_detail *ev, events[] = {
-        { "Selected", le_ev_selected, chb_ev_selected },
-        { "Value confirmed", le_ev_value_confirmed, chb_ev_value_confirmed },
-        { "Value changed", le_ev_value_changed, chb_ev_value_changed },
-        { "Exit", le_ev_exit, chb_ev_exit }
-    };
-
-    int i, t;
+    QLabel *label;
+    QLineEdit *edit;
+    QCheckBox *cb;
+    QHBoxLayout *h;
+    QMap<QString, QPair<enum XDialogItem::LineEdit, enum XDialogItem::CheckBox>> events_label;
     QGroupBox *g = new QGroupBox(tr("Events"));
     QVBoxLayout *v = new QVBoxLayout;
 
-    t = sizeof(events) / sizeof(events[0]);
+    events_label.insert("Selected",
+                        qMakePair(XDialogItem::LineEdit::EventSelected,
+                                  XDialogItem::CheckBox::EvSelected));
 
-    for (i = 0; i < t; i++) {
-        ev = &events[i];
+    events_label.insert("Value confirmed",
+                        qMakePair(XDialogItem::LineEdit::EventValueConfirmed,
+                                  XDialogItem::CheckBox::EvValueConfirmed));
 
-        QHBoxLayout *h = new QHBoxLayout;
-        ev->cb = new QCheckBox(QString(ev->name));
-        QLabel *l = new QLabel(tr("Function name:"));
-        ev->le = new QLineEdit;
-        l->setBuddy(ev->le);
-        h->addWidget(ev->cb);
-        h->addWidget(l);
-        h->addWidget(ev->le);
+    events_label.insert("Value changed",
+                        qMakePair(XDialogItem::LineEdit::EventValueChanged,
+                                  XDialogItem::CheckBox::EvValueChanged));
+
+    events_label.insert("Exit",
+                        qMakePair(XDialogItem::LineEdit::EventExit,
+                                  XDialogItem::CheckBox::EvExit));
+
+    QMapIterator<QString, QPair<enum XDialogItem::LineEdit, enum XDialogItem::CheckBox>> i(events_label);
+
+    while (i.hasNext()) {
+        i.next();
+        QPair<enum XDialogItem::LineEdit, enum XDialogItem::CheckBox> pair;
+
+        h = new QHBoxLayout;
+        cb = new QCheckBox(i.key());
+        label = new QLabel(tr("Function name:"));
+        edit = new QLineEdit;
+        label->setBuddy(edit);
+        h->addWidget(cb);
+        h->addWidget(label);
+        h->addWidget(edit);
+
+        pair = i.value();
+        line_edit[pair.first] = edit;
+        check_box[pair.second] = cb;
 
         v->addLayout(h);
     }
@@ -319,6 +366,7 @@ QGroupBox *XDialogItem::create_events_widgets(void)
     g->setCheckable(true);
     g->setChecked(false);
     g->setLayout(v);
+    group_box[XDialogItem::GroupBox::Events] = g;
 
     return g;
 }
@@ -336,6 +384,12 @@ QHBoxLayout *XDialogItem::create_ranges_and_events_widgets(void)
 XDialogItem::XDialogItem(QWidget *parent)
     : QWidget(parent)
 {
+    line_edit = QVector<QLineEdit *>(XDialogItem::MaxLineEdit);
+    check_box = QVector<QCheckBox *>(XDialogItem::MaxCheckBox);
+    group_box = QVector<QGroupBox *>(XDialogItem::MaxGroupBox);
+    combo_box = QVector<QComboBox *>(XDialogItem::MaxComboBox);
+    list_widget = QVector<QListWidget *>(XDialogItem::MaxListWidget);
+
     QVBoxLayout *layout = new QVBoxLayout;
 
     layout->addLayout(create_identification_widgets());
@@ -348,6 +402,68 @@ XDialogItem::XDialogItem(QWidget *parent)
 }
 
 XDialogItem::~XDialogItem()
+{
+}
+
+void XDialogItem::set_current_project(XanteProject *project,
+    int selected_menu_index, int selected_item_index)
+{
+    this->project = project;
+    set_selection(selected_menu_index, selected_item_index);
+}
+
+void XDialogItem::set_selection(int selected_menu_index, int selected_item_index)
+{
+    current_menu_index = selected_menu_index;
+    current_item_index = selected_item_index;
+    setup_widgets();
+}
+
+void XDialogItem::setup_widgets(void)
+{
+    XanteJTF jtf = project->get_jtf();
+    XanteMenu menu = jtf.menu_at(current_menu_index);
+    XanteItem item = menu.item_at(current_item_index);
+
+    setup_widgets(item);
+}
+
+void XDialogItem::setup_widgets(XanteItem item)
+{
+}
+
+void XDialogItem::select_item_type(int index)
+{
+}
+
+void XDialogItem::add_option(void)
+{
+    bool ok;
+    QString option = QInputDialog::getText(this, tr("New option"),
+                                           tr("Enter the new option name:"),
+                                           QLineEdit::Normal, "", &ok);
+
+    if ((ok == false) || (option.isEmpty()))
+        return;
+
+    list_widget[XDialogItem::ListWidget::OptionsLw]->addItem(option);
+}
+
+void XDialogItem::del_option(void)
+{
+    QListWidget *l = list_widget[XDialogItem::ListWidget::OptionsLw];
+    int row = l->currentRow();
+}
+
+void XDialogItem::hideEvent(QHideEvent *event)
+{
+}
+
+void XDialogItem::add_option_help(void)
+{
+}
+
+void XDialogItem::del_option_help(void)
 {
 }
 

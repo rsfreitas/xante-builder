@@ -27,6 +27,7 @@
 #define _XDIALOGITEM_HPP          1
 
 #include <QWidget>
+#include <QVector>
 
 class QLineEdit;
 class QComboBox;
@@ -36,6 +37,9 @@ class QRadioButton;
 class QHBoxLayout;
 class QListWidget;
 
+class XanteProject;
+class XanteItem;
+
 class XDialogItem : public QWidget
 {
     Q_OBJECT
@@ -43,9 +47,89 @@ class XDialogItem : public QWidget
     public:
         XDialogItem(QWidget *parent = 0);
         ~XDialogItem();
+        void set_current_project(XanteProject *project,
+                                 int selected_menu_index,
+                                 int selected_item_index);
+
+        void set_selection(int selected_menu_index, int selected_item_index);
+
+    private slots:
+        void select_item_type(int index);
+        void add_option(void);
+        void del_option(void);
+        void add_option_help(void);
+        void del_option_help(void);
+
+    protected:
+        void hideEvent(QHideEvent *event) override;
 
     private:
+        enum LineEdit {
+            Name,
+            ObjectId,
+            EventSelected,
+            EventExit,
+            EventValueConfirmed,
+            EventValueChanged,
+            CfgBlock,
+            CfgItem,
+            Options,
+            InputStringLength,
+            InputMin,
+            InputMax,
+            HelpBrief,
+            HelpDescription,
+            DefaultValue,
+
+            MaxLineEdit
+        };
+
+        enum ComboBox {
+            Type,
+            Mode,
+            MenuReference,
+
+            MaxComboBox
+        };
+
+        enum CheckBox {
+            EvSelected,
+            EvExit,
+            EvValueConfirmed,
+            EvValueChanged,
+
+            MaxCheckBox
+        };
+
+        enum GroupBox {
+            Events,
+            Help,
+            OptionsGb,
+            ListOptions,
+            ListHelpOptions,
+            Config,
+            InputRanges,
+
+            MaxGroupBox
+        };
+
+        enum ListWidget {
+            OptionsLw,
+            HelpOptions,
+
+            MaxListWidget
+        };
+
+        int current_menu_index = -1, current_item_index = -1;
+        XanteProject *project = nullptr;
+
         /* UI */
+        QVector<QLineEdit *> line_edit;
+        QVector<QCheckBox *> check_box;
+        QVector<QGroupBox *> group_box;
+        QVector<QComboBox *> combo_box;
+        QVector<QListWidget *> list_widget;
+
         QComboBox *cb_type, *cb_mode, *cb_menu_id;
         QGroupBox *gb_events, *gb_help;
         QCheckBox *chb_ev_selected, *chb_ev_exit, *chb_ev_value_confirmed,
@@ -67,6 +151,9 @@ class XDialogItem : public QWidget
         QGroupBox *create_item_help_widgets(void);
         QGroupBox *create_ranges_widgets(void);
         QGroupBox *create_events_widgets(void);
+
+        void setup_widgets(void);
+        void setup_widgets(XanteItem item);
 };
 
 #endif

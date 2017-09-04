@@ -32,12 +32,6 @@
 
 #define APP_NAME                    "xante-builder"
 
-enum xante_mode {
-    XANTE_ACCESS_HIDDEN             = 0,
-    XANTE_ACCESS_VIEW               = (1 << 0),
-    XANTE_ACCESS_EDIT               = (1 << 1)
-};
-
 /* Internal classes */
 #include "XanteConfig.hpp"
 #include "XanteProject.hpp"

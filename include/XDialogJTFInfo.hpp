@@ -28,6 +28,7 @@
 
 #include <QDialog>
 #include <QWidget>
+#include <QList>
 
 class QComboBox;
 class QLineEdit;
@@ -50,14 +51,26 @@ class XDialogJTFInfo : public QDialog
     private:
         XanteProject *project = nullptr;
 
+        enum edit_widget {
+            ApplicationName,
+            Description,
+            Company,
+            Plugin,
+            CfgPathname,
+            LogPathname,
+            Version,
+            Revision,
+            Build
+        };
+
         /* UI */
         QComboBox *cb_main_menu, *cb_beta;
-        QLineEdit *le_application_name, *le_description, *le_company,
-                  *le_plugin, *le_cfg_pathname, *le_log_pathname,
-                  *le_version, *le_revision, *le_build;
+        QList<QLineEdit *> edit;
 
         void create_widgets(void);
         void reject(void);
+        void fill_widgets_with_project_data(void);
+        void prepare_main_menu_chooser(void);
         QHBoxLayout *create_main_menu_chooser(void);
         QHBoxLayout *create_beta_chooser(void);
         QHBoxLayout *create_buttons(void);

@@ -40,6 +40,7 @@ XDialogJTFInfo::XDialogJTFInfo(XanteProject *project, QWidget *parent)
 {
     setWindowTitle(tr("JTF file main informations"));
     create_widgets();
+    fill_widgets_with_project_data();
 }
 
 XDialogJTFInfo::~XDialogJTFInfo()
@@ -100,20 +101,19 @@ QGroupBox *XDialogJTFInfo::create_information_widgets(void)
 
     struct item {
         QString             label;
-        QLineEdit           *le;
         enum validator_type validator;
     };
 
     struct item *p, page_items[] = {
-        { tr("Application name:"),      le_application_name,    VLD_STRING },
-        { tr("Description:"),           le_description,         VLD_STRING },
-        { tr("Company name:"),          le_company,             VLD_STRING },
-        { tr("Plugin name:"),           le_plugin,              VLD_STRING },
-        { tr("Config file directoty:"), le_cfg_pathname,        VLD_STRING },
-        { tr("Log file directory:"),    le_log_pathname,        VLD_STRING },
-        { tr("Version:"),               le_version,             VLD_FLOAT  },
-        { tr("Revision:"),              le_revision,            VLD_INT    },
-        { tr("Build:"),                 le_build,               VLD_INT    }
+        { tr("Application name:"),      VLD_STRING },
+        { tr("Description:"),           VLD_STRING },
+        { tr("Company name:"),          VLD_STRING },
+        { tr("Plugin name:"),           VLD_STRING },
+        { tr("Config file directoty:"), VLD_STRING },
+        { tr("Log file directory:"),    VLD_STRING },
+        { tr("Version:"),               VLD_FLOAT  },
+        { tr("Revision:"),              VLD_INT    },
+        { tr("Build:"),                 VLD_INT    }
     };
 
     QVBoxLayout *v = new QVBoxLayout;
@@ -125,19 +125,20 @@ QGroupBox *XDialogJTFInfo::create_information_widgets(void)
     for (i = 0; i < t; i++) {
         p = &page_items[i];
         QLabel *l = new QLabel(p->label);
-        p->le = new QLineEdit;
-        l->setBuddy(p->le);
+        QLineEdit *le = new QLineEdit;
+        l->setBuddy(le);
 
         if (p->validator == VLD_INT)
-            p->le->setValidator(new QIntValidator(p->le));
+            le->setValidator(new QIntValidator(le));
         else if (p->validator == VLD_FLOAT)
-            p->le->setValidator(new QDoubleValidator(p->le));
+            le->setValidator(new QDoubleValidator(le));
 
         QHBoxLayout *h = new QHBoxLayout;
         h->addWidget(l);
-        h->addWidget(p->le);
+        h->addWidget(le);
 
         v->addLayout(h);
+        edit.append(le);
     }
 
     v->addLayout(create_beta_chooser());
@@ -159,6 +160,13 @@ void XDialogJTFInfo::create_widgets(void)
 
 void XDialogJTFInfo::confirm_ok(void)
 {
+    /*
+     * TODO
+     *
+     * 1 - Validate all widgets content.
+     * 2 - Update the JTF object.
+     */
+
     done(0);
 }
 
@@ -170,5 +178,42 @@ void XDialogJTFInfo::confirm_cancel(void)
 void XDialogJTFInfo::reject(void)
 {
     confirm_cancel();
+}
+
+void XDialogJTFInfo::fill_widgets_with_project_data(void)
+{
+    XanteJTF jtf = project->get_jtf();
+
+    /* LineEdit */
+    edit.at(XDialogJTFInfo::ApplicationName)->setText(jtf.get_application_name());
+    edit.at(XDialogJTFInfo::Description)->setText(jtf.get_description());;
+    edit.at(XDialogJTFInfo::Company)->setText(jtf.get_company());
+    edit.at(XDialogJTFInfo::Plugin)->setText(jtf.get_plugin());
+    edit.at(XDialogJTFInfo::CfgPathname)->setText(jtf.get_cfg_pathname());
+    edit.at(XDialogJTFInfo::LogPathname)->setText(jtf.get_log_pathname());
+    edit.at(XDialogJTFInfo::Version)->setText(jtf.get_version());
+    edit.at(XDialogJTFInfo::Revision)->setText(QString("%1").arg(jtf.get_revision()));
+    edit.at(XDialogJTFInfo::Build)->setText(QString("%1").arg(jtf.get_build()));
+
+    /* Beta ComboBox */
+    cb_beta->setCurrentIndex(jtf.get_beta() == true ? 0 : 1);
+
+    /* Main menu chooser */
+    prepare_main_menu_chooser();
+}
+
+void XDialogJTFInfo::prepare_main_menu_chooser(void)
+{
+    XanteJTF jtf = project->get_jtf();
+    int i;
+
+    /* Insert all available menus */
+    for (i = 0; i < jtf.total_menus(); i++) {
+        XanteMenu menu = jtf.menu_at(i);
+        cb_main_menu->addItem(menu.get_name());
+    }
+
+    /* Set current option to the current main menu */
+    cb_main_menu->setCurrentIndex(cb_main_menu->findText(jtf.get_main_menu()));
 }
 

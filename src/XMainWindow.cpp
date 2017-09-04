@@ -36,12 +36,11 @@
 XMainWindow::XMainWindow(XanteConfig &config)
     : config(config)
 {
+    dialog = new XMainDialog(this);
     create_menu();
     statusBar()->showMessage(APP_NAME);
 
-    dialog = new XMainDialog(this);
     setCentralWidget(dialog);
-
     setWindowTitle(APP_NAME);
     resize(config.get_window_size());
     move(config.get_window_position());
@@ -192,5 +191,7 @@ void XMainWindow::control_window_widgets(bool enable)
         model = new XTreeModel(project, this);
         dialog->set_tree_content(model, enable);
     }
+
+    dialog->control_project_widgets(enable);
 }
 

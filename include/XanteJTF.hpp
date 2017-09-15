@@ -200,8 +200,8 @@ class XanteMenu
         enum XanteMenu::Type get_type(void) const { return type; }
         enum XanteMenu::DynamicType get_dynamic_type(void) const { return dynamic_type; }
         enum XanteMode get_mode(void) const { return mode; }
-        bool has_events(void) const { return events.size() != 0; }
         int get_dynamic_copies(void) const { return dynamic_copies; }
+        bool has_events(void) const { return events.size() != 0; }
 
         void set_name(QString name);
         void set_type(enum XanteMenu::Type type) { this->type = type; }

@@ -207,10 +207,6 @@ XProjectWizard::~XProjectWizard()
 
 void XProjectWizard::accept()
 {
-    printf("Project OK\n");
-//    project = new XanteProject();
-//
-
     /*
      * TODO: Call source-tpl to create the templates
      */

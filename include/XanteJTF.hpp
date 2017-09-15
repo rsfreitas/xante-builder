@@ -280,6 +280,11 @@ class XanteJTF
                 beta(beta)
         {
             build_default_menu();
+
+            /*
+             * Sets the main menu of a JTF as the first one inside our list.
+             */
+            set_main_menu(menus.at(0).get_object_id());
         }
 
         static QString object_id_calc(QString application_name,

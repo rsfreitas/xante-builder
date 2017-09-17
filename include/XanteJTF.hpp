@@ -125,7 +125,7 @@ class XanteItem
         void set_brief_help(QString help) { brief_help = help; }
         void set_descriptive_help(QString help) { descriptive_help = help; }
 
-        bool has_events(void) const { return events.size != 0; }
+        bool has_events(void) const { return events.size() != 0; }
         bool has_options(void) const { return (type >= XanteItem::Type::InputInt) &&
                                               (type <= XanteItem::Type::DeleteDynamicMenu); }
         bool has_input_ranges(void) const { return (type >= XanteItem::Type::InputInt) &&

@@ -635,7 +635,11 @@ void XDialogItem::del_option(void)
 
 void XDialogItem::hideEvent(QHideEvent *event)
 {
-    /* TODO: Save the current item modifications */
+    if (event->spontaneous() == false) {
+        /* TODO: Save the current item modifications */
+    }
+
+    event->accept();
 }
 
 void XDialogItem::add_option_help(void)

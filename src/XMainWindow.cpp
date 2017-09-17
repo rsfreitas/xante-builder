@@ -117,7 +117,7 @@ void XMainWindow::about_us()
     QString msg;
 
     msg.sprintf("<b>%s</b> - An application to build libxante projects.\n"
-                   "Version %d.%d.%d", APP_NAME, MAJOR_VERSION, MINOR_VERSION,
+                "Version %d.%d.%d", APP_NAME, MAJOR_VERSION, MINOR_VERSION,
                 RELEASE);
 
     QMessageBox::about(this, tr("About xante-builder"), msg);

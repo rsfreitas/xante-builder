@@ -121,8 +121,8 @@ class XDialogMenu : public QWidget
 
         void setup_widgets(void);
         void setup_widgets(XanteMenu menu);
-        void setup_widgets_dynamic_info(XanteMenu menu);
-        void setup_widgets_events(XanteMenu menu);
+        void setup_dynamic_info_widgets(XanteMenu menu);
+        void setup_events_widgets(XanteMenu menu);
 };
 
 #endif

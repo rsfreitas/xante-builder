@@ -142,6 +142,16 @@ class XDialogItem : public QWidget
 
         void setup_widgets(void);
         void setup_widgets(XanteItem item);
+        void setup_dynamic_info_widgets(XanteItem menu);
+        void setup_events_widgets(XanteItem menu);
+        void setup_help_widgets(XanteItem menu);
+        void setup_config_widgets(XanteItem menu);
+        void setup_input_ranges_widgets(XanteItem menu);
+        void setup_options_widgets(XanteItem menu);
+
+        void disable_all_widgets(void);
+        void enable_input_ranges(int type);
+        void enable_options(int type);
 };
 
 #endif

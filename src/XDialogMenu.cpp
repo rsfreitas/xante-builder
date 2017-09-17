@@ -313,6 +313,11 @@ void XDialogMenu::dynamic_radio_toggled(bool checked)
     }
 }
 
+/*
+ * Sets the current project that's been edited, so all other informations
+ * (or selections inside the main list view) may use it. At the same time,
+ * sets the current XanteMenu to the @selected_menu_index inside it.
+ */
 void XDialogMenu::set_current_project(XanteProject *project,
     int selected_menu_index)
 {
@@ -320,6 +325,10 @@ void XDialogMenu::set_current_project(XanteProject *project,
     set_selection(selected_menu_index);
 }
 
+/*
+ * Sets data by using the @selected_menu_index to get its corresponding
+ * XanteMenu.
+ */
 void XDialogMenu::set_selection(int selected_menu_index)
 {
     current_menu_index = selected_menu_index;
@@ -335,15 +344,22 @@ void XDialogMenu::setup_widgets(void)
 }
 
 /*
- * Adjusts current selected XanteMenu dynamic informations in the UI.
+ * Adjusts current selected XanteMenu dynamic informations in the UI if it
+ * contains them.
  */
-void XDialogMenu::setup_widgets_dynamic_info(XanteMenu menu)
+void XDialogMenu::setup_dynamic_info_widgets(XanteMenu menu)
 {
     enum XanteMenu::DynamicType type = menu.get_dynamic_type();
 
-    /* Unsupported dynamic menu type */
-    if (type >= XanteMenu::DynamicType::MaxDynamicMenuType)
+    /*
+     * If we're dealing with a default menu or an unsupported dynamic menu
+     * type, abort.
+     */
+    if ((menu.get_type() != XanteMenu::Type::Dynamic) ||
+        (type >= XanteMenu::DynamicType::MaxDynamicMenuType))
+    {
         return;
+    }
 
     radio_button[type]->setChecked(true);
 
@@ -382,7 +398,7 @@ void XDialogMenu::setup_widgets_dynamic_info(XanteMenu menu)
 /*
  * Adjusts current selected XanteMenu events information in the UI.
  */
-void XDialogMenu::setup_widgets_events(XanteMenu menu)
+void XDialogMenu::setup_events_widgets(XanteMenu menu)
 {
     int i;
     QList<QPair<enum XanteMenu::Event,
@@ -420,6 +436,8 @@ void XDialogMenu::setup_widgets_events(XanteMenu menu)
 
 void XDialogMenu::setup_widgets(XanteMenu menu)
 {
+    /* TODO: Disable all widgets */
+
     /* Enable/Disable dynamics groupbox */
     select_menu_type((menu.get_type() == XanteMenu::Type::Default) ? 0 : 1);
 
@@ -428,8 +446,8 @@ void XDialogMenu::setup_widgets(XanteMenu menu)
     combo_box[XDialogMenu::ComboBox::Type]->setCurrentIndex((int)menu.get_type());
     combo_box[XDialogMenu::ComboBox::Mode]->setCurrentIndex((int)menu.get_mode());
 
-    setup_widgets_dynamic_info(menu);
-    setup_widgets_events(menu);
+    setup_dynamic_info_widgets(menu);
+    setup_events_widgets(menu);
 }
 
 void XDialogMenu::select_menu_type(int index)

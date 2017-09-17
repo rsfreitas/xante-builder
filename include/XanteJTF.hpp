@@ -125,6 +125,14 @@ class XanteItem
         void set_brief_help(QString help) { brief_help = help; }
         void set_descriptive_help(QString help) { descriptive_help = help; }
 
+        bool has_events(void) const { return events_exist; }
+        bool has_options(void) const { return (type >= XanteItem::Type::InputInt) &&
+                                              (type <= XanteItem::Type::DeleteDynamicMenu); }
+        bool has_input_ranges(void) const { return (type >= XanteItem::Type::InputInt) &&
+                                                   (type <= XanteItem::Type::InputPasswd); }
+        bool has_config(void) const { return (type >= XanteItem::Type::InputInt) &&
+                                             (type <= XanteItem::Type::YesNo); }
+
     private:
         QString application_name, menu_name, name, object_id, brief_help,
                 descriptive_help, config_block, config_item, fixed_option,
@@ -139,14 +147,6 @@ class XanteItem
         enum XanteItem::OptionType option_type;
         int string_length;
         bool events_exist;
-
-        bool has_events(void) const { return events_exist; }
-        bool has_options(void) const { return (type >= XanteItem::Type::InputInt) &&
-                                              (type <= XanteItem::Type::DeleteDynamicMenu); }
-        bool has_input_ranges(void) const { return (type >= XanteItem::Type::InputInt) &&
-                                                   (type <= XanteItem::Type::InputPasswd); }
-        bool has_config(void) const { return (type >= XanteItem::Type::InputInt) &&
-                                             (type <= XanteItem::Type::YesNo); }
 
         void pre_load(void);
         void parse(QJsonObject item);

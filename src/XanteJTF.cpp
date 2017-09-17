@@ -353,7 +353,7 @@ void XanteMenu::parse_dynamic_data(QJsonObject menu)
         QString tmp = value.toString();
 
         if (tmp.compare(QString("dynamic")) == 0) {
-            QJsonObject dynamic = value.toObject();
+            QJsonObject dynamic = menu["dynamic"].toObject();
 
             type = XanteMenu::Type::Dynamic;
             value = dynamic["copies"];
@@ -363,17 +363,17 @@ void XanteMenu::parse_dynamic_data(QJsonObject menu)
                 dynamic_copies = value.toInt();
             } else if (value.type() == QJsonValue::Array) {
                 QJsonArray copies = value.toArray();
-
                 dynamic_type = XanteMenu::FixedOptions;
 
                 foreach(const QJsonValue &v, copies)
-                    copies.append(v.toString());
+                    this->copies.append(v.toString());
             } else {
                 QJsonObject origin = dynamic["origin"].toObject();
 
                 dynamic_type = XanteMenu::DynamicOptions;
                 dynamic_origin_block = origin["block"].toString();
                 dynamic_origin_item = origin["item"].toString();
+                dynamic_block_prefix = dynamic["block_prefix"].toString();
             }
         } else
             type = XanteMenu::Type::Default;

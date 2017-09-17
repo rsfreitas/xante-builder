@@ -125,6 +125,14 @@ class XanteItem
         void set_brief_help(QString help) { brief_help = help; }
         void set_descriptive_help(QString help) { descriptive_help = help; }
 
+        bool has_events(void) const { return events.size != 0; }
+        bool has_options(void) const { return (type >= XanteItem::Type::InputInt) &&
+                                              (type <= XanteItem::Type::DeleteDynamicMenu); }
+        bool has_input_ranges(void) const { return (type >= XanteItem::Type::InputInt) &&
+                                                   (type <= XanteItem::Type::InputPasswd); }
+        bool has_config(void) const { return (type >= XanteItem::Type::InputInt) &&
+                                             (type <= XanteItem::Type::YesNo); }
+
     private:
         QString application_name, menu_name, name, object_id, brief_help,
                 descriptive_help, config_block, config_item, fixed_option,
@@ -138,14 +146,6 @@ class XanteItem
         enum XanteItem::Type type;
         enum XanteItem::OptionType option_type;
         int string_length;
-
-        bool has_events(void) const { return events.size() != 0; }
-        bool has_options(void) const { return (type >= XanteItem::Type::InputInt) &&
-                                              (type <= XanteItem::Type::DeleteDynamicMenu); }
-        bool has_input_ranges(void) const { return (type >= XanteItem::Type::InputInt) &&
-                                                   (type <= XanteItem::Type::InputPasswd); }
-        bool has_config(void) const { return (type >= XanteItem::Type::InputInt) &&
-                                             (type <= XanteItem::Type::YesNo); }
 
         void pre_load(void);
         void parse(QJsonObject item);
@@ -202,6 +202,10 @@ class XanteMenu
         enum XanteMode get_mode(void) const { return mode; }
         int get_dynamic_copies(void) const { return dynamic_copies; }
         bool has_events(void) const { return events.size() != 0; }
+        const QStringList get_dynamic_options(void) const { return copies; }
+        const QString get_dynamic_origin_block(void) const { return dynamic_origin_block; }
+        const QString get_dynamic_origin_item(void) const { return dynamic_origin_item; }
+        const QString get_block_prefix(void) const { return dynamic_block_prefix; }
 
         void set_name(QString name);
         void set_type(enum XanteMenu::Type type) { this->type = type; }
@@ -243,7 +247,7 @@ class XanteMenu
         enum XanteMenu::DynamicType dynamic_type;
         int dynamic_copies;
         QVector<QString> events;
-        QList<QString> copies;
+        QStringList copies;
         QList<XanteItem> items;
         QMap<enum XanteMenu::Type, QString> type_description;
 

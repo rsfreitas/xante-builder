@@ -39,6 +39,7 @@
 #include <QVector>
 #include <QMapIterator>
 #include <QInputDialog>
+#include <QAction>
 
 #include "xante_builder.hpp"
 
@@ -209,7 +210,6 @@ QGroupBox *XDialogItem::create_item_options_widgets(void)
     group_box[XDialogItem::GroupBox::ListOptions] = lo;
 
     v->addLayout(hdescription);
-//    v->addLayout(hbuttons);
     v->addWidget(lo);
     g->setLayout(v);
     group_box[XDialogItem::GroupBox::OptionsGb] = g;
@@ -222,7 +222,8 @@ QGroupBox *XDialogItem::create_item_help_widgets(void)
     QLabel *label;
     QLineEdit *edit;
     QListWidget *lwidget;
-    QGroupBox *g = new QGroupBox(tr("Help details"));
+    QGroupBox *g = new QGroupBox(tr("Help details")),
+              *g_list = new QGroupBox();
     QVBoxLayout *v = new QVBoxLayout,
                 *vbuttons = new QVBoxLayout;
     QHBoxLayout *hbuttons = new QHBoxLayout,
@@ -254,13 +255,16 @@ QGroupBox *XDialogItem::create_item_help_widgets(void)
     hbuttons->addWidget(lwidget);
     hbuttons->addLayout(vbuttons);
     list_widget[XDialogItem::ListWidget::HelpOptions] = lwidget;
+    g_list->setLayout(hbuttons);
+    group_box[XDialogItem::GroupBox::ListHelpOptions] = g_list;
 
     v->addLayout(hbrief);
     v->addLayout(hdescription);
-    v->addLayout(hbuttons);
+    v->addWidget(g_list);
     g->setCheckable(true);
     g->setChecked(false);
     g->setLayout(v);
+    connect(g, SIGNAL(toggled(bool)), this, SLOT(help_group_toggled(bool)));
     group_box[XDialogItem::GroupBox::Help] = g;
 
     return g;
@@ -411,6 +415,17 @@ XDialogItem::~XDialogItem()
 }
 
 /*
+ * Just returns a reference to the current XanteItem we are editing.
+ */
+XanteItem &XDialogItem::get_current_item(void)
+{
+    XanteJTF jtf = project->get_jtf();
+    XanteMenu menu = jtf.menu_at(current_menu_index);
+
+    return menu.item_at(current_item_index);
+}
+
+/*
  * Sets the current project that's been edited, so all other informations
  * (or selections inside the main list view) may use it. At the same time,
  * sets the current XanteItem to the @selected_menu_index and the
@@ -436,11 +451,7 @@ void XDialogItem::set_selection(int selected_menu_index, int selected_item_index
 
 void XDialogItem::setup_widgets(void)
 {
-    XanteJTF jtf = project->get_jtf();
-    XanteMenu menu = jtf.menu_at(current_menu_index);
-    XanteItem item = menu.item_at(current_item_index);
-
-    setup_widgets(item);
+    setup_widgets(get_current_item());
 }
 
 void XDialogItem::setup_config_widgets(XanteItem item)
@@ -498,18 +509,23 @@ void XDialogItem::setup_events_widgets(XanteItem item)
 
 void XDialogItem::setup_help_widgets(XanteItem item)
 {
+    /* TODO */
 }
 
 void XDialogItem::setup_input_ranges_widgets(XanteItem item)
 {
     if (item.has_input_ranges() == false)
         return;
+
+    /* TODO */
 }
 
 void XDialogItem::setup_options_widgets(XanteItem item)
 {
     if (item.has_options() == false)
         return;
+
+    /* TODO */
 }
 
 void XDialogItem::setup_widgets(XanteItem item)
@@ -523,6 +539,7 @@ void XDialogItem::setup_widgets(XanteItem item)
     combo_box[XDialogItem::ComboBox::Type]->setCurrentIndex((int)item.get_type());
     combo_box[XDialogItem::ComboBox::Mode]->setCurrentIndex((int)item.get_mode());
 
+    /* Specific informations */
     setup_config_widgets(item);
     setup_events_widgets(item);
     setup_help_widgets(item);
@@ -581,6 +598,20 @@ void XDialogItem::enable_options(int type)
     group_box[XDialogItem::GroupBox::ListOptions]->setEnabled(list_options);
 }
 
+void XDialogItem::enable_help(int type)
+{
+    bool list_options = false;
+
+    if (((type == XanteItem::Type::Checklist) ||
+         (type == XanteItem::Type::RadioChecklist)) &&
+        group_box[XDialogItem::GroupBox::Help]->isChecked())
+    {
+        list_options = true;
+    }
+
+    group_box[XDialogItem::GroupBox::ListHelpOptions]->setEnabled(list_options);
+}
+
 void XDialogItem::select_item_type(int index)
 {
     /* Adjusts current widgets according to the selected item type */
@@ -607,6 +638,7 @@ void XDialogItem::select_item_type(int index)
             group_box[XDialogItem::GroupBox::Config]->setEnabled(true);
             enable_input_ranges(type);
             enable_options(type);
+            enable_help(type);
             break;
 
         default:
@@ -631,11 +663,16 @@ void XDialogItem::del_option(void)
 {
     QListWidget *l = list_widget[XDialogItem::ListWidget::OptionsLw];
     int row = l->currentRow();
+
+    if (row < 0)
+        return;
+
+    l->takeItem(row);
 }
 
 void XDialogItem::hideEvent(QHideEvent *event)
 {
-    if (event->spontaneous() == false) {
+    if ((event->spontaneous() == false) && (project != nullptr)) {
         /* TODO: Save the current item modifications */
     }
 
@@ -644,9 +681,34 @@ void XDialogItem::hideEvent(QHideEvent *event)
 
 void XDialogItem::add_option_help(void)
 {
+    bool ok;
+    QString option = QInputDialog::getText(this, tr("New option"),
+                                           tr("Enter the new option brief help:"),
+                                           QLineEdit::Normal, "", &ok);
+
+    if ((ok == false) || (option.isEmpty()))
+        return;
+
+    list_widget[XDialogItem::ListWidget::HelpOptions]->addItem(option);
 }
 
 void XDialogItem::del_option_help(void)
 {
+    QListWidget *l = list_widget[XDialogItem::ListWidget::HelpOptions];
+    int row = l->currentRow();
+
+    if (row < 0)
+        return;
+
+    l->takeItem(row);
+}
+
+void XDialogItem::help_group_toggled(bool on)
+{
+    if (on == false)
+        return;
+
+    /* Are we editing a checklist or a radio_checklist item? */
+    enable_help(combo_box[XDialogItem::ComboBox::Type]->currentIndex());
 }
 

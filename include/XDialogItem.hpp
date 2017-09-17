@@ -52,6 +52,7 @@ class XDialogItem : public QWidget
                                  int selected_item_index);
 
         void set_selection(int selected_menu_index, int selected_item_index);
+        XanteItem &get_current_item(void);
 
     private slots:
         void select_item_type(int index);
@@ -59,6 +60,7 @@ class XDialogItem : public QWidget
         void del_option(void);
         void add_option_help(void);
         void del_option_help(void);
+        void help_group_toggled(bool on);
 
     protected:
         void hideEvent(QHideEvent *event) override;
@@ -152,6 +154,7 @@ class XDialogItem : public QWidget
         void disable_all_widgets(void);
         void enable_input_ranges(int type);
         void enable_options(int type);
+        void enable_help(int type);
 };
 
 #endif

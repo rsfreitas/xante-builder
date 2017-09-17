@@ -9,6 +9,7 @@ INCLUDEPATH += ../include
 
 QT += widgets core
 LIBS +=
+CONFIG += debug
 
 # Input
 HEADERS += ../include/XMainWindow.hpp   \

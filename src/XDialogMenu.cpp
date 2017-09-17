@@ -434,9 +434,15 @@ void XDialogMenu::setup_events_widgets(XanteMenu menu)
     }
 }
 
+void XDialogMenu::disable_all_widgets(void)
+{
+    group_box[XDialogMenu::GroupBox::Events]->setEnabled(false);
+    group_box[XDialogMenu::GroupBox::Dynamic]->setEnabled(false);
+}
+
 void XDialogMenu::setup_widgets(XanteMenu menu)
 {
-    /* TODO: Disable all widgets */
+    disable_all_widgets();
 
     /* Enable/Disable dynamics groupbox */
     select_menu_type((menu.get_type() == XanteMenu::Type::Default) ? 0 : 1);
@@ -481,7 +487,7 @@ void XDialogMenu::del_dynamic_fixed_option(void)
 
 void XDialogMenu::hideEvent(QHideEvent *event)
 {
-    if (event->spontaneous() == false) {
+    if ((event->spontaneous() == false) && (project != nullptr)) {
         /* TODO: Save content with current data */
         XanteJTF jtf = project->get_jtf();
         XanteMenu menu = jtf.menu_at(current_menu_index);

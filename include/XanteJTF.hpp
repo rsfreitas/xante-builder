@@ -191,7 +191,7 @@ class XanteMenu
 
         void write(QJsonObject &root) const;
         int total_items(void) { return items.size(); }
-        XanteItem item_at(int index) { return items.at(index); }
+        XanteItem &item_at(int index) { return items[index]; }
 
         /* Menu properties */
         const QString get_name(void) const { return name; }
@@ -313,7 +313,7 @@ class XanteJTF
         bool get_beta(void) const { return beta; }
 
         int total_menus(void) const { return menus.size(); }
-        XanteMenu menu_at(int index) { return menus.at(index); }
+        XanteMenu &menu_at(int index) { return menus[index]; }
         XanteMenu get_menu(QString object_id);
 
     private:

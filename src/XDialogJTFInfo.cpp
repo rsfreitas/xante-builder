@@ -214,6 +214,7 @@ void XDialogJTFInfo::prepare_main_menu_chooser(void)
     }
 
     /* Set current option to the current main menu */
-    cb_main_menu->setCurrentIndex(cb_main_menu->findText(jtf.get_main_menu()));
+    XanteMenu menu = jtf.get_menu(jtf.get_main_menu());
+    cb_main_menu->setCurrentIndex(cb_main_menu->findText(menu.get_name()));
 }
 

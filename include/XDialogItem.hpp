@@ -52,6 +52,7 @@ class XDialogItem : public QWidget
                                  int selected_item_index);
 
         void set_selection(int selected_menu_index, int selected_item_index);
+        XanteItem &get_current_item(void);
 
     private slots:
         void select_item_type(int index);
@@ -59,6 +60,7 @@ class XDialogItem : public QWidget
         void del_option(void);
         void add_option_help(void);
         void del_option_help(void);
+        void help_group_toggled(bool on);
 
     protected:
         void hideEvent(QHideEvent *event) override;
@@ -130,18 +132,6 @@ class XDialogItem : public QWidget
         QVector<QComboBox *> combo_box;
         QVector<QListWidget *> list_widget;
 
-        QComboBox *cb_type, *cb_mode, *cb_menu_id;
-        QGroupBox *gb_events, *gb_help;
-        QCheckBox *chb_ev_selected, *chb_ev_exit, *chb_ev_value_confirmed,
-                  *chb_ev_value_changed;
-
-        QListWidget *l_options, *l_help_options;
-        QLineEdit *le_name, *le_object_id, *le_ev_selected, *le_ev_exit,
-                  *le_ev_value_confirmed, *le_ev_value_changed, *le_cfg_block,
-                  *le_cfg_item, *le_options, *le_input_str_length,
-                  *le_input_min, *le_input_max, *le_help_brief,
-                  *le_help_description, *le_default_value;
-
         QHBoxLayout *create_identification_widgets(void);
         QHBoxLayout *create_type_widgets(void);
         QHBoxLayout *create_item_details_widgets(void);
@@ -154,6 +144,17 @@ class XDialogItem : public QWidget
 
         void setup_widgets(void);
         void setup_widgets(XanteItem item);
+        void setup_dynamic_info_widgets(XanteItem menu);
+        void setup_events_widgets(XanteItem menu);
+        void setup_help_widgets(XanteItem menu);
+        void setup_config_widgets(XanteItem menu);
+        void setup_input_ranges_widgets(XanteItem menu);
+        void setup_options_widgets(XanteItem menu);
+
+        void disable_all_widgets(void);
+        void enable_input_ranges(int type);
+        void enable_options(int type);
+        void enable_help(int type);
 };
 
 #endif

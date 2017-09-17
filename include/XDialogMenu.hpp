@@ -70,6 +70,7 @@ class XDialogMenu : public QWidget
             DynamicOriginBlock,
             DynamicOriginItem,
             DynamicNumberOfCopies,
+            BlockPrefix,
 
             MaxLineEdit
         };
@@ -106,6 +107,7 @@ class XDialogMenu : public QWidget
         QVector<QCheckBox *> check_box;
         QVector<QComboBox *> combo_box;
         QVector<QGroupBox *> group_box;
+        QVector<QRadioButton *> radio_button;
 
         QListWidget *dynamic_options;
 
@@ -119,6 +121,10 @@ class XDialogMenu : public QWidget
 
         void setup_widgets(void);
         void setup_widgets(XanteMenu menu);
+        void setup_dynamic_info_widgets(XanteMenu menu);
+        void setup_events_widgets(XanteMenu menu);
+
+        void disable_all_widgets(void);
 };
 
 #endif

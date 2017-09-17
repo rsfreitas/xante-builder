@@ -209,8 +209,7 @@ void XTreeModel::setup_model_data(XTreeItem *parent)
 
             QList<QVariant> it_child_data;
             it_child_data << item.get_name();
-            parents.last()
-                    ->child(child_index)
+            parents.last()->child(child_index)
                           ->appendChild(new XTreeItem(it_child_data,
                                                       parents.last()->child(child_index)));
         }

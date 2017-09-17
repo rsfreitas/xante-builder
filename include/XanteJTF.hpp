@@ -125,6 +125,14 @@ class XanteItem
         void set_brief_help(QString help) { brief_help = help; }
         void set_descriptive_help(QString help) { descriptive_help = help; }
 
+        bool has_events(void) const { return events.size() != 0; }
+        bool has_options(void) const { return (type >= XanteItem::Type::InputInt) &&
+                                              (type <= XanteItem::Type::DeleteDynamicMenu); }
+        bool has_input_ranges(void) const { return (type >= XanteItem::Type::InputInt) &&
+                                                   (type <= XanteItem::Type::InputPasswd); }
+        bool has_config(void) const { return (type >= XanteItem::Type::InputInt) &&
+                                             (type <= XanteItem::Type::YesNo); }
+
     private:
         QString application_name, menu_name, name, object_id, brief_help,
                 descriptive_help, config_block, config_item, fixed_option,
@@ -138,14 +146,6 @@ class XanteItem
         enum XanteItem::Type type;
         enum XanteItem::OptionType option_type;
         int string_length;
-
-        bool has_events(void) const { return events.size() != 0; }
-        bool has_options(void) const { return (type >= XanteItem::Type::InputInt) &&
-                                              (type <= XanteItem::Type::DeleteDynamicMenu); }
-        bool has_input_ranges(void) const { return (type >= XanteItem::Type::InputInt) &&
-                                                   (type <= XanteItem::Type::InputPasswd); }
-        bool has_config(void) const { return (type >= XanteItem::Type::InputInt) &&
-                                             (type <= XanteItem::Type::YesNo); }
 
         void pre_load(void);
         void parse(QJsonObject item);
@@ -191,7 +191,7 @@ class XanteMenu
 
         void write(QJsonObject &root) const;
         int total_items(void) { return items.size(); }
-        XanteItem item_at(int index) { return items.at(index); }
+        XanteItem &item_at(int index) { return items[index]; }
 
         /* Menu properties */
         const QString get_name(void) const { return name; }
@@ -200,8 +200,12 @@ class XanteMenu
         enum XanteMenu::Type get_type(void) const { return type; }
         enum XanteMenu::DynamicType get_dynamic_type(void) const { return dynamic_type; }
         enum XanteMode get_mode(void) const { return mode; }
-        bool has_events(void) const { return events.size() != 0; }
         int get_dynamic_copies(void) const { return dynamic_copies; }
+        bool has_events(void) const { return events.size() != 0; }
+        const QStringList get_dynamic_options(void) const { return copies; }
+        const QString get_dynamic_origin_block(void) const { return dynamic_origin_block; }
+        const QString get_dynamic_origin_item(void) const { return dynamic_origin_item; }
+        const QString get_block_prefix(void) const { return dynamic_block_prefix; }
 
         void set_name(QString name);
         void set_type(enum XanteMenu::Type type) { this->type = type; }
@@ -243,7 +247,7 @@ class XanteMenu
         enum XanteMenu::DynamicType dynamic_type;
         int dynamic_copies;
         QVector<QString> events;
-        QList<QString> copies;
+        QStringList copies;
         QList<XanteItem> items;
         QMap<enum XanteMenu::Type, QString> type_description;
 
@@ -280,6 +284,11 @@ class XanteJTF
                 beta(beta)
         {
             build_default_menu();
+
+            /*
+             * Sets the main menu of a JTF as the first one inside our list.
+             */
+            set_main_menu(menus.at(0).get_object_id());
         }
 
         static QString object_id_calc(QString application_name,
@@ -304,7 +313,7 @@ class XanteJTF
         bool get_beta(void) const { return beta; }
 
         int total_menus(void) const { return menus.size(); }
-        XanteMenu menu_at(int index) { return menus.at(index); }
+        XanteMenu &menu_at(int index) { return menus[index]; }
         XanteMenu get_menu(QString object_id);
 
     private:

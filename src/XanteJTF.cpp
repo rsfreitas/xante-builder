@@ -94,7 +94,9 @@ void XanteItem::write_events(QJsonObject &events) const
 
     while (i.hasNext()) {
         i.next();
-        events[i.key()] = this->events[i.value()];
+
+        if (this->events[i.value()].isEmpty() == false)
+            events[i.key()] = this->events[i.value()];
     }
 }
 
@@ -104,7 +106,9 @@ void XanteItem::write(QJsonObject &root) const
     root["object_id"] = object_id;
     root["mode"] = mode;
     root["type"] = type_description.value(type);
-    root["default_value"] = default_value;
+
+    if (default_value.isEmpty() == false)
+        root["default_value"] = default_value;
 
     if ((type == XanteItem::Type::Menu) ||
         (type == XanteItem::Type::DeleteDynamicMenu))
@@ -140,6 +144,7 @@ void XanteItem::write(QJsonObject &root) const
 void XanteItem::pre_load(void)
 {
     events = QVector<QString>(XanteItem::MaxEvents);
+    events.clear();
     type_description.insert(XanteItem::Type::Menu, QString("menu"));
     type_description.insert(XanteItem::Type::InputInt, QString("input-int"));
     type_description.insert(XanteItem::Type::InputFloat, QString("input-float"));
@@ -296,6 +301,7 @@ void XanteMenu::set_name(QString name)
 void XanteMenu::pre_load(void)
 {
     events = QVector<QString>(XanteMenu::MaxEvents);
+    events.clear();
     type_description.insert(XanteMenu::Type::Dynamic, QString("dynamic"));
     type_description.insert(XanteMenu::Type::Default, QString("default"));
 }
@@ -347,7 +353,7 @@ void XanteMenu::parse_dynamic_data(QJsonObject menu)
         QString tmp = value.toString();
 
         if (tmp.compare(QString("dynamic")) == 0) {
-            QJsonObject dynamic = value.toObject();
+            QJsonObject dynamic = menu["dynamic"].toObject();
 
             type = XanteMenu::Type::Dynamic;
             value = dynamic["copies"];
@@ -357,17 +363,17 @@ void XanteMenu::parse_dynamic_data(QJsonObject menu)
                 dynamic_copies = value.toInt();
             } else if (value.type() == QJsonValue::Array) {
                 QJsonArray copies = value.toArray();
-
                 dynamic_type = XanteMenu::FixedOptions;
 
                 foreach(const QJsonValue &v, copies)
-                    copies.append(v.toString());
+                    this->copies.append(v.toString());
             } else {
                 QJsonObject origin = dynamic["origin"].toObject();
 
                 dynamic_type = XanteMenu::DynamicOptions;
                 dynamic_origin_block = origin["block"].toString();
                 dynamic_origin_item = origin["item"].toString();
+                dynamic_block_prefix = dynamic["block_prefix"].toString();
             }
         } else
             type = XanteMenu::Type::Default;
@@ -405,6 +411,7 @@ XanteMenu::XanteMenu(QString application_name, QString name)
     pre_load();
     set_mode(XanteMode::XanteAccessEdit);
     set_name(name);
+    set_type(XanteMenu::Type::Default);
 
     /* We always create an empty item for a new menu */
     XanteItem it(application_name, name, QString("Item"));
@@ -422,7 +429,9 @@ void XanteMenu::write_events(QJsonObject &events) const
 
     while (i.hasNext()) {
         i.next();
-        events[i.key()] = this->events[i.value()];
+
+        if (this->events[i.value()].isEmpty() == false)
+            events[i.key()] = this->events[i.value()];
     }
 }
 

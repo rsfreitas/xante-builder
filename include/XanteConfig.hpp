@@ -40,10 +40,13 @@ class XanteConfig
         ~XanteConfig();
 
         void write_configuration_file(void);
-        void set_window_size(QSize size);
-        void set_window_position(QPoint point);
-        QSize get_window_size(void);
-        QPoint get_window_position(void);
+        void set_window_size(QSize size) { window_size = size; }
+        void set_window_position(QPoint point) { window_position = point; }
+        QSize get_window_size(void) { return window_size; }
+        QPoint get_window_position(void) { return window_position; }
+        const QString get_recent_file(int index) { return recent_opened_files.value(index); }
+        int recent_files_size(void) { return recent_opened_files.size(); }
+        bool set_recent_file(const QString &filename);
 
     private:
         QString cfg_filename, pathname;

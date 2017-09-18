@@ -65,6 +65,15 @@ void XMainWindow::new_project()
     }
 }
 
+void XMainWindow::load_file(const QString &filename)
+{
+    qDebug() << __FUNCTION__ << ";" << filename;
+    set_current_file(filename);
+    project = new XanteProject(filename);
+    dialog->set_current_project(project);
+    control_window_widgets(true);
+}
+
 void XMainWindow::open_project()
 {
     QFileDialog::Options options;
@@ -74,11 +83,8 @@ void XMainWindow::open_project()
                                                     tr("Project files (*.pjx)"),
                                                     &selected_filter, options);
 
-    if (filename.isEmpty() == false) {
-        project = new XanteProject(filename);
-        dialog->set_current_project(project);
-        control_window_widgets(true);
-    }
+    if (filename.isEmpty() == false)
+        load_file(filename);
 }
 
 void XMainWindow::save_project()
@@ -91,10 +97,13 @@ void XMainWindow::close_project()
     if (editing_project == false)
         return;
 
+    dialog->set_current_project(nullptr);
     control_window_widgets(false);
 
-    if (project != nullptr)
+    if (project != nullptr) {
         delete project;
+        project = nullptr;
+    }
 }
 
 void XMainWindow::edit_jtf_info()
@@ -123,6 +132,14 @@ void XMainWindow::about_us()
     QMessageBox::about(this, tr("About xante-builder"), msg);
 }
 
+void XMainWindow::open_recent_file()
+{
+    QAction *action = qobject_cast<QAction *>(sender());
+
+    if (action)
+        load_file(action->data().toString());
+}
+
 void XMainWindow::create_menu(void)
 {
     QMenu *m_main = menuBar()->addMenu(tr("&Project"));
@@ -144,6 +161,26 @@ void XMainWindow::create_menu(void)
                                  &XMainWindow::close_project);
 
     ac_close->setStatusTip(tr("Closes the project."));
+    m_main->addSeparator();
+
+    for (int i = 0; i < MaxRecentFiles; i++) {
+        QString file = config.get_recent_file(i);
+        ac_recent_files[i] = m_main->addAction(file.isEmpty() ? tr("") : file,
+                                               this,
+                                               &XMainWindow::open_recent_file);
+
+        qDebug() << "Nome: " << file;
+        QString text = tr("&%1 %2").arg(i + 1)
+                                   .arg(QFileInfo(file).fileName());
+
+        if (file.isEmpty())
+            ac_recent_files[i]->setVisible(false);
+        else {
+            ac_recent_files[i]->setText(text);
+            ac_recent_files[i]->setData(file);
+        }
+    }
+
     m_main->addSeparator();
     QAction *ac_exit = m_main->addAction(tr("&Quit"), this, &QWidget::close);
     ac_exit->setStatusTip(tr("Quits the application."));
@@ -193,5 +230,26 @@ void XMainWindow::control_window_widgets(bool enable)
     }
 
     dialog->control_project_widgets(enable);
+}
+
+void XMainWindow::set_current_file(const QString &filename)
+{
+    if (config.set_recent_file(filename) == false)
+        return;
+
+    int n_recent_files = qMin(config.recent_files_size(), (int)MaxRecentFiles);
+
+    for (int i = 0; i < n_recent_files; i++) {
+        QString file = config.get_recent_file(i);
+        QString text = tr("&%1 %2").arg(i + 1)
+                                   .arg(QFileInfo(file).fileName());
+
+        ac_recent_files[i]->setText(text);
+        ac_recent_files[i]->setData(file);
+        ac_recent_files[i]->setVisible(true);
+    }
+
+    for (int j = n_recent_files; j < MaxRecentFiles; j++)
+        ac_recent_files[j]->setVisible(false);
 }
 

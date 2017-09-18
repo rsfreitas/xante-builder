@@ -95,23 +95,20 @@ void XanteConfig::read_configuration_file(void)
     settings.endGroup();
 }
 
-QSize XanteConfig::get_window_size(void)
+/*
+ * Updates the internal list of recent opened files. If it is a new file, returns
+ * true, otherwise returns false.
+ */
+bool XanteConfig::set_recent_file(const QString &filename)
 {
-    return window_size;
-}
+    if (recent_opened_files.contains(filename))
+        return false;
 
-QPoint XanteConfig::get_window_position(void)
-{
-    return window_position;
-}
+    recent_opened_files.prepend(filename);
 
-void XanteConfig::set_window_size(QSize size)
-{
-    window_size = size;
-}
+    while (recent_opened_files.size() > MaxRecentFiles)
+        recent_opened_files.removeLast();
 
-void XanteConfig::set_window_position(QPoint point)
-{
-    window_position = point;
+    return true;
 }
 

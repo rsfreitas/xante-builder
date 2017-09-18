@@ -28,6 +28,8 @@
 
 #include <QMainWindow>
 
+#include <XanteCommon.hpp>
+
 class QAction;
 class XanteConfig;
 class XanteProject;
@@ -52,6 +54,7 @@ class XMainWindow : public QMainWindow
         void edit_jtf_info();
         void jtf_test();
         void about_us();
+        void open_recent_file();
 
     private:
         XanteConfig &config;
@@ -60,13 +63,15 @@ class XMainWindow : public QMainWindow
 
         /* UI */
         QAction *ac_open, *ac_close, *ac_save, *ac_jtf_main_info, *ac_test_jtf,
-                *ac_new_project;
+                *ac_new_project, *ac_recent_files[MaxRecentFiles];
 
         XMainDialog *dialog;
 
         void create_menu_actions(void);
         void create_menu(void);
         void control_window_widgets(bool enable);
+        void load_file(const QString &filename);
+        void set_current_file(const QString &filename);
 };
 
 #endif

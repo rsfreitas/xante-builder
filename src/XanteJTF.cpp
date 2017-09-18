@@ -94,9 +94,10 @@ void XanteItem::write_events(QJsonObject &events) const
 
     while (i.hasNext()) {
         i.next();
+        QString ev_value = this->events.value(i.value(), QString(""));
 
-        if (this->events[i.value()].isEmpty() == false)
-            events[i.key()] = this->events[i.value()];
+        if (ev_value.isEmpty() == false)
+            events[i.key()] = ev_value;
     }
 }
 
@@ -143,8 +144,6 @@ void XanteItem::write(QJsonObject &root) const
 
 void XanteItem::pre_load(void)
 {
-    events = QVector<QString>(XanteItem::MaxEvents);
-    events.clear();
     type_description.insert(XanteItem::Type::Menu, QString("menu"));
     type_description.insert(XanteItem::Type::InputInt, QString("input-int"));
     type_description.insert(XanteItem::Type::InputFloat, QString("input-float"));
@@ -219,7 +218,7 @@ void XanteItem::parse_events_data(QJsonObject item)
             value = events[i.key()];
 
             if (value.type() == QJsonValue::String)
-                this->events[i.value()] = value.toString();
+                this->events.insert(i.value(), value.toString());
         }
     }
 }
@@ -300,8 +299,6 @@ void XanteMenu::set_name(QString name)
 
 void XanteMenu::pre_load(void)
 {
-    events = QVector<QString>(XanteMenu::MaxEvents);
-    events.clear();
     type_description.insert(XanteMenu::Type::Dynamic, QString("dynamic"));
     type_description.insert(XanteMenu::Type::Default, QString("default"));
 }
@@ -336,7 +333,7 @@ void XanteMenu::parse_events_data(QJsonObject menu)
             value = events[i.key()];
 
             if (value.type() == QJsonValue::String)
-                this->events[i.value()] = value.toString();
+                this->events.insert(i.value(), value.toString());
         }
     }
 }
@@ -429,9 +426,10 @@ void XanteMenu::write_events(QJsonObject &events) const
 
     while (i.hasNext()) {
         i.next();
+        QString ev_value = this->events.value(i.value(), QString(""));
 
-        if (this->events[i.value()].isEmpty() == false)
-            events[i.key()] = this->events[i.value()];
+        if (ev_value.isEmpty() == false)
+            events[i.key()] = ev_value;
     }
 }
 

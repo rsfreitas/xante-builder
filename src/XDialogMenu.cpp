@@ -322,7 +322,9 @@ void XDialogMenu::set_current_project(XanteProject *project,
     int selected_menu_index)
 {
     this->project = project;
-    set_selection(selected_menu_index);
+
+    if (project != nullptr)
+        set_selection(selected_menu_index);
 }
 
 /*

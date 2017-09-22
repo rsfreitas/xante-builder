@@ -77,11 +77,12 @@ class XanteItem
         XanteItem() {}
         XanteItem(QString application_name, QString menu_name, QJsonObject item);
         XanteItem(QString application_name, QString menu_name, QString name);
+
         void write(QJsonObject &root) const;
 
         /* Item properties */
-        const QString get_name(void) const { return name; }
-        const QString get_object_id(void) const { return object_id; }
+        const QString &get_name(void) const { return name; }
+        const QString &get_object_id(void) const { return object_id; }
         const QString get_brief_help(void) const { return brief_help; }
         const QString get_descriptive_help(void) const { return descriptive_help; }
         const QString get_config_block(void) const { return config_block; }
@@ -282,7 +283,7 @@ class XanteJTF
 {
     public:
         class Builder;
-        XanteJTF(QString filename);
+        XanteJTF() {}
         XanteJTF(const QString application_name, const QString description,
                  const QString company, const QString plugin,
                  const QString cfg_pathname, const QString log_pathname,
@@ -306,6 +307,9 @@ class XanteJTF
              * Sets the main menu of a JTF as the first one inside our list.
              */
             set_main_menu(menus.at(0).get_object_id());
+
+            /* We're not empty anymore */
+            empty = false;
         }
 
         static QString object_id_calc(QString application_name,
@@ -313,11 +317,14 @@ class XanteJTF
                                       QString item_name = nullptr);
 
         bool save(QString filename);
+        bool is_empty(void) const { return empty; }
+        void clear(void);
+        void load(const QString &filename);
         void add_menu(XanteMenu menu) { menus.append(menu); }
         void set_main_menu(QString menu_name) { main_menu = menu_name; }
-        const QString get_main_menu(void) { return main_menu; }
 
-        /* JTF main information */
+        /* JTF information */
+        const QString get_main_menu(void) { return main_menu; }
         const QString get_application_name(void) const { return application_name; }
         const QString get_description(void) const { return description; }
         const QString get_company(void) const { return company; }
@@ -330,15 +337,15 @@ class XanteJTF
         bool get_beta(void) const { return beta; }
 
         int total_menus(void) const { return menus.size(); }
-        XanteMenu &menu_at(int index) { return menus[index]; }
-        XanteMenu get_menu(QString object_id);
+        XanteMenu &menu_at(int index);
+        XanteMenu &get_menu(QString object_id);
 
     private:
         QString application_name, description, company, plugin, cfg_pathname,
                 log_pathname, version;
 
         int revision, build;
-        bool beta;
+        bool beta, empty = true;
         QList<XanteMenu> menus;
         QString main_menu;
         int file_revision = 1;
@@ -348,22 +355,15 @@ class XanteJTF
         void write_jtf_ui(QJsonObject &root);
         void write_jtf_general(QJsonObject &root);
         void write_jtf_internal(QJsonObject &root);
-        void read_jtf_data(void);
-        void read_jtf_internal(void);
-        void read_jtf_general(void);
-        void read_jtf_ui(void);
+        void load_jtf_from_file(void);
+        void load_jtf_internal(void);
+        void load_jtf_general(void);
+        void load_jtf_ui(void);
         void build_default_menu(void);
 };
 
 class XanteJTF::Builder
 {
-    private:
-        QString application_name, description, company, plugin, cfg_pathname,
-                log_pathname, version;
-
-        int revision, build_;
-        bool beta;
-
     public:
         Builder()
             :
@@ -422,12 +422,19 @@ class XanteJTF::Builder
             return *this;
         }
 
-        XanteJTF *build() {
-            return new XanteJTF(this->application_name, this->description,
+        XanteJTF build() {
+            return XanteJTF(this->application_name, this->description,
                                 this->company, this->plugin, this->cfg_pathname,
                                 this->log_pathname, this->version,
                                 this->revision, this->build_, this->beta);
         }
+
+    private:
+        QString application_name, description, company, plugin, cfg_pathname,
+                log_pathname, version;
+
+        int revision, build_;
+        bool beta;
 };
 
 #endif

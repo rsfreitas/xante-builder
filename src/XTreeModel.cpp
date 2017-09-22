@@ -86,23 +86,16 @@ int XTreeItem::row() const
  *
  */
 
-XTreeModel::XTreeModel(QWidget *parent)
+XTreeModel::XTreeModel(bool enable, QWidget *parent)
     : QAbstractItemModel(parent)
 {
     QList<QVariant> root_data;
     root_data << tr("File");
 
     root_item = new XTreeItem(root_data);
-}
 
-XTreeModel::XTreeModel(XanteProject *project, QWidget *parent)
-    : QAbstractItemModel(parent), project(project)
-{
-    QList<QVariant> root_data;
-    root_data << tr("File");
-
-    root_item = new XTreeItem(root_data);
-    setup_model_data(root_item);
+    if (enable)
+        setup_model_data(root_item);
 }
 
 XTreeModel::~XTreeModel()
@@ -191,7 +184,8 @@ QVariant XTreeModel::headerData(int section, Qt::Orientation orientation,
 void XTreeModel::setup_model_data(XTreeItem *parent)
 {
     QList<XTreeItem *> parents;
-    XanteJTF jtf = project->get_jtf();
+    XanteProject &project = XMainWindow::get_project();
+    XanteJTF jtf = project.get_jtf();
     int i, j;
 
     parents << parent;

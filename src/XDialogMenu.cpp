@@ -318,13 +318,9 @@ void XDialogMenu::dynamic_radio_toggled(bool checked)
  * (or selections inside the main list view) may use it. At the same time,
  * sets the current XanteMenu to the @selected_menu_index inside it.
  */
-void XDialogMenu::set_current_project(XanteProject *project,
-    int selected_menu_index)
+void XDialogMenu::set_current_project(int selected_menu_index)
 {
-    this->project = project;
-
-    if (project != nullptr)
-        set_selection(selected_menu_index);
+    set_selection(selected_menu_index);
 }
 
 /*
@@ -339,7 +335,9 @@ void XDialogMenu::set_selection(int selected_menu_index)
 
 void XDialogMenu::setup_widgets(void)
 {
-    XanteJTF jtf = project->get_jtf();
+    XanteProject &project = XMainWindow::get_project();
+
+    XanteJTF jtf = project.get_jtf();
     XanteMenu menu = jtf.menu_at(current_menu_index);
 
     setup_widgets(menu);
@@ -489,12 +487,36 @@ void XDialogMenu::del_dynamic_fixed_option(void)
 
 void XDialogMenu::hideEvent(QHideEvent *event)
 {
-    if ((event->spontaneous() == false) && (project != nullptr)) {
+//    if ((event->spontaneous() == false) && (project != nullptr)) {
         /* TODO: Save content with current data */
-        XanteJTF jtf = project->get_jtf();
-        XanteMenu menu = jtf.menu_at(current_menu_index);
-    }
+//        XanteJTF jtf = project->get_jtf();
+//        XanteMenu menu = jtf.menu_at(current_menu_index);
+//    }
 
     event->accept();
+}
+
+void XDialogMenu::clear(void)
+{
+    for (int i = XDialogMenu::LineEdit::Name;
+         i < XDialogMenu::LineEdit::MaxLineEdit;
+         i++)
+    {
+        line_edit[i]->clear();
+    }
+
+    for (int i = XDialogMenu::ComboBox::Type;
+         i < XDialogMenu::ComboBox::MaxComboBox;
+         i++)
+    {
+        combo_box[i]->clear();
+    }
+
+    for (int i = XDialogMenu::CheckBox::EvSelected;
+         i < XDialogMenu::CheckBox::MaxCheckBox;
+         i++)
+    {
+        check_box[i]->setChecked(false);
+    }
 }
 

@@ -33,6 +33,8 @@
 
 #include "xante_builder.hpp"
 
+XanteProject *XMainWindow::project = nullptr;
+
 XMainWindow::XMainWindow(XanteConfig &config)
     : config(config)
 {
@@ -60,8 +62,8 @@ void XMainWindow::new_project()
 
     if (project_wizard.exec()) {
         project = project_wizard.get_project();
-        dialog->set_current_project(project);
-        control_window_widgets(true);
+        dialog->active_project(true);
+        set_window_widgets_enabled(true);
     }
 }
 
@@ -69,9 +71,10 @@ void XMainWindow::load_file(const QString &filename)
 {
     qDebug() << __FUNCTION__ << ";" << filename;
     set_current_file(filename);
+    setWindowTitle(QString("%1 [%2]").arg(APP_NAME).arg(filename));
     project = new XanteProject(filename);
-    dialog->set_current_project(project);
-    control_window_widgets(true);
+    dialog->active_project(true);
+    set_window_widgets_enabled(true);
 }
 
 void XMainWindow::open_project()
@@ -97,8 +100,9 @@ void XMainWindow::close_project()
     if (editing_project == false)
         return;
 
-    dialog->set_current_project(nullptr);
-    control_window_widgets(false);
+    dialog->active_project(false);
+    set_window_widgets_enabled(false);
+    setWindowTitle(APP_NAME);
 
     if (project != nullptr) {
         delete project;
@@ -111,7 +115,7 @@ void XMainWindow::edit_jtf_info()
     if (editing_project == false)
         return;
 
-    XDialogJTFInfo dlg(project, this);
+    XDialogJTFInfo dlg(this);
 
     if (dlg.exec()) {
     }
@@ -206,16 +210,16 @@ void XMainWindow::create_menu(void)
                                              &QApplication::aboutQt);
 
     ac_about_qt->setStatusTip(tr("Shows the current Qt version."));
-    control_window_widgets(false);
+    set_window_widgets_enabled(false);
 }
 
-void XMainWindow::control_window_widgets(bool enable)
+void XMainWindow::set_window_widgets_enabled(bool enable)
 {
     XTreeModel *model;
 
     editing_project = enable;
 
-    /* Enable/Disable widgets */
+    /* Enable/Disable menu options */
     ac_new_project->setEnabled(!enable);
     ac_open->setEnabled(!enable);
     ac_save->setEnabled(enable);
@@ -223,12 +227,12 @@ void XMainWindow::control_window_widgets(bool enable)
     ac_jtf_main_info->setEnabled(enable);
     ac_test_jtf->setEnabled(enable);
 
-    /* Populate the tree view */
-    if (enable == true) {
-        model = new XTreeModel(project, this);
-        dialog->set_tree_content(model, enable);
-    }
+    for (int j = 0; j < MaxRecentFiles; j++)
+        ac_recent_files[j]->setEnabled(!enable);
 
+    /* Populate the tree view */
+    model = new XTreeModel(enable, this);
+    dialog->set_tree_content(model, enable);
     dialog->control_project_widgets(enable);
 }
 

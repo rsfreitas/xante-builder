@@ -41,16 +41,14 @@ class XDialogJTFInfo : public QDialog
     Q_OBJECT
 
     public:
-        XDialogJTFInfo(XanteProject *project, QWidget *parent = 0);
-        ~XDialogJTFInfo();
+        XDialogJTFInfo(QWidget *parent = 0);
+        ~XDialogJTFInfo() {};
 
     private slots:
         void confirm_ok(void);
         void confirm_cancel(void);
 
     private:
-        XanteProject *project = nullptr;
-
         enum edit_widget {
             ApplicationName,
             Description,

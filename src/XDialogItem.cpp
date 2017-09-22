@@ -415,29 +415,15 @@ XDialogItem::~XDialogItem()
 }
 
 /*
- * Just returns a reference to the current XanteItem we are editing.
- */
-XanteItem &XDialogItem::get_current_item(void)
-{
-    XanteJTF jtf = project->get_jtf();
-    XanteMenu menu = jtf.menu_at(current_menu_index);
-
-    return menu.item_at(current_item_index);
-}
-
-/*
  * Sets the current project that's been edited, so all other informations
  * (or selections inside the main list view) may use it. At the same time,
  * sets the current XanteItem to the @selected_menu_index and the
  * @selected_item_index inside it.
  */
-void XDialogItem::set_current_project(XanteProject *project,
-    int selected_menu_index, int selected_item_index)
+void XDialogItem::set_current_project(int selected_menu_index,
+    int selected_item_index)
 {
-    this->project = project;
-
-    if (project != nullptr)
-        set_selection(selected_menu_index, selected_item_index);
+    set_selection(selected_menu_index, selected_item_index);
 }
 
 /*
@@ -451,12 +437,7 @@ void XDialogItem::set_selection(int selected_menu_index, int selected_item_index
     setup_widgets();
 }
 
-void XDialogItem::setup_widgets(void)
-{
-    setup_widgets(get_current_item());
-}
-
-void XDialogItem::setup_config_widgets(XanteItem item)
+void XDialogItem::setup_config_widgets(const XanteItem &item)
 {
     if (item.has_config() == false)
         return;
@@ -465,7 +446,7 @@ void XDialogItem::setup_config_widgets(XanteItem item)
     line_edit[XDialogItem::LineEdit::CfgItem]->setText(item.get_config_item());
 }
 
-void XDialogItem::setup_events_widgets(XanteItem item)
+void XDialogItem::setup_events_widgets(const XanteItem &item)
 {
     int i;
     QList<QPair<enum XanteItem::Event,
@@ -509,12 +490,12 @@ void XDialogItem::setup_events_widgets(XanteItem item)
     }
 }
 
-void XDialogItem::setup_help_widgets(XanteItem item)
+void XDialogItem::setup_help_widgets(const XanteItem &item)
 {
     /* TODO */
 }
 
-void XDialogItem::setup_input_ranges_widgets(XanteItem item)
+void XDialogItem::setup_input_ranges_widgets(const XanteItem &item)
 {
     if (item.has_input_ranges() == false)
         return;
@@ -522,7 +503,7 @@ void XDialogItem::setup_input_ranges_widgets(XanteItem item)
     /* TODO */
 }
 
-void XDialogItem::setup_options_widgets(XanteItem item)
+void XDialogItem::setup_options_widgets(const XanteItem &item)
 {
     if (item.has_options() == false)
         return;
@@ -530,8 +511,13 @@ void XDialogItem::setup_options_widgets(XanteItem item)
     /* TODO */
 }
 
-void XDialogItem::setup_widgets(XanteItem item)
+void XDialogItem::setup_widgets(void)
 {
+    XanteProject &project = XMainWindow::get_project();
+    XanteJTF &jtf = project.get_jtf();
+    XanteMenu menu = jtf.menu_at(current_menu_index);
+    XanteItem &item = menu.item_at(current_item_index);
+
     /* Prepare dialog widgets for item */
     select_item_type(item.get_type());
 
@@ -551,6 +537,7 @@ void XDialogItem::setup_widgets(XanteItem item)
 
 void XDialogItem::disable_all_widgets(void)
 {
+    clear();
     combo_box[XDialogItem::ComboBox::MenuReference]->setEnabled(false);
     group_box[XDialogItem::GroupBox::Config]->setEnabled(false);
     group_box[XDialogItem::GroupBox::OptionsGb]->setEnabled(false);
@@ -674,9 +661,9 @@ void XDialogItem::del_option(void)
 
 void XDialogItem::hideEvent(QHideEvent *event)
 {
-    if ((event->spontaneous() == false) && (project != nullptr)) {
+//    if ((event->spontaneous() == false) && (project != nullptr)) {
         /* TODO: Save the current item modifications */
-    }
+//    }
 
     event->accept();
 }
@@ -712,5 +699,29 @@ void XDialogItem::help_group_toggled(bool on)
 
     /* Are we editing a checklist or a radio_checklist item? */
     enable_help(combo_box[XDialogItem::ComboBox::Type]->currentIndex());
+}
+
+void XDialogItem::clear(void)
+{
+    for (int i = XDialogItem::LineEdit::Name;
+         i < XDialogItem::LineEdit::MaxLineEdit;
+         i++)
+    {
+        line_edit[i]->clear();
+    }
+
+    for (int i = XDialogItem::ComboBox::Type;
+         i < XDialogItem::ComboBox::MaxComboBox;
+         i++)
+    {
+        combo_box[i]->clear();
+    }
+
+    for (int i = XDialogItem::CheckBox::EvSelected;
+         i < XDialogItem::CheckBox::MaxCheckBox;
+         i++)
+    {
+        check_box[i]->setChecked(false);
+    }
 }
 

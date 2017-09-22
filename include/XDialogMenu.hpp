@@ -47,10 +47,9 @@ class XDialogMenu : public QWidget
     public:
         XDialogMenu(QWidget *parent = 0);
         ~XDialogMenu();
-        void set_current_project(XanteProject *project,
-                                 int selected_menu_index);
-
+        void set_current_project(int selected_menu_index);
         void set_selection(int selected_menu_index);
+        void clear(void);
 
     public slots:
         void dynamic_radio_toggled(bool checked);
@@ -99,7 +98,6 @@ class XDialogMenu : public QWidget
             MaxGroupBox
         };
 
-        XanteProject *project = nullptr;
         int current_menu_index = -1;
 
         /* UI */

@@ -35,8 +35,8 @@
 /* Internal classes */
 #include "XanteCommon.hpp"
 #include "XanteConfig.hpp"
-#include "XanteProject.hpp"
 #include "XanteJTF.hpp"
+#include "XanteProject.hpp"
 #include "XProjectWizard.hpp"
 #include "XMainWindow.hpp"
 #include "XMainDialog.hpp"

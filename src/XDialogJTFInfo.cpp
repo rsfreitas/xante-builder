@@ -35,16 +35,12 @@
 
 #include "xante_builder.hpp"
 
-XDialogJTFInfo::XDialogJTFInfo(XanteProject *project, QWidget *parent)
-    : QDialog(parent), project(project)
+XDialogJTFInfo::XDialogJTFInfo(QWidget *parent)
+    : QDialog(parent)
 {
     setWindowTitle(tr("JTF file main informations"));
     create_widgets();
     fill_widgets_with_project_data();
-}
-
-XDialogJTFInfo::~XDialogJTFInfo()
-{
 }
 
 QHBoxLayout *XDialogJTFInfo::create_main_menu_chooser(void)
@@ -182,7 +178,8 @@ void XDialogJTFInfo::reject(void)
 
 void XDialogJTFInfo::fill_widgets_with_project_data(void)
 {
-    XanteJTF jtf = project->get_jtf();
+    XanteProject &project = XMainWindow::get_project();
+    XanteJTF jtf = project.get_jtf();
 
     /* LineEdit */
     edit.at(XDialogJTFInfo::ApplicationName)->setText(jtf.get_application_name());
@@ -204,7 +201,8 @@ void XDialogJTFInfo::fill_widgets_with_project_data(void)
 
 void XDialogJTFInfo::prepare_main_menu_chooser(void)
 {
-    XanteJTF jtf = project->get_jtf();
+    XanteProject &project = XMainWindow::get_project();
+    XanteJTF jtf = project.get_jtf();
     int i;
 
     /* Insert all available menus */

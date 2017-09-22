@@ -41,7 +41,7 @@ class XMainDialog : public QWidget
     public:
         XMainDialog(QWidget *parent = 0);
         ~XMainDialog() {}
-        void set_current_project(XanteProject *project);
+        void active_project(bool active);
         void set_tree_content(XTreeModel *model, bool enable_menu);
         void control_project_widgets(bool enable);
 
@@ -51,7 +51,6 @@ class XMainDialog : public QWidget
         void dialog_content_changed();
 
     private:
-        XanteProject *project = nullptr;
         XDialogItem *dialog_item;
         XDialogMenu *dialog_menu;
         XTreeView *tree;

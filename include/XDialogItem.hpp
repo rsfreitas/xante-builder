@@ -47,12 +47,11 @@ class XDialogItem : public QWidget
     public:
         XDialogItem(QWidget *parent = 0);
         ~XDialogItem();
-        void set_current_project(XanteProject *project,
-                                 int selected_menu_index,
+        void set_current_project(int selected_menu_index,
                                  int selected_item_index);
 
         void set_selection(int selected_menu_index, int selected_item_index);
-        XanteItem &get_current_item(void);
+        void clear(void);
 
     private slots:
         void select_item_type(int index);
@@ -123,7 +122,6 @@ class XDialogItem : public QWidget
         };
 
         int current_menu_index = -1, current_item_index = -1;
-        XanteProject *project = nullptr;
 
         /* UI */
         QVector<QLineEdit *> line_edit;
@@ -143,13 +141,12 @@ class XDialogItem : public QWidget
         QGroupBox *create_events_widgets(void);
 
         void setup_widgets(void);
-        void setup_widgets(XanteItem item);
-        void setup_dynamic_info_widgets(XanteItem menu);
-        void setup_events_widgets(XanteItem menu);
-        void setup_help_widgets(XanteItem menu);
-        void setup_config_widgets(XanteItem menu);
-        void setup_input_ranges_widgets(XanteItem menu);
-        void setup_options_widgets(XanteItem menu);
+        void setup_dynamic_info_widgets(const XanteItem &item);
+        void setup_events_widgets(const XanteItem &item);
+        void setup_help_widgets(const XanteItem &item);
+        void setup_config_widgets(const XanteItem &item);
+        void setup_input_ranges_widgets(const XanteItem &item);
+        void setup_options_widgets(const XanteItem &item);
 
         void disable_all_widgets(void);
         void enable_input_ranges(int type);

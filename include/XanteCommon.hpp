@@ -12,9 +12,11 @@
 #ifndef _XANTECOMMON_HPP
 #define _XANTECOMMON_HPP          1
 
+/* Common constants */
 enum {
     MaxRecentFiles = 5
 };
+
 
 #endif
 

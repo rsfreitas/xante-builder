@@ -175,14 +175,17 @@ void XanteItem::parse_common_data(QJsonObject item)
     int tmp;
 
     /* Load item from JSON */
+
     name = item["name"].toString();
     object_id = item["object_id"].toString();
-    tmp = item["mode"].toInt();
-    mode = (enum XanteMode)tmp;
-    tmp = item["type"].toInt();
-    type = (enum XanteItem::Type)tmp;
     default_value = item["default_value"].toString();
     menu_reference_id = item["menu_id"].toString();
+
+    tmp = item["mode"].toInt();
+    mode = (enum XanteMode)tmp;
+
+    tmp = item["type"].toInt();
+    type = (enum XanteItem::Type)tmp;
 
     QJsonValue value = item["options"];
 
@@ -567,7 +570,7 @@ bool XanteJTF::save(QString filename)
     return true;
 }
 
-XanteJTF::XanteJTF(QString filename)
+void XanteJTF::load(const QString &filename)
 {
     QFile file;
     QString data;
@@ -579,17 +582,20 @@ XanteJTF::XanteJTF(QString filename)
 
     QJsonDocument d = QJsonDocument::fromJson(data.toUtf8());
     jtf_root = d.object();
-    read_jtf_data();
+    load_jtf_from_file();
+
+    /* We're not empty anymore */
+    empty = false;
 }
 
-void XanteJTF::read_jtf_data(void)
+void XanteJTF::load_jtf_from_file(void)
 {
-    read_jtf_internal();
-    read_jtf_general();
-    read_jtf_ui();
+    load_jtf_internal();
+    load_jtf_general();
+    load_jtf_ui();
 }
 
-void XanteJTF::read_jtf_internal(void)
+void XanteJTF::load_jtf_internal(void)
 {
     QJsonValue value = jtf_root.value(QString("internal"));
     QJsonObject internal = value.toObject();
@@ -604,7 +610,7 @@ void XanteJTF::read_jtf_internal(void)
     beta = application["beta"].toBool();
 }
 
-void XanteJTF::read_jtf_general(void)
+void XanteJTF::load_jtf_general(void)
 {
     QJsonValue value = jtf_root.value(QString("general"));
     QJsonObject general = value.toObject();
@@ -617,7 +623,7 @@ void XanteJTF::read_jtf_general(void)
     log_pathname = general["log_pathname"].toString();
 }
 
-void XanteJTF::read_jtf_ui(void)
+void XanteJTF::load_jtf_ui(void)
 {
     QJsonValue value = jtf_root.value(QString("ui"));
     QJsonObject ui = value.toObject();
@@ -657,10 +663,23 @@ void XanteJTF::build_default_menu(void)
     menus.append(m);
 }
 
-XanteMenu XanteJTF::get_menu(QString object_id)
+XanteMenu &XanteJTF::get_menu(QString object_id)
 {
     int index = menus.indexOf(object_id);
-//    int index = menus.indexOf(XanteMenu(object_id));
-    return menus.at(index);
+
+    return menu_at(index);
+}
+
+XanteMenu &XanteJTF::menu_at(int index)
+{
+    if ((index < 0) || (index > menus.size()))
+        throw std::out_of_range("Menu not found.");
+
+    return menus[index];
+}
+
+void XanteJTF::clear(void)
+{
+    empty = true;
 }
 

@@ -170,6 +170,42 @@ XanteItem::XanteItem(QString application_name, QString menu_name, QString name)
     set_type(XanteItem::Type::Menu);
 }
 
+enum XanteItem::Type XanteItem::toXanteItem(const QString &type)
+{
+    if (type == "menu")
+        return XanteItem::Type::Menu;
+    else if (type == "input-int")
+        return XanteItem::Type::InputInt;
+    else if (type == "input-float")
+        return XanteItem::Type::InputFloat;
+    else if (type == "input-date")
+        return XanteItem::Type::InputDate;
+    else if (type == "input-time")
+        return XanteItem::Type::InputTime;
+    else if (type == "input-string")
+        return XanteItem::Type::InputString;
+    else if (type == "input-passwd")
+        return XanteItem::Type::InputPasswd;
+    else if (type == "calendar")
+        return XanteItem::Type::Calendar;
+    else if (type == "timebox")
+        return XanteItem::Type::Timebox;
+    else if (type == "radio-checklist")
+        return XanteItem::Type::RadioChecklist;
+    else if (type == "checklist")
+        return XanteItem::Type::Checklist;
+    else if (type == "yesno")
+        return XanteItem::Type::YesNo;
+    else if (type == "dynamic-menu")
+        return XanteItem::Type::DynamicMenu;
+    else if (type == "delete-dynamic-menu")
+        return XanteItem::Type::DeleteDynamicMenu;
+    else if (type == "add-dynamic-menu")
+        return XanteItem::Type::AddDynamicMenu;
+
+    return XanteItem::Type::Unknown;
+}
+
 void XanteItem::parse_common_data(QJsonObject item)
 {
     int tmp;
@@ -183,9 +219,7 @@ void XanteItem::parse_common_data(QJsonObject item)
 
     tmp = item["mode"].toInt();
     mode = (enum XanteMode)tmp;
-
-    tmp = item["type"].toInt();
-    type = (enum XanteItem::Type)tmp;
+    type = toXanteItem(item["type"].toString());
 
     QJsonValue value = item["options"];
 
@@ -209,10 +243,10 @@ void XanteItem::parse_events_data(QJsonObject item)
         QJsonObject events = value.toObject();
         QMap<QString, enum XanteItem::Event> ev_map;
 
-        ev_map.insert("selected", XanteItem::Event::Selected);
-        ev_map.insert("exit", XanteItem::Event::Exit);
-        ev_map.insert("value_confirmed", XanteItem::Event::ValueConfirmed);
-        ev_map.insert("value_changed", XanteItem::Event::ValueChanged);
+        ev_map.insert("item-selected", XanteItem::Event::Selected);
+        ev_map.insert("item-exit", XanteItem::Event::Exit);
+        ev_map.insert("item-value-confirm", XanteItem::Event::ValueConfirmed);
+        ev_map.insert("item-value-updated", XanteItem::Event::ValueChanged);
 
         QMapIterator<QString, enum XanteItem::Event> i(ev_map);
 
@@ -352,7 +386,7 @@ void XanteMenu::parse_dynamic_data(QJsonObject menu)
     } else {
         QString tmp = value.toString();
 
-        if (tmp.compare(QString("dynamic")) == 0) {
+        if (tmp == "dynamic") {
             QJsonObject dynamic = menu["dynamic"].toObject();
 
             type = XanteMenu::Type::Dynamic;

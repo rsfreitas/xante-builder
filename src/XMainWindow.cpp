@@ -69,7 +69,6 @@ void XMainWindow::new_project()
 
 void XMainWindow::load_file(const QString &filename)
 {
-    qDebug() << __FUNCTION__ << ";" << filename;
     set_current_file(filename);
     setWindowTitle(QString("%1 [%2]").arg(APP_NAME).arg(filename));
     project = new XanteProject(filename);
@@ -173,7 +172,6 @@ void XMainWindow::create_menu(void)
                                                this,
                                                &XMainWindow::open_recent_file);
 
-        qDebug() << "Nome: " << file;
         QString text = tr("&%1 %2").arg(i + 1)
                                    .arg(QFileInfo(file).fileName());
 

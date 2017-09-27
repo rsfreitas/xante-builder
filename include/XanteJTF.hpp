@@ -43,6 +43,7 @@ class XanteItem
 {
     public:
         enum Type {
+            Unknown = -1,
             Menu,
             InputInt,
             InputFloat,
@@ -89,8 +90,10 @@ class XanteItem
         const QString get_config_item(void) const { return config_item; }
         enum XanteItem::OptionType get_option_type(void) const { return option_type; }
         int get_total_options(void) const { return options.size(); }
+        int get_total_help_options(void) const { return help_options.size(); }
         const QString get_option(void) const { return fixed_option; }
         const QString get_option(int index) const { return options.at(index); }
+        const QString get_help_option(int index) const { return help_options.at(index); }
         const QString get_default_value(void) const { return default_value; }
         const QString get_referenced_menu(void) const { return menu_reference_id; }
         const QVariant get_min(void) const { return min_input_range; }
@@ -168,6 +171,8 @@ class XanteItem
         void write_input_ranges(QJsonObject &input_ranges) const;
         void write_config(QJsonObject &config) const;
         void write_events(QJsonObject &events) const;
+
+        enum XanteItem::Type toXanteItem(const QString &type);
 };
 
 class XanteMenu

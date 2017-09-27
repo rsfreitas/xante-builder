@@ -79,7 +79,7 @@ class XDialogItem : public QWidget
             InputMin,
             InputMax,
             HelpBrief,
-            HelpDescription,
+            HelpDescriptive,
             DefaultValue,
 
             MaxLineEdit

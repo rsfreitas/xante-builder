@@ -417,6 +417,7 @@ void XDialogMenu::setup_events_widgets(XanteMenu menu)
                                       XDialogMenu::CheckBox::EvExit)));
 
     group_box[XDialogMenu::GroupBox::Events]->setChecked(true);
+    group_box[XDialogMenu::GroupBox::Events]->setEnabled(true);
 
     for (i = 0; i < events.size(); i++) {
         QPair<enum XanteMenu::Event,
@@ -436,6 +437,7 @@ void XDialogMenu::setup_events_widgets(XanteMenu menu)
 
 void XDialogMenu::disable_all_widgets(void)
 {
+    group_box[XDialogMenu::GroupBox::Events]->setChecked(false);
     group_box[XDialogMenu::GroupBox::Events]->setEnabled(false);
     group_box[XDialogMenu::GroupBox::Dynamic]->setEnabled(false);
 }
@@ -509,7 +511,7 @@ void XDialogMenu::clear(void)
          i < XDialogMenu::ComboBox::MaxComboBox;
          i++)
     {
-        combo_box[i]->clear();
+        combo_box[i]->setCurrentIndex(0);
     }
 
     for (int i = XDialogMenu::CheckBox::EvSelected;

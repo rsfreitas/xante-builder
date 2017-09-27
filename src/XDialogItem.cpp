@@ -242,7 +242,7 @@ QGroupBox *XDialogItem::create_item_help_widgets(void)
     label->setBuddy(edit);
     hdescription->addWidget(label);
     hdescription->addWidget(edit);
-    line_edit[XDialogItem::LineEdit::HelpDescription] = edit;
+    line_edit[XDialogItem::LineEdit::HelpDescriptive] = edit;
 
     QPushButton *bt_add = new QPushButton(tr("Add"));
     QPushButton *bt_del = new QPushButton(tr("Remove"));
@@ -415,26 +415,14 @@ XDialogItem::~XDialogItem()
 }
 
 /*
- * Just returns a reference to the current XanteItem we are editing.
- */
-XanteItem &XDialogItem::get_current_item(void)
-{
-    XanteJTF jtf = project->get_jtf();
-    XanteMenu menu = jtf.menu_at(current_menu_index);
-
-    return menu.item_at(current_item_index);
-}
-
-/*
  * Sets the current project that's been edited, so all other informations
  * (or selections inside the main list view) may use it. At the same time,
  * sets the current XanteItem to the @selected_menu_index and the
  * @selected_item_index inside it.
  */
-void XDialogItem::set_current_project(XanteProject *project,
-    int selected_menu_index, int selected_item_index)
+void XDialogItem::set_current_project(int selected_menu_index,
+    int selected_item_index)
 {
-    this->project = project;
     set_selection(selected_menu_index, selected_item_index);
 }
 
@@ -449,12 +437,7 @@ void XDialogItem::set_selection(int selected_menu_index, int selected_item_index
     setup_widgets();
 }
 
-void XDialogItem::setup_widgets(void)
-{
-    setup_widgets(get_current_item());
-}
-
-void XDialogItem::setup_config_widgets(XanteItem item)
+void XDialogItem::setup_config_widgets(const XanteItem &item)
 {
     if (item.has_config() == false)
         return;
@@ -463,7 +446,7 @@ void XDialogItem::setup_config_widgets(XanteItem item)
     line_edit[XDialogItem::LineEdit::CfgItem]->setText(item.get_config_item());
 }
 
-void XDialogItem::setup_events_widgets(XanteItem item)
+void XDialogItem::setup_events_widgets(const XanteItem &item)
 {
     int i;
     QList<QPair<enum XanteItem::Event,
@@ -490,6 +473,7 @@ void XDialogItem::setup_events_widgets(XanteItem item)
                                       XDialogItem::CheckBox::EvValueChanged)));
 
     group_box[XDialogItem::GroupBox::Events]->setChecked(true);
+    group_box[XDialogItem::GroupBox::Events]->setEnabled(true);
 
     for (i = 0; i < events.size(); i++) {
         QPair<enum XanteItem::Event,
@@ -507,30 +491,94 @@ void XDialogItem::setup_events_widgets(XanteItem item)
     }
 }
 
-void XDialogItem::setup_help_widgets(XanteItem item)
+void XDialogItem::setup_help_widgets(const XanteItem &item)
 {
-    /* TODO */
+    QString text;
+    int t;
+    bool has_help = false;
+
+    /* brief help */
+    text = item.get_brief_help();
+
+    if (text.isEmpty() == false) {
+        line_edit[XDialogItem::LineEdit::HelpBrief]->setText(text);
+        has_help = true;
+    }
+
+    /* descriptive help */
+    text = item.get_descriptive_help();
+
+    if (text.isEmpty() == false) {
+        line_edit[XDialogItem::LineEdit::HelpDescriptive]->setText(text);
+        has_help = true;
+    }
+
+    /* checklist/radio-checklist help options */
+    t = item.get_total_help_options();
+
+    if (t) {
+        for (int i = 0; i < t; i++)
+            list_widget[XDialogItem::ListWidget::HelpOptions]->addItem(item.get_help_option(i));
+
+        has_help = true;
+    }
+
+    group_box[XDialogItem::GroupBox::Help]->setChecked(has_help);
 }
 
-void XDialogItem::setup_input_ranges_widgets(XanteItem item)
+void XDialogItem::setup_input_ranges_widgets(const XanteItem &item)
 {
     if (item.has_input_ranges() == false)
         return;
 
-    /* TODO */
+    enum XanteItem::Type type = item.get_type();
+
+    if (type == XanteItem::Type::InputString) {
+        line_edit[XDialogItem::LineEdit::InputStringLength]->setText(
+            QString("%1").arg(item.get_string_length())
+        );
+    } else {
+        line_edit[XDialogItem::LineEdit::InputMin]->setText(
+            QString("%1").arg((type == XanteItem::Type::InputInt)
+                                    ? item.get_min().toInt()
+                                    : item.get_min().toFloat())
+        );
+
+        line_edit[XDialogItem::LineEdit::InputMax]->setText(
+            QString("%1").arg((type == XanteItem::Type::InputInt)
+                                    ? item.get_max().toInt()
+                                    : item.get_max().toFloat())
+        );
+    }
 }
 
-void XDialogItem::setup_options_widgets(XanteItem item)
+void XDialogItem::setup_options_widgets(const XanteItem &item)
 {
     if (item.has_options() == false)
         return;
 
-    /* TODO */
+    /* TODO: Use item.get_option_type */
+
+    enum XanteItem::Type type = item.get_type();
+
+    if ((type == XanteItem::Type::Checklist) ||
+        (type == XanteItem::Type::RadioChecklist))
+    {
+        for (int i = 0; i < item.get_total_options(); i++)
+            list_widget[XDialogItem::ListWidget::OptionsLw]->addItem(item.get_option(i));
+    } else
+        line_edit[XDialogItem::LineEdit::Options]->setText(item.get_option());
 }
 
-void XDialogItem::setup_widgets(XanteItem item)
+void XDialogItem::setup_widgets(void)
 {
+    XanteProject &project = XMainWindow::get_project();
+    XanteJTF &jtf = project.get_jtf();
+    XanteMenu menu = jtf.menu_at(current_menu_index);
+    XanteItem &item = menu.item_at(current_item_index);
+
     /* Prepare dialog widgets for item */
+    clear();
     select_item_type(item.get_type());
 
     /* Common informations */
@@ -553,6 +601,8 @@ void XDialogItem::disable_all_widgets(void)
     group_box[XDialogItem::GroupBox::Config]->setEnabled(false);
     group_box[XDialogItem::GroupBox::OptionsGb]->setEnabled(false);
     group_box[XDialogItem::GroupBox::InputRanges]->setEnabled(false);
+    group_box[XDialogItem::GroupBox::Events]->setChecked(false);
+    group_box[XDialogItem::GroupBox::Events]->setEnabled(false);
 }
 
 void XDialogItem::enable_input_ranges(int type)
@@ -636,6 +686,7 @@ void XDialogItem::select_item_type(int index)
         case XanteItem::Type::Checklist:
         case XanteItem::Type::RadioChecklist:
             group_box[XDialogItem::GroupBox::Config]->setEnabled(true);
+            group_box[XDialogItem::GroupBox::Events]->setEnabled(true);
             enable_input_ranges(type);
             enable_options(type);
             enable_help(type);
@@ -672,9 +723,9 @@ void XDialogItem::del_option(void)
 
 void XDialogItem::hideEvent(QHideEvent *event)
 {
-    if ((event->spontaneous() == false) && (project != nullptr)) {
+//    if ((event->spontaneous() == false) && (project != nullptr)) {
         /* TODO: Save the current item modifications */
-    }
+//    }
 
     event->accept();
 }
@@ -710,5 +761,36 @@ void XDialogItem::help_group_toggled(bool on)
 
     /* Are we editing a checklist or a radio_checklist item? */
     enable_help(combo_box[XDialogItem::ComboBox::Type]->currentIndex());
+}
+
+void XDialogItem::clear(void)
+{
+    for (int i = XDialogItem::LineEdit::Name;
+         i < XDialogItem::LineEdit::MaxLineEdit;
+         i++)
+    {
+        line_edit[i]->clear();
+    }
+
+    for (int i = XDialogItem::ComboBox::Type;
+         i < XDialogItem::ComboBox::MaxComboBox;
+         i++)
+    {
+        combo_box[i]->setCurrentIndex(0);
+    }
+
+    for (int i = XDialogItem::CheckBox::EvSelected;
+         i < XDialogItem::CheckBox::MaxCheckBox;
+         i++)
+    {
+        check_box[i]->setChecked(false);
+    }
+
+    for (int i = XDialogItem::ListWidget::OptionsLw;
+         i < XDialogItem::ListWidget::MaxListWidget;
+         i++)
+    {
+        list_widget[i]->clear();
+    }
 }
 

@@ -43,6 +43,7 @@ class XanteItem
 {
     public:
         enum Type {
+            Unknown = -1,
             Menu,
             InputInt,
             InputFloat,
@@ -77,27 +78,38 @@ class XanteItem
         XanteItem() {}
         XanteItem(QString application_name, QString menu_name, QJsonObject item);
         XanteItem(QString application_name, QString menu_name, QString name);
+
         void write(QJsonObject &root) const;
 
         /* Item properties */
-        const QString get_name(void) const { return name; }
-        const QString get_object_id(void) const { return object_id; }
+        const QString &get_name(void) const { return name; }
+        const QString &get_object_id(void) const { return object_id; }
         const QString get_brief_help(void) const { return brief_help; }
         const QString get_descriptive_help(void) const { return descriptive_help; }
         const QString get_config_block(void) const { return config_block; }
         const QString get_config_item(void) const { return config_item; }
         enum XanteItem::OptionType get_option_type(void) const { return option_type; }
         int get_total_options(void) const { return options.size(); }
+        int get_total_help_options(void) const { return help_options.size(); }
         const QString get_option(void) const { return fixed_option; }
         const QString get_option(int index) const { return options.at(index); }
+        const QString get_help_option(int index) const { return help_options.at(index); }
         const QString get_default_value(void) const { return default_value; }
         const QString get_referenced_menu(void) const { return menu_reference_id; }
-        const QString get_event(enum XanteItem::Event event) const { return events.at(event); }
         const QVariant get_min(void) const { return min_input_range; }
         const QVariant get_max(void) const { return max_input_range; }
         enum XanteItem::Type get_type(void) const { return type; }
         enum XanteMode get_mode(void) const { return mode; }
         int get_string_length(void) const { return string_length; }
+        const QString get_event(enum XanteItem::Event event) const {
+            QMap<enum XanteItem::Event, QString>::const_iterator it;
+
+            for (it = events.constBegin(); it != events.constEnd(); it++)
+                if (it.key() == event)
+                    return it.value();
+
+            return QString("");
+        }
 
         void set_name(QString name);
         void set_mode(enum XanteMode mode) { this->mode = mode; }
@@ -139,9 +151,9 @@ class XanteItem
                 default_value, menu_reference_id;
 
         QVariant min_input_range, max_input_range;
-        QVector<QString> events;
         QList<QString> options, help_options;
         QMap<enum XanteItem::Type, QString> type_description;
+        QMap<enum XanteItem::Event, QString> events;
         enum XanteMode mode;
         enum XanteItem::Type type;
         enum XanteItem::OptionType option_type;
@@ -159,6 +171,8 @@ class XanteItem
         void write_input_ranges(QJsonObject &input_ranges) const;
         void write_config(QJsonObject &config) const;
         void write_events(QJsonObject &events) const;
+
+        enum XanteItem::Type toXanteItem(const QString &type);
 };
 
 class XanteMenu
@@ -196,16 +210,25 @@ class XanteMenu
         /* Menu properties */
         const QString get_name(void) const { return name; }
         const QString get_object_id(void) const { return object_id; }
-        const QString get_event(enum XanteMenu::Event event) const { return events.at(event); }
         enum XanteMenu::Type get_type(void) const { return type; }
         enum XanteMenu::DynamicType get_dynamic_type(void) const { return dynamic_type; }
         enum XanteMode get_mode(void) const { return mode; }
         int get_dynamic_copies(void) const { return dynamic_copies; }
-        bool has_events(void) const { return events.size() != 0; }
         const QStringList get_dynamic_options(void) const { return copies; }
         const QString get_dynamic_origin_block(void) const { return dynamic_origin_block; }
         const QString get_dynamic_origin_item(void) const { return dynamic_origin_item; }
         const QString get_block_prefix(void) const { return dynamic_block_prefix; }
+        const QString get_event(enum XanteMenu::Event event) const {
+            QMap<enum XanteMenu::Event, QString>::const_iterator it;
+
+            for (it = events.constBegin(); it != events.constEnd(); it++)
+                if (it.key() == event)
+                    return it.value();
+
+            return QString("");
+        }
+
+        bool has_events(void) const { return events.size() != 0; }
 
         void set_name(QString name);
         void set_type(enum XanteMenu::Type type) { this->type = type; }
@@ -227,7 +250,7 @@ class XanteMenu
         }
 
         void set_event(QString event, enum XanteMenu::Event event_id) {
-            events[event_id] = event;
+            events.insert(event_id, event);
         }
 
         bool operator ==(const XanteMenu &other) const {
@@ -246,10 +269,10 @@ class XanteMenu
         enum XanteMenu::Type type;
         enum XanteMenu::DynamicType dynamic_type;
         int dynamic_copies;
-        QVector<QString> events;
         QStringList copies;
         QList<XanteItem> items;
         QMap<enum XanteMenu::Type, QString> type_description;
+        QMap<enum XanteMenu::Event, QString> events;
 
         void pre_load(void);
         void parse(QJsonObject menu);
@@ -265,7 +288,7 @@ class XanteJTF
 {
     public:
         class Builder;
-        XanteJTF(QString filename);
+        XanteJTF() {}
         XanteJTF(const QString application_name, const QString description,
                  const QString company, const QString plugin,
                  const QString cfg_pathname, const QString log_pathname,
@@ -289,6 +312,9 @@ class XanteJTF
              * Sets the main menu of a JTF as the first one inside our list.
              */
             set_main_menu(menus.at(0).get_object_id());
+
+            /* We're not empty anymore */
+            empty = false;
         }
 
         static QString object_id_calc(QString application_name,
@@ -296,11 +322,14 @@ class XanteJTF
                                       QString item_name = nullptr);
 
         bool save(QString filename);
+        bool is_empty(void) const { return empty; }
+        void clear(void);
+        void load(const QString &filename);
         void add_menu(XanteMenu menu) { menus.append(menu); }
         void set_main_menu(QString menu_name) { main_menu = menu_name; }
-        const QString get_main_menu(void) { return main_menu; }
 
-        /* JTF main information */
+        /* JTF information */
+        const QString get_main_menu(void) { return main_menu; }
         const QString get_application_name(void) const { return application_name; }
         const QString get_description(void) const { return description; }
         const QString get_company(void) const { return company; }
@@ -313,15 +342,15 @@ class XanteJTF
         bool get_beta(void) const { return beta; }
 
         int total_menus(void) const { return menus.size(); }
-        XanteMenu &menu_at(int index) { return menus[index]; }
-        XanteMenu get_menu(QString object_id);
+        XanteMenu &menu_at(int index);
+        XanteMenu &get_menu(QString object_id);
 
     private:
         QString application_name, description, company, plugin, cfg_pathname,
                 log_pathname, version;
 
         int revision, build;
-        bool beta;
+        bool beta, empty = true;
         QList<XanteMenu> menus;
         QString main_menu;
         int file_revision = 1;
@@ -331,22 +360,15 @@ class XanteJTF
         void write_jtf_ui(QJsonObject &root);
         void write_jtf_general(QJsonObject &root);
         void write_jtf_internal(QJsonObject &root);
-        void read_jtf_data(void);
-        void read_jtf_internal(void);
-        void read_jtf_general(void);
-        void read_jtf_ui(void);
+        void load_jtf_from_file(void);
+        void load_jtf_internal(void);
+        void load_jtf_general(void);
+        void load_jtf_ui(void);
         void build_default_menu(void);
 };
 
 class XanteJTF::Builder
 {
-    private:
-        QString application_name, description, company, plugin, cfg_pathname,
-                log_pathname, version;
-
-        int revision, build_;
-        bool beta;
-
     public:
         Builder()
             :
@@ -405,12 +427,19 @@ class XanteJTF::Builder
             return *this;
         }
 
-        XanteJTF *build() {
-            return new XanteJTF(this->application_name, this->description,
+        XanteJTF build() {
+            return XanteJTF(this->application_name, this->description,
                                 this->company, this->plugin, this->cfg_pathname,
                                 this->log_pathname, this->version,
                                 this->revision, this->build_, this->beta);
         }
+
+    private:
+        QString application_name, description, company, plugin, cfg_pathname,
+                log_pathname, version;
+
+        int revision, build_;
+        bool beta;
 };
 
 #endif

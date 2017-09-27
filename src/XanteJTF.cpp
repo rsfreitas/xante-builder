@@ -94,9 +94,10 @@ void XanteItem::write_events(QJsonObject &events) const
 
     while (i.hasNext()) {
         i.next();
+        QString ev_value = this->events.value(i.value(), QString(""));
 
-        if (this->events[i.value()].isEmpty() == false)
-            events[i.key()] = this->events[i.value()];
+        if (ev_value.isEmpty() == false)
+            events[i.key()] = ev_value;
     }
 }
 
@@ -143,8 +144,6 @@ void XanteItem::write(QJsonObject &root) const
 
 void XanteItem::pre_load(void)
 {
-    events = QVector<QString>(XanteItem::MaxEvents);
-    events.clear();
     type_description.insert(XanteItem::Type::Menu, QString("menu"));
     type_description.insert(XanteItem::Type::InputInt, QString("input-int"));
     type_description.insert(XanteItem::Type::InputFloat, QString("input-float"));
@@ -171,19 +170,56 @@ XanteItem::XanteItem(QString application_name, QString menu_name, QString name)
     set_type(XanteItem::Type::Menu);
 }
 
+enum XanteItem::Type XanteItem::toXanteItem(const QString &type)
+{
+    if (type == "menu")
+        return XanteItem::Type::Menu;
+    else if (type == "input-int")
+        return XanteItem::Type::InputInt;
+    else if (type == "input-float")
+        return XanteItem::Type::InputFloat;
+    else if (type == "input-date")
+        return XanteItem::Type::InputDate;
+    else if (type == "input-time")
+        return XanteItem::Type::InputTime;
+    else if (type == "input-string")
+        return XanteItem::Type::InputString;
+    else if (type == "input-passwd")
+        return XanteItem::Type::InputPasswd;
+    else if (type == "calendar")
+        return XanteItem::Type::Calendar;
+    else if (type == "timebox")
+        return XanteItem::Type::Timebox;
+    else if (type == "radio-checklist")
+        return XanteItem::Type::RadioChecklist;
+    else if (type == "checklist")
+        return XanteItem::Type::Checklist;
+    else if (type == "yesno")
+        return XanteItem::Type::YesNo;
+    else if (type == "dynamic-menu")
+        return XanteItem::Type::DynamicMenu;
+    else if (type == "delete-dynamic-menu")
+        return XanteItem::Type::DeleteDynamicMenu;
+    else if (type == "add-dynamic-menu")
+        return XanteItem::Type::AddDynamicMenu;
+
+    return XanteItem::Type::Unknown;
+}
+
 void XanteItem::parse_common_data(QJsonObject item)
 {
     int tmp;
 
     /* Load item from JSON */
+
     name = item["name"].toString();
     object_id = item["object_id"].toString();
-    tmp = item["mode"].toInt();
-    mode = (enum XanteMode)tmp;
-    tmp = item["type"].toInt();
-    type = (enum XanteItem::Type)tmp;
     default_value = item["default_value"].toString();
     menu_reference_id = item["menu_id"].toString();
+
+    tmp = item["mode"].toInt();
+    mode = (enum XanteMode)tmp;
+    type = toXanteItem(item["type"].toString());
 
     QJsonValue value = item["options"];
 
@@ -207,10 +243,10 @@ void XanteItem::parse_events_data(QJsonObject item)
         QJsonObject events = value.toObject();
         QMap<QString, enum XanteItem::Event> ev_map;
 
-        ev_map.insert("selected", XanteItem::Event::Selected);
-        ev_map.insert("exit", XanteItem::Event::Exit);
-        ev_map.insert("value_confirmed", XanteItem::Event::ValueConfirmed);
-        ev_map.insert("value_changed", XanteItem::Event::ValueChanged);
+        ev_map.insert("item-selected", XanteItem::Event::Selected);
+        ev_map.insert("item-exit", XanteItem::Event::Exit);
+        ev_map.insert("item-value-confirm", XanteItem::Event::ValueConfirmed);
+        ev_map.insert("item-value-updated", XanteItem::Event::ValueChanged);
 
         QMapIterator<QString, enum XanteItem::Event> i(ev_map);
 
@@ -219,7 +255,7 @@ void XanteItem::parse_events_data(QJsonObject item)
             value = events[i.key()];
 
             if (value.type() == QJsonValue::String)
-                this->events[i.value()] = value.toString();
+                this->events.insert(i.value(), value.toString());
         }
     }
 }
@@ -300,8 +336,6 @@ void XanteMenu::set_name(QString name)
 
 void XanteMenu::pre_load(void)
 {
-    events = QVector<QString>(XanteMenu::MaxEvents);
-    events.clear();
     type_description.insert(XanteMenu::Type::Dynamic, QString("dynamic"));
     type_description.insert(XanteMenu::Type::Default, QString("default"));
 }
@@ -336,7 +370,7 @@ void XanteMenu::parse_events_data(QJsonObject menu)
             value = events[i.key()];
 
             if (value.type() == QJsonValue::String)
-                this->events[i.value()] = value.toString();
+                this->events.insert(i.value(), value.toString());
         }
     }
 }
@@ -352,7 +386,7 @@ void XanteMenu::parse_dynamic_data(QJsonObject menu)
     } else {
         QString tmp = value.toString();
 
-        if (tmp.compare(QString("dynamic")) == 0) {
+        if (tmp == "dynamic") {
             QJsonObject dynamic = menu["dynamic"].toObject();
 
             type = XanteMenu::Type::Dynamic;
@@ -429,9 +463,10 @@ void XanteMenu::write_events(QJsonObject &events) const
 
     while (i.hasNext()) {
         i.next();
+        QString ev_value = this->events.value(i.value(), QString(""));
 
-        if (this->events[i.value()].isEmpty() == false)
-            events[i.key()] = this->events[i.value()];
+        if (ev_value.isEmpty() == false)
+            events[i.key()] = ev_value;
     }
 }
 
@@ -569,7 +604,7 @@ bool XanteJTF::save(QString filename)
     return true;
 }
 
-XanteJTF::XanteJTF(QString filename)
+void XanteJTF::load(const QString &filename)
 {
     QFile file;
     QString data;
@@ -581,17 +616,20 @@ XanteJTF::XanteJTF(QString filename)
 
     QJsonDocument d = QJsonDocument::fromJson(data.toUtf8());
     jtf_root = d.object();
-    read_jtf_data();
+    load_jtf_from_file();
+
+    /* We're not empty anymore */
+    empty = false;
 }
 
-void XanteJTF::read_jtf_data(void)
+void XanteJTF::load_jtf_from_file(void)
 {
-    read_jtf_internal();
-    read_jtf_general();
-    read_jtf_ui();
+    load_jtf_internal();
+    load_jtf_general();
+    load_jtf_ui();
 }
 
-void XanteJTF::read_jtf_internal(void)
+void XanteJTF::load_jtf_internal(void)
 {
     QJsonValue value = jtf_root.value(QString("internal"));
     QJsonObject internal = value.toObject();
@@ -606,7 +644,7 @@ void XanteJTF::read_jtf_internal(void)
     beta = application["beta"].toBool();
 }
 
-void XanteJTF::read_jtf_general(void)
+void XanteJTF::load_jtf_general(void)
 {
     QJsonValue value = jtf_root.value(QString("general"));
     QJsonObject general = value.toObject();
@@ -619,7 +657,7 @@ void XanteJTF::read_jtf_general(void)
     log_pathname = general["log_pathname"].toString();
 }
 
-void XanteJTF::read_jtf_ui(void)
+void XanteJTF::load_jtf_ui(void)
 {
     QJsonValue value = jtf_root.value(QString("ui"));
     QJsonObject ui = value.toObject();
@@ -659,10 +697,23 @@ void XanteJTF::build_default_menu(void)
     menus.append(m);
 }
 
-XanteMenu XanteJTF::get_menu(QString object_id)
+XanteMenu &XanteJTF::get_menu(QString object_id)
 {
     int index = menus.indexOf(object_id);
-//    int index = menus.indexOf(XanteMenu(object_id));
-    return menus.at(index);
+
+    return menu_at(index);
+}
+
+XanteMenu &XanteJTF::menu_at(int index)
+{
+    if ((index < 0) || (index > menus.size()))
+        throw std::out_of_range("Menu not found.");
+
+    return menus[index];
+}
+
+void XanteJTF::clear(void)
+{
+    empty = true;
 }
 

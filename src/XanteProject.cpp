@@ -32,12 +32,12 @@
 XanteProject::XanteProject(QString filename)
 {
     info = QFileInfo(filename);
-    load_project_file();
-    jtf = new XanteJTF(jtf_filename);
+    jtf_filename = load_project_file();
+    jtf.load(jtf_filename);
 }
 
-XanteProject::XanteProject(QString project_name, QString path, XanteJTF *jtf)
-    : jtf(std::move(jtf)), project_name(project_name)
+XanteProject::XanteProject(QString project_name, QString path, const XanteJTF &jtf)
+    : jtf(jtf), project_name(project_name)
 {
     project_root_path = QDir(path + "/" + project_name);
     info = QFileInfo(project_root_path.path() + "/" + project_name + ".pjx");
@@ -49,16 +49,18 @@ XanteProject::~XanteProject()
 {
 }
 
-void XanteProject::load_project_file(void)
+QString XanteProject::load_project_file(void)
 {
     QSettings settings(info.absoluteFilePath(), QSettings::IniFormat);
-    QString pathname = info.absolutePath();
+    QString pathname = info.absolutePath(), filename;
 
     settings.beginGroup("Project");
     project_name = settings.value("Name").value<QString>();
     version = settings.value("Version").value<int>();
-    jtf_filename = pathname + "/jtf/" + settings.value("JTF").value<QString>();
+    filename = pathname + "/jtf/" + settings.value("JTF").value<QString>();
     settings.endGroup();
+
+    return filename;
 }
 
 void XanteProject::write_project_file(void)
@@ -85,7 +87,7 @@ QString XanteProject::get_project_name(void)
 
 bool XanteProject::create(void)
 {
-    if (nullptr == jtf)
+    if (jtf.is_empty())
         return false;
 
     if (project_root_path.exists() == false)
@@ -101,17 +103,17 @@ bool XanteProject::create(void)
 
 bool XanteProject::save(void)
 {
-    if (nullptr == jtf)
+    if (jtf.is_empty())
         return false;
 
-    if (jtf->save(jtf_filename) == false)
+    if (jtf.save(jtf_filename) == false)
         return false;
 
     return true;
 }
 
-const XanteJTF &XanteProject::get_jtf(void)
+XanteJTF &XanteProject::get_jtf(void)
 {
-    return *jtf;
+    return jtf;
 }
 

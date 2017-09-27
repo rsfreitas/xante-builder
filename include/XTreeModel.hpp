@@ -55,8 +55,7 @@ class XTreeModel : public QAbstractItemModel
     Q_OBJECT
 
     public:
-        XTreeModel(QWidget *parent = 0);
-        XTreeModel(XanteProject *project, QWidget *parent = 0);
+        XTreeModel(bool enable, QWidget *parent = 0);
         ~XTreeModel();
 
         QVariant data(const QModelIndex &index, int role) const;
@@ -73,7 +72,6 @@ class XTreeModel : public QAbstractItemModel
 
     private:
         XTreeItem *root_item;
-        XanteProject *project;
 };
 
 #endif

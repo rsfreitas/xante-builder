@@ -40,7 +40,7 @@ class XTreeView : public QTreeView
 
         XTreeView(QWidget *parent = 0);
         ~XTreeView();
-        void set_current_project(XanteProject *project) { this->project = project; }
+
         void control_actions(bool enable);
 
     protected:
@@ -63,7 +63,6 @@ class XTreeView : public QTreeView
         void content_changed();
 
     private:
-        XanteProject *project = nullptr;
         bool selected_line = false;
         QMenu *menu;
         QAction *ac_add_menu, *ac_rename_menu, *ac_add_item, *ac_copy,

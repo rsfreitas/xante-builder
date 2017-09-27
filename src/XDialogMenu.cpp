@@ -318,10 +318,8 @@ void XDialogMenu::dynamic_radio_toggled(bool checked)
  * (or selections inside the main list view) may use it. At the same time,
  * sets the current XanteMenu to the @selected_menu_index inside it.
  */
-void XDialogMenu::set_current_project(XanteProject *project,
-    int selected_menu_index)
+void XDialogMenu::set_current_project(int selected_menu_index)
 {
-    this->project = project;
     set_selection(selected_menu_index);
 }
 
@@ -337,7 +335,9 @@ void XDialogMenu::set_selection(int selected_menu_index)
 
 void XDialogMenu::setup_widgets(void)
 {
-    XanteJTF jtf = project->get_jtf();
+    XanteProject &project = XMainWindow::get_project();
+
+    XanteJTF jtf = project.get_jtf();
     XanteMenu menu = jtf.menu_at(current_menu_index);
 
     setup_widgets(menu);
@@ -417,6 +417,7 @@ void XDialogMenu::setup_events_widgets(XanteMenu menu)
                                       XDialogMenu::CheckBox::EvExit)));
 
     group_box[XDialogMenu::GroupBox::Events]->setChecked(true);
+    group_box[XDialogMenu::GroupBox::Events]->setEnabled(true);
 
     for (i = 0; i < events.size(); i++) {
         QPair<enum XanteMenu::Event,
@@ -436,6 +437,7 @@ void XDialogMenu::setup_events_widgets(XanteMenu menu)
 
 void XDialogMenu::disable_all_widgets(void)
 {
+    group_box[XDialogMenu::GroupBox::Events]->setChecked(false);
     group_box[XDialogMenu::GroupBox::Events]->setEnabled(false);
     group_box[XDialogMenu::GroupBox::Dynamic]->setEnabled(false);
 }
@@ -487,12 +489,36 @@ void XDialogMenu::del_dynamic_fixed_option(void)
 
 void XDialogMenu::hideEvent(QHideEvent *event)
 {
-    if ((event->spontaneous() == false) && (project != nullptr)) {
+//    if ((event->spontaneous() == false) && (project != nullptr)) {
         /* TODO: Save content with current data */
-        XanteJTF jtf = project->get_jtf();
-        XanteMenu menu = jtf.menu_at(current_menu_index);
-    }
+//        XanteJTF jtf = project->get_jtf();
+//        XanteMenu menu = jtf.menu_at(current_menu_index);
+//    }
 
     event->accept();
+}
+
+void XDialogMenu::clear(void)
+{
+    for (int i = XDialogMenu::LineEdit::Name;
+         i < XDialogMenu::LineEdit::MaxLineEdit;
+         i++)
+    {
+        line_edit[i]->clear();
+    }
+
+    for (int i = XDialogMenu::ComboBox::Type;
+         i < XDialogMenu::ComboBox::MaxComboBox;
+         i++)
+    {
+        combo_box[i]->setCurrentIndex(0);
+    }
+
+    for (int i = XDialogMenu::CheckBox::EvSelected;
+         i < XDialogMenu::CheckBox::MaxCheckBox;
+         i++)
+    {
+        check_box[i]->setChecked(false);
+    }
 }
 

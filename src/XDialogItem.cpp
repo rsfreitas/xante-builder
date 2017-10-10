@@ -497,31 +497,26 @@ void XDialogItem::setup_help_widgets(const XanteItem &item)
     int t;
     bool has_help = false;
 
+    if (item.has_help())
+        has_help = true;
+
     /* brief help */
     text = item.get_brief_help();
 
-    if (text.isEmpty() == false) {
+    if (text.isEmpty() == false)
         line_edit[XDialogItem::LineEdit::HelpBrief]->setText(text);
-        has_help = true;
-    }
 
     /* descriptive help */
     text = item.get_descriptive_help();
 
-    if (text.isEmpty() == false) {
+    if (text.isEmpty() == false)
         line_edit[XDialogItem::LineEdit::HelpDescriptive]->setText(text);
-        has_help = true;
-    }
 
     /* checklist/radio-checklist help options */
     t = item.get_total_help_options();
 
-    if (t) {
-        for (int i = 0; i < t; i++)
-            list_widget[XDialogItem::ListWidget::HelpOptions]->addItem(item.get_help_option(i));
-
-        has_help = true;
-    }
+    for (int i = 0; i < t; i++)
+        list_widget[XDialogItem::ListWidget::HelpOptions]->addItem(item.get_help_option(i));
 
     group_box[XDialogItem::GroupBox::Help]->setChecked(has_help);
 }

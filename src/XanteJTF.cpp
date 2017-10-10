@@ -60,8 +60,10 @@ void XanteItem::write_options(QJsonObject &root) const
         root["options"] = fixed_option;
 }
 
-void XanteItem::write_input_ranges(QJsonObject &input_ranges) const
+QJsonObject XanteItem::write_input_ranges(void) const
 {
+    QJsonObject input_ranges;
+
     if (type == XanteItem::Type::InputString)
         input_ranges["string_length"] = string_length;
     else {
@@ -73,16 +75,23 @@ void XanteItem::write_input_ranges(QJsonObject &input_ranges) const
             input_ranges["min"] = min_input_range.toFloat();
         }
     }
+
+    return input_ranges;
 }
 
-void XanteItem::write_config(QJsonObject &config) const
+QJsonObject XanteItem::write_config(void) const
 {
+    QJsonObject config;
+
     config["block"] = config_block;
     config["item"] = config_item;
+
+    return config;
 }
 
-void XanteItem::write_events(QJsonObject &events) const
+QJsonObject XanteItem::write_events(void) const
 {
+    QJsonObject events;
     QMap<QString, enum XanteItem::Event> ev_map;
 
     ev_map.insert("selected", XanteItem::Event::Selected);
@@ -99,8 +108,39 @@ void XanteItem::write_events(QJsonObject &events) const
         if (ev_value.isEmpty() == false)
             events[i.key()] = ev_value;
     }
+
+    return events;
 }
 
+QJsonObject XanteItem::write_help(void) const
+{
+    QJsonObject help;
+
+    if (brief_help.isEmpty() == false)
+        help["brief"] = brief_help;
+
+    if (descriptive_help.isEmpty() == false)
+        help["description"] = descriptive_help;
+
+    if (((type == XanteItem::Type::Checklist) ||
+         (type == XanteItem::Type::RadioChecklist)) &&
+        help_options.size() != 0)
+    {
+        QJsonArray options;
+        int i, t = help_options.size();
+
+        for (i = 0; i < t; i++)
+            options.append(help_options.at(i));
+
+        help["options"] = options;
+    }
+
+    return help;
+}
+
+/*
+ * Writes the current content of a XanteItem object into a JSON object.
+ */
 void XanteItem::write(QJsonObject &root) const
 {
     root["name"] = name;
@@ -120,26 +160,17 @@ void XanteItem::write(QJsonObject &root) const
     if (has_options())
         write_options(root);
 
-    if (has_input_ranges()) {
-        QJsonObject input_ranges;
+    if (has_input_ranges())
+        root["input_ranges"] = write_input_ranges();
 
-        write_input_ranges(input_ranges);
-        root["input_ranges"] = input_ranges;
-    }
+    if (has_config())
+        root["config"] = write_config();
 
-    if (has_config()) {
-        QJsonObject config;
+    if (has_events())
+        root["events"] = write_events();
 
-        write_config(config);
-        root["config"] = config;
-    }
-
-    if (has_events()) {
-        QJsonObject events;
-
-        write_events(events);
-        root["events"] = events;
-    }
+    if (has_help())
+        root["help"] = write_help();
 }
 
 void XanteItem::pre_load(void)
@@ -452,8 +483,9 @@ XanteMenu::XanteMenu(QString application_name, QString name)
     items.append(it);
 }
 
-void XanteMenu::write_events(QJsonObject &events) const
+QJsonObject XanteMenu::write_events(void) const
 {
+    QJsonObject events;
     QMap<QString, enum XanteMenu::Event> ev_map;
 
     ev_map.insert("selected", XanteMenu::Event::Selected);
@@ -468,12 +500,14 @@ void XanteMenu::write_events(QJsonObject &events) const
         if (ev_value.isEmpty() == false)
             events[i.key()] = ev_value;
     }
+
+    return events;
 }
 
-void XanteMenu::write_dynamic(QJsonObject &dynamic) const
+QJsonObject XanteMenu::write_dynamic(void) const
 {
     QJsonArray opt_array;
-    QJsonObject origin;
+    QJsonObject origin, dynamic;
 
     switch (dynamic_type) {
         case XanteMenu::DynamicType::FixedSize:
@@ -496,6 +530,8 @@ void XanteMenu::write_dynamic(QJsonObject &dynamic) const
         default:
             break;
     }
+
+    return dynamic;
 }
 
 void XanteMenu::write(QJsonObject &root) const
@@ -513,19 +549,11 @@ void XanteMenu::write(QJsonObject &root) const
     root["object_id"] = object_id;
     root["type"] = type_description.value(type);
 
-    if (has_events()) {
-        QJsonObject events;
+    if (has_events())
+        root["events"] = write_events();
 
-        write_events(events);
-        root["events"] = events;
-    }
-
-    if (type == XanteMenu::Type::Dynamic) {
-        QJsonObject dynamic;
-
-        write_dynamic(dynamic);
-        root["dynamic"] = dynamic;
-    }
+    if (type == XanteMenu::Type::Dynamic)
+        root["dynamic"] = write_dynamic();
 
     root["items"] = jitems;
 }

@@ -489,7 +489,7 @@ void XDialogMenu::del_dynamic_fixed_option(void)
 
 void XDialogMenu::hideEvent(QHideEvent *event)
 {
-//    if ((event->spontaneous() == false) && (project != nullptr)) {
+//    if (event->spontaneous() == false)
         /* TODO: Save content with current data */
 //        XanteJTF jtf = project->get_jtf();
 //        XanteMenu menu = jtf.menu_at(current_menu_index);

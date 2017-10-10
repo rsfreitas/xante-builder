@@ -145,6 +145,14 @@ class XanteItem
         bool has_config(void) const { return (type >= XanteItem::Type::InputInt) &&
                                              (type <= XanteItem::Type::YesNo); }
 
+        bool has_help(void) const {
+            return (brief_help.isEmpty() == false) ||
+                   (descriptive_help.isEmpty() == false) ||
+                   (((type == XanteItem::Type::Checklist) ||
+                     (type == XanteItem::Type::RadioChecklist)) &&
+                    help_options.size() != 0);
+        }
+
     private:
         QString application_name, menu_name, name, object_id, brief_help,
                 descriptive_help, config_block, config_item, fixed_option,
@@ -168,9 +176,10 @@ class XanteItem
         void parse_help_data(QJsonObject item);
 
         void write_options(QJsonObject &root) const;
-        void write_input_ranges(QJsonObject &input_ranges) const;
-        void write_config(QJsonObject &config) const;
-        void write_events(QJsonObject &events) const;
+        QJsonObject write_input_ranges(void) const;
+        QJsonObject write_config(void) const;
+        QJsonObject write_events(void) const;
+        QJsonObject write_help(void) const;
 
         enum XanteItem::Type toXanteItem(const QString &type);
 };
@@ -280,8 +289,9 @@ class XanteMenu
         void parse_events_data(QJsonObject menu);
         void parse_dynamic_data(QJsonObject menu);
         void parse_items(QJsonObject menu);
-        void write_events(QJsonObject &events) const;
-        void write_dynamic(QJsonObject &dynamic) const;
+
+        QJsonObject write_events(void) const;
+        QJsonObject write_dynamic(void) const;
 };
 
 class XanteJTF

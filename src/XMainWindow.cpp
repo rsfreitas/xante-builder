@@ -44,15 +44,14 @@ XMainWindow::XMainWindow(XanteConfig &config)
 
     setCentralWidget(dialog);
     setWindowTitle(APP_NAME);
-    resize(config.get_window_size());
-    move(config.get_window_position());
+    resize(config.getWindowSize());
+    move(config.getWindowPosition());
 }
 
 void XMainWindow::closeEvent(QCloseEvent *event)
 {
-    config.set_window_size(size());
-    config.set_window_position(pos());
-    config.write_configuration_file();
+    config.setWindowSize(size());
+    config.setWindowPosition(pos());
     event->accept();
 }
 
@@ -167,7 +166,7 @@ void XMainWindow::create_menu(void)
     m_main->addSeparator();
 
     for (int i = 0; i < MaxRecentFiles; i++) {
-        QString file = config.get_recent_file(i);
+        QString file = config.getRecentFile(i);
         ac_recent_files[i] = m_main->addAction(file.isEmpty() ? tr("") : file,
                                                this,
                                                &XMainWindow::open_recent_file);
@@ -236,13 +235,13 @@ void XMainWindow::set_window_widgets_enabled(bool enable)
 
 void XMainWindow::set_current_file(const QString &filename)
 {
-    if (config.set_recent_file(filename) == false)
+    if (config.setRecentFile(filename) == false)
         return;
 
-    int n_recent_files = qMin(config.recent_files_size(), (int)MaxRecentFiles);
+    int n_recent_files = qMin(config.recentFilesSize(), (int)MaxRecentFiles);
 
     for (int i = 0; i < n_recent_files; i++) {
-        QString file = config.get_recent_file(i);
+        QString file = config.getRecentFile(i);
         QString text = tr("&%1 %2").arg(i + 1)
                                    .arg(QFileInfo(file).fileName());
 

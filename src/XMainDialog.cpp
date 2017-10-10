@@ -61,9 +61,9 @@ XMainDialog::XMainDialog(QWidget *parent)
 void XMainDialog::active_project(bool active)
 {
     if (active) {
-        dialog_menu->set_current_project(tree->current_selected_menu);
-        dialog_item->set_current_project(tree->current_selected_menu,
-                                         tree->current_selected_item);
+        dialog_menu->set_current_project(tree->currentSelectedMenu);
+        dialog_item->set_current_project(tree->currentSelectedMenu,
+                                         tree->currentSelectedItem);
     } else {
         dialog_menu->clear();
         dialog_item->clear();
@@ -73,21 +73,21 @@ void XMainDialog::active_project(bool active)
 void XMainDialog::set_tree_content(XTreeModel *model, bool enable_menu)
 {
     tree->setModel(model);
-    tree->control_actions(enable_menu);
+    tree->controlDialogActions(enable_menu);
 }
 
 void XMainDialog::dialog_item_selected()
 {
     dialog_menu->hide();
     dialog_item->show();
-    dialog_item->set_selection(tree->current_selected_menu,
-                               tree->current_selected_item);
+    dialog_item->set_selection(tree->currentSelectedMenu,
+                               tree->currentSelectedItem);
 }
 
 void XMainDialog::dialog_menu_selected()
 {
     dialog_menu->show();
-    dialog_menu->set_selection(tree->current_selected_menu);
+    dialog_menu->set_selection(tree->currentSelectedMenu);
     dialog_item->hide();
 }
 

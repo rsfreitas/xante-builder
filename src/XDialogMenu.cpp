@@ -487,13 +487,26 @@ void XDialogMenu::del_dynamic_fixed_option(void)
     dynamic_options->takeItem(row);
 }
 
+void XDialogMenu::updateXanteMenu(void)
+{
+    XanteProject &project = XMainWindow::get_project();
+    XanteJTF jtf = project.get_jtf();
+    XanteMenu menu = jtf.menu_at(current_menu_index);
+
+    /*
+    menu.set_name();
+    menu.set_type();
+    menu.set_mode();
+    menu.set_event();
+    menu.set_dynamic();
+    */
+}
+
 void XDialogMenu::hideEvent(QHideEvent *event)
 {
-//    if (event->spontaneous() == false)
-        /* TODO: Save content with current data */
-//        XanteJTF jtf = project->get_jtf();
-//        XanteMenu menu = jtf.menu_at(current_menu_index);
-//    }
+    if (event->spontaneous() == false)
+        /* Save content with current data */
+        updateXanteMenu();
 
     event->accept();
 }

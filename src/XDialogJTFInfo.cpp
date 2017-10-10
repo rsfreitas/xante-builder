@@ -39,57 +39,57 @@ XDialogJTFInfo::XDialogJTFInfo(QWidget *parent)
     : QDialog(parent)
 {
     setWindowTitle(tr("JTF file main informations"));
-    create_widgets();
-    fill_widgets_with_project_data();
+    createWidgets();
+    fillWidgetsWithProjectData();
 }
 
-QHBoxLayout *XDialogJTFInfo::create_main_menu_chooser(void)
+QHBoxLayout *XDialogJTFInfo::createMainMenuChooser(void)
 {
     QHBoxLayout *h = new QHBoxLayout;
 
     QLabel *l = new QLabel(tr("Main menu:"));
-    cb_main_menu = new QComboBox;
-    l->setBuddy(cb_main_menu);
+    cbMainMenu = new QComboBox;
+    l->setBuddy(cbMainMenu);
     h->addWidget(l);
-    h->addWidget(cb_main_menu);
+    h->addWidget(cbMainMenu);
 
     return h;
 }
 
-QHBoxLayout *XDialogJTFInfo::create_buttons(void)
+QHBoxLayout *XDialogJTFInfo::createButtons(void)
 {
     QHBoxLayout *h = new QHBoxLayout;
 
-    QPushButton *btn_ok = new QPushButton(tr("Ok"));
-    connect(btn_ok, SIGNAL(clicked()), this, SLOT(confirm_ok()));
+    QPushButton *btnOk = new QPushButton(tr("Ok"));
+    connect(btnOk, SIGNAL(clicked()), this, SLOT(confirmOk()));
 
-    QPushButton *btn_cancel = new QPushButton(tr("Cancel"));
-    connect(btn_cancel, SIGNAL(clicked()), this, SLOT(confirm_cancel()));
+    QPushButton *btnCancel = new QPushButton(tr("Cancel"));
+    connect(btnCancel, SIGNAL(clicked()), this, SLOT(confirmCancel()));
 
-    h->addWidget(btn_ok);
-    h->addWidget(btn_cancel);
+    h->addWidget(btnOk);
+    h->addWidget(btnCancel);
 
     return h;
 }
 
-QHBoxLayout *XDialogJTFInfo::create_beta_chooser(void)
+QHBoxLayout *XDialogJTFInfo::createBetaChooser(void)
 {
     QHBoxLayout *h = new QHBoxLayout;
 
     QLabel *l = new QLabel(tr("Beta:"));
-    cb_beta = new QComboBox;
-    l->setBuddy(cb_beta);
-    cb_beta->addItem(tr("Yes"));
-    cb_beta->addItem(tr("No"));
+    cbBeta = new QComboBox;
+    l->setBuddy(cbBeta);
+    cbBeta->addItem(tr("Yes"));
+    cbBeta->addItem(tr("No"));
     h->addWidget(l);
-    h->addWidget(cb_beta);
+    h->addWidget(cbBeta);
 
     return h;
 }
 
-QGroupBox *XDialogJTFInfo::create_information_widgets(void)
+QGroupBox *XDialogJTFInfo::createInformationWidgets(void)
 {
-    enum validator_type {
+    enum validatorType {
         VLD_STRING,
         VLD_INT,
         VLD_FLOAT
@@ -97,10 +97,10 @@ QGroupBox *XDialogJTFInfo::create_information_widgets(void)
 
     struct item {
         QString             label;
-        enum validator_type validator;
+        enum validatorType validator;
     };
 
-    struct item *p, page_items[] = {
+    struct item *p, pageItems[] = {
         { tr("Application name:"),      VLD_STRING },
         { tr("Description:"),           VLD_STRING },
         { tr("Company name:"),          VLD_STRING },
@@ -116,10 +116,10 @@ QGroupBox *XDialogJTFInfo::create_information_widgets(void)
     QGroupBox *gb = new QGroupBox(tr("JTF Informations"));
     int i, t;
 
-    t = sizeof(page_items) / sizeof(page_items[0]);
+    t = sizeof(pageItems) / sizeof(pageItems[0]);
 
     for (i = 0; i < t; i++) {
-        p = &page_items[i];
+        p = &pageItems[i];
         QLabel *l = new QLabel(p->label);
         QLineEdit *le = new QLineEdit;
         l->setBuddy(le);
@@ -137,24 +137,24 @@ QGroupBox *XDialogJTFInfo::create_information_widgets(void)
         edit.append(le);
     }
 
-    v->addLayout(create_beta_chooser());
+    v->addLayout(createBetaChooser());
     gb->setLayout(v);
 
     return gb;
 }
 
-void XDialogJTFInfo::create_widgets(void)
+void XDialogJTFInfo::createWidgets(void)
 {
     QVBoxLayout *v = new QVBoxLayout;
 
-    v->addWidget(create_information_widgets());
-    v->addLayout(create_main_menu_chooser());
-    v->addLayout(create_buttons());
+    v->addWidget(createInformationWidgets());
+    v->addLayout(createMainMenuChooser());
+    v->addLayout(createButtons());
 
     setLayout(v);
 }
 
-void XDialogJTFInfo::confirm_ok(void)
+void XDialogJTFInfo::confirmOk(void)
 {
     /*
      * TODO
@@ -166,53 +166,53 @@ void XDialogJTFInfo::confirm_ok(void)
     done(0);
 }
 
-void XDialogJTFInfo::confirm_cancel(void)
+void XDialogJTFInfo::confirmCancel(void)
 {
     done(-1);
 }
 
 void XDialogJTFInfo::reject(void)
 {
-    confirm_cancel();
+    confirmCancel();
 }
 
-void XDialogJTFInfo::fill_widgets_with_project_data(void)
+void XDialogJTFInfo::fillWidgetsWithProjectData(void)
 {
-    XanteProject &project = XMainWindow::get_project();
-    XanteJTF jtf = project.get_jtf();
+    XanteProject &project = XMainWindow::getProject();
+    XanteJTF jtf = project.getJtf();
 
     /* LineEdit */
-    edit.at(XDialogJTFInfo::ApplicationName)->setText(jtf.get_application_name());
-    edit.at(XDialogJTFInfo::Description)->setText(jtf.get_description());;
-    edit.at(XDialogJTFInfo::Company)->setText(jtf.get_company());
-    edit.at(XDialogJTFInfo::Plugin)->setText(jtf.get_plugin());
-    edit.at(XDialogJTFInfo::CfgPathname)->setText(jtf.get_cfg_pathname());
-    edit.at(XDialogJTFInfo::LogPathname)->setText(jtf.get_log_pathname());
-    edit.at(XDialogJTFInfo::Version)->setText(jtf.get_version());
-    edit.at(XDialogJTFInfo::Revision)->setText(QString("%1").arg(jtf.get_revision()));
-    edit.at(XDialogJTFInfo::Build)->setText(QString("%1").arg(jtf.get_build()));
+    edit.at(XDialogJTFInfo::ApplicationName)->setText(jtf.getApplicationName());
+    edit.at(XDialogJTFInfo::Description)->setText(jtf.getDescription());;
+    edit.at(XDialogJTFInfo::Company)->setText(jtf.getCompany());
+    edit.at(XDialogJTFInfo::Plugin)->setText(jtf.getPlugin());
+    edit.at(XDialogJTFInfo::CfgPathname)->setText(jtf.getCfgPathname());
+    edit.at(XDialogJTFInfo::LogPathname)->setText(jtf.getLogPathname());
+    edit.at(XDialogJTFInfo::Version)->setText(jtf.getVersion());
+    edit.at(XDialogJTFInfo::Revision)->setText(QString("%1").arg(jtf.getRevision()));
+    edit.at(XDialogJTFInfo::Build)->setText(QString("%1").arg(jtf.getBuild()));
 
     /* Beta ComboBox */
-    cb_beta->setCurrentIndex(jtf.get_beta() == true ? 0 : 1);
+    cbBeta->setCurrentIndex(jtf.getBeta() == true ? 0 : 1);
 
     /* Main menu chooser */
-    prepare_main_menu_chooser();
+    prepareMainMenuChooser();
 }
 
-void XDialogJTFInfo::prepare_main_menu_chooser(void)
+void XDialogJTFInfo::prepareMainMenuChooser(void)
 {
-    XanteProject &project = XMainWindow::get_project();
-    XanteJTF jtf = project.get_jtf();
+    XanteProject &project = XMainWindow::getProject();
+    XanteJTF jtf = project.getJtf();
     int i;
 
     /* Insert all available menus */
-    for (i = 0; i < jtf.total_menus(); i++) {
-        XanteMenu menu = jtf.menu_at(i);
-        cb_main_menu->addItem(menu.get_name());
+    for (i = 0; i < jtf.totalMenus(); i++) {
+        XanteMenu menu = jtf.menuAt(i);
+        cbMainMenu->addItem(menu.getName());
     }
 
     /* Set current option to the current main menu */
-    XanteMenu menu = jtf.get_menu(jtf.get_main_menu());
-    cb_main_menu->setCurrentIndex(cb_main_menu->findText(menu.get_name()));
+    XanteMenu menu = jtf.getMenu(jtf.getMainMenu());
+    cbMainMenu->setCurrentIndex(cbMainMenu->findText(menu.getName()));
 }
 

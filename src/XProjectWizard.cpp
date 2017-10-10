@@ -73,32 +73,32 @@ ProjectInfoPage::ProjectInfoPage(QWidget *parent)
     setTitle(tr("Project Informations"));
 
     QLabel *lname = new QLabel(tr("Project name:"));
-    le_name = new QLineEdit;
+    leName = new QLineEdit;
     lname->setBuddy(lname);
 
     QHBoxLayout *hname = new QHBoxLayout;
     hname->addWidget(lname);
-    hname->addWidget(le_name);
+    hname->addWidget(leName);
 
     QLabel *ldescription = new QLabel(tr("Project description:"));
-    le_description = new QLineEdit;
-    ldescription->setBuddy(le_description);
+    leDescription = new QLineEdit;
+    ldescription->setBuddy(leDescription);
 
     QHBoxLayout *hdescription = new QHBoxLayout;
     hdescription->addWidget(ldescription);
-    hdescription->addWidget(le_description);
+    hdescription->addWidget(leDescription);
 
     QLabel *lpathname = new QLabel(tr("Destination:"));
-    le_pathname = new QLineEdit;
-    le_pathname->setText(getenv("HOME"));
-    lpathname->setBuddy(le_pathname);
+    lePathname = new QLineEdit;
+    lePathname->setText(getenv("HOME"));
+    lpathname->setBuddy(lePathname);
 
     QPushButton *bt = new QPushButton(tr("..."));
-    connect(bt, SIGNAL(clicked()), this, SLOT(choose_dir()));
+    connect(bt, SIGNAL(clicked()), this, SLOT(chooseDir()));
 
     QHBoxLayout *hpathname = new QHBoxLayout;
     hpathname->addWidget(lpathname);
-    hpathname->addWidget(le_pathname);
+    hpathname->addWidget(lePathname);
     hpathname->addWidget(bt);
 
     QVBoxLayout *layout = new QVBoxLayout;
@@ -107,12 +107,12 @@ ProjectInfoPage::ProjectInfoPage(QWidget *parent)
     layout->addLayout(hpathname);
     setLayout(layout);
 
-    registerField("project_name", le_name);
-    registerField("project_description", le_description);
-    registerField("project_pathname", le_pathname);
+    registerField("projectName", leName);
+    registerField("projectDescription", leDescription);
+    registerField("projectPathname", lePathname);
 }
 
-void ProjectInfoPage::choose_dir(void)
+void ProjectInfoPage::chooseDir(void)
 {
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open directory"),
                                                     getenv("HOME"),
@@ -120,13 +120,13 @@ void ProjectInfoPage::choose_dir(void)
                                                     QFileDialog::DontResolveSymlinks);
 
     if (dir.isEmpty() == false)
-        le_pathname->setText(dir);
+        lePathname->setText(dir);
 }
 
 ProjectConfigPage::ProjectConfigPage(QWidget *parent)
     : QWizardPage(parent)
 {
-    enum validator_type {
+    enum validatorType {
         VLD_STRING,
         VLD_INT,
         VLD_FLOAT
@@ -135,27 +135,27 @@ ProjectConfigPage::ProjectConfigPage(QWidget *parent)
     struct item {
         QString             label;
         QLineEdit           *le;
-        enum validator_type validator;
-        const char          *field_name;
+        enum validatorType validator;
+        const char          *fieldName;
     };
 
-    struct item *p, page_items[] = {
-        { tr("Company name:"),                  le_company,     VLD_STRING, "project_company"  },
-        { tr("Plugin name:"),                   le_plugin,      VLD_STRING, "project_plugin"   },
-        { tr("Configuration file directoty:"),  le_cfg_path,    VLD_STRING, "project_cfg"      },
-        { tr("Log file directory:"),            le_log_path,    VLD_STRING, "project_log"      },
-        { tr("Version:"),                       le_version,     VLD_FLOAT,  "project_version"  },
-        { tr("Revision:"),                      le_revision,    VLD_INT,    "project_revision" },
-        { tr("Build:"),                         le_build,       VLD_INT,    "project_build"    }
+    struct item *p, pageItems[] = {
+        { tr("Company name:"),                  leCompany,     VLD_STRING, "projectCompany"  },
+        { tr("Plugin name:"),                   lePlugin,      VLD_STRING, "projectPlugin"   },
+        { tr("Configuration file directoty:"),  leCfgPath,    VLD_STRING, "projectCfg"      },
+        { tr("Log file directory:"),            leLogPath,    VLD_STRING, "projectLog"      },
+        { tr("Version:"),                       leVersion,     VLD_FLOAT,  "projectVersion"  },
+        { tr("Revision:"),                      leRevision,    VLD_INT,    "projectRevision" },
+        { tr("Build:"),                         leBuild,       VLD_INT,    "projectBuild"    }
     };
     int i, t;
 
-    t = sizeof(page_items) / sizeof(page_items[0]);
+    t = sizeof(pageItems) / sizeof(pageItems[0]);
     setTitle(tr("Project Configuration"));
     QVBoxLayout *layout = new QVBoxLayout;
 
     for (i = 0; i < t; i++) {
-        p = &page_items[i];
+        p = &pageItems[i];
         QLabel *l = new QLabel(p->label);
         p->le = new QLineEdit;
         l->setBuddy(p->le);
@@ -165,7 +165,7 @@ ProjectConfigPage::ProjectConfigPage(QWidget *parent)
         else if (p->validator == VLD_FLOAT)
             p->le->setValidator(new QDoubleValidator(p->le));
 
-        registerField(p->field_name, p->le);
+        registerField(p->fieldName, p->le);
         QHBoxLayout *h = new QHBoxLayout;
         h->addWidget(l);
         h->addWidget(p->le);
@@ -174,15 +174,15 @@ ProjectConfigPage::ProjectConfigPage(QWidget *parent)
     }
 
     QLabel *l = new QLabel(tr("Beta version:"));
-    cb_beta = new QComboBox;
-    l->setBuddy(cb_beta);
-    cb_beta->addItem(tr("Yes"));
-    cb_beta->addItem(tr("No"));
+    cbBeta = new QComboBox;
+    l->setBuddy(cbBeta);
+    cbBeta->addItem(tr("Yes"));
+    cbBeta->addItem(tr("No"));
 
     QHBoxLayout *h = new QHBoxLayout;
     h->addWidget(l);
-    h->addWidget(cb_beta);
-    registerField("project_beta", cb_beta);
+    h->addWidget(cbBeta);
+    registerField("projectBeta", cbBeta);
 
     layout->addLayout(h);
     setLayout(layout);
@@ -201,7 +201,7 @@ XProjectWizard::XProjectWizard(QWidget *parent)
 
 XProjectWizard::~XProjectWizard()
 {
-    if (release_project && (project != nullptr))
+    if (releaseProject && (project != nullptr))
         delete project;
 }
 
@@ -214,22 +214,22 @@ void XProjectWizard::accept()
     QDialog::accept();
 }
 
-XanteProject *XProjectWizard::get_project(void)
+XanteProject *XProjectWizard::getProject(void)
 {
-    QString project_name = field("project_name").toString();
-    project = new XanteProject(project_name,
-                               field("project_pathname").toString(),
+    QString projectName = field("projectName").toString();
+    project = new XanteProject(projectName,
+                               field("projectPathname").toString(),
                                XanteJTF::Builder()
-                                .set_application_name(project_name)
-                                .set_description(field("project_description").toString())
-                                .set_company(field("project_company").toString())
-                                .set_plugin(field("project_plugin").toString())
-                                .set_cfg_pathname(field("project_cfg").toString())
-                                .set_log_pathname(field("project_log").toString())
-                                .set_version(field("project_version").toString())
-                                .set_revision(field("project_revision").toInt())
-                                .set_build(field("project_build").toInt())
-                                .set_beta(field("project_beta").toBool())
+                                .setApplicationName(projectName)
+                                .setDescription(field("projectDescription").toString())
+                                .setCompany(field("projectCompany").toString())
+                                .setPlugin(field("projectPlugin").toString())
+                                .setCfgPathname(field("projectCfg").toString())
+                                .setLogPathname(field("projectLog").toString())
+                                .setVersion(field("projectVersion").toString())
+                                .setRevision(field("projectRevision").toInt())
+                                .setBuild(field("projectBuild").toInt())
+                                .setBeta(field("projectBeta").toBool())
                                 .build());
 
     project->create();
@@ -238,7 +238,7 @@ XanteProject *XProjectWizard::get_project(void)
      * Don't let release the project object when this object goes out of
      * scope.
      */
-    release_project = false;
+    releaseProject = false;
 
     return project;
 }

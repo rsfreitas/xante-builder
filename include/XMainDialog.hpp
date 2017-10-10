@@ -41,18 +41,19 @@ class XMainDialog : public QWidget
     public:
         XMainDialog(QWidget *parent = 0);
         ~XMainDialog() {}
-        void active_project(bool active);
-        void set_tree_content(XTreeModel *model, bool enable_menu);
-        void control_project_widgets(bool enable);
+
+        void activeProject(bool active);
+        void setTreeContent(XTreeModel *model, bool enableMenu);
+        void controlProjectWidgets(bool enable);
 
     private slots:
-        void dialog_item_selected();
-        void dialog_menu_selected();
-        void dialog_content_changed();
+        void dialogItemSelected();
+        void dialogMenuSelected();
+        void dialogContentChanged();
 
     private:
-        XDialogItem *dialog_item;
-        XDialogMenu *dialog_menu;
+        XDialogItem *dialogItem;
+        XDialogMenu *dialogMenu;
         XTreeView *tree;
 };
 

@@ -89,18 +89,18 @@ int XTreeItem::row() const
 XTreeModel::XTreeModel(bool enable, QWidget *parent)
     : QAbstractItemModel(parent)
 {
-    QList<QVariant> root_data;
-    root_data << tr("File");
+    QList<QVariant> rootData;
+    rootData << tr("File");
 
-    root_item = new XTreeItem(root_data);
+    rootItem = new XTreeItem(rootData);
 
     if (enable)
-        setup_model_data(root_item);
+        setupModelData(rootItem);
 }
 
 XTreeModel::~XTreeModel()
 {
-    delete root_item;
+    delete rootItem;
 }
 
 int XTreeModel::columnCount(const QModelIndex &parent) const
@@ -108,7 +108,7 @@ int XTreeModel::columnCount(const QModelIndex &parent) const
     if (parent.isValid())
         return static_cast<XTreeItem *>(parent.internalPointer())->columnCount();
     else
-        return root_item->columnCount();
+        return rootItem->columnCount();
 }
 
 QVariant XTreeModel::data(const QModelIndex &index, int role) const
@@ -128,17 +128,17 @@ QModelIndex XTreeModel::index(int row, int column, const QModelIndex &parent) co
     if (!hasIndex(row, column, parent))
         return QModelIndex();
 
-    XTreeItem *parent_item;
+    XTreeItem *parentItem;
 
     if (!parent.isValid())
-        parent_item = root_item;
+        parentItem = rootItem;
     else
-        parent_item = static_cast<XTreeItem *>(parent.internalPointer());
+        parentItem = static_cast<XTreeItem *>(parent.internalPointer());
 
-    XTreeItem *child_item = parent_item->child(row);
+    XTreeItem *childItem = parentItem->child(row);
 
-    if (child_item)
-        return createIndex(row, column, child_item);
+    if (childItem)
+        return createIndex(row, column, childItem);
     else
         return QModelIndex();
 }
@@ -148,64 +148,64 @@ QModelIndex XTreeModel::parent(const QModelIndex &index) const
     if (!index.isValid())
         return QModelIndex();
 
-    XTreeItem *child_item = static_cast<XTreeItem *>(index.internalPointer());
-    XTreeItem *parent_item = child_item->parent();
+    XTreeItem *childItem = static_cast<XTreeItem *>(index.internalPointer());
+    XTreeItem *parentItem = childItem->parent();
 
-    if (parent_item == root_item)
+    if (parentItem == rootItem)
         return QModelIndex();
 
-    return createIndex(parent_item->row (), 0, parent_item);
+    return createIndex(parentItem->row (), 0, parentItem);
 }
 
 int XTreeModel::rowCount(const QModelIndex &parent) const
 {
-    XTreeItem *parent_item;
+    XTreeItem *parentItem;
 
     if (parent.column() > 0)
         return 0;
 
     if (!parent.isValid())
-        parent_item = root_item;
+        parentItem = rootItem;
     else
-        parent_item = static_cast<XTreeItem *>(parent.internalPointer());
+        parentItem = static_cast<XTreeItem *>(parent.internalPointer());
 
-    return parent_item->childCount();
+    return parentItem->childCount();
 }
 
 QVariant XTreeModel::headerData(int section, Qt::Orientation orientation,
     int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-        return root_item->data(section);
+        return rootItem->data(section);
 
     return QVariant();
 }
 
-void XTreeModel::setup_model_data(XTreeItem *parent)
+void XTreeModel::setupModelData(XTreeItem *parent)
 {
     QList<XTreeItem *> parents;
-    XanteProject &project = XMainWindow::get_project();
-    XanteJTF jtf = project.get_jtf();
+    XanteProject &project = XMainWindow::getProject();
+    XanteJTF jtf = project.getJtf();
     int i, j;
 
     parents << parent;
 
-    for (i = 0; i < jtf.total_menus(); i++) {
-        XanteMenu menu = jtf.menu_at(i);
+    for (i = 0; i < jtf.totalMenus(); i++) {
+        XanteMenu menu = jtf.menuAt(i);
 
-        QList<QVariant> child_data;
-        child_data << menu.get_name();
-        parents.last()->appendChild(new XTreeItem(child_data, parents.last()));
+        QList<QVariant> childData;
+        childData << menu.getName();
+        parents.last()->appendChild(new XTreeItem(childData, parents.last()));
 
-        for (j = 0; j < menu.total_items(); j++) {
-            XanteItem item = menu.item_at(j);
-            int child_index = parents.last()->childCount() - 1;
+        for (j = 0; j < menu.totalItems(); j++) {
+            XanteItem item = menu.itemAt(j);
+            int childIndex = parents.last()->childCount() - 1;
 
-            QList<QVariant> it_child_data;
-            it_child_data << item.get_name();
-            parents.last()->child(child_index)
-                          ->appendChild(new XTreeItem(it_child_data,
-                                                      parents.last()->child(child_index)));
+            QList<QVariant> itChildData;
+            itChildData << item.getName();
+            parents.last()->child(childIndex)
+                          ->appendChild(new XTreeItem(itChildData,
+                                                      parents.last()->child(childIndex)));
         }
     }
 }

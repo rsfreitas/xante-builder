@@ -39,7 +39,7 @@ XMainWindow::XMainWindow(XanteConfig &config)
     : config(config)
 {
     dialog = new XMainDialog(this);
-    create_menu();
+    createMenu();
     statusBar()->showMessage(APP_NAME);
 
     setCentralWidget(dialog);
@@ -55,51 +55,51 @@ void XMainWindow::closeEvent(QCloseEvent *event)
     event->accept();
 }
 
-void XMainWindow::new_project()
+void XMainWindow::newProject()
 {
-    XProjectWizard project_wizard;
+    XProjectWizard projectWizard;
 
-    if (project_wizard.exec()) {
-        project = project_wizard.get_project();
-        dialog->active_project(true);
-        set_window_widgets_enabled(true);
+    if (projectWizard.exec()) {
+        project = projectWizard.getProject();
+        dialog->activeProject(true);
+        setWindowWidgetsEnabled(true);
     }
 }
 
-void XMainWindow::load_file(const QString &filename)
+void XMainWindow::loadFile(const QString &filename)
 {
-    set_current_file(filename);
+    setCurrentFile(filename);
     setWindowTitle(QString("%1 [%2]").arg(APP_NAME).arg(filename));
     project = new XanteProject(filename);
-    dialog->active_project(true);
-    set_window_widgets_enabled(true);
+    dialog->activeProject(true);
+    setWindowWidgetsEnabled(true);
 }
 
-void XMainWindow::open_project()
+void XMainWindow::openProject()
 {
     QFileDialog::Options options;
-    QString selected_filter;
+    QString selectedFilter;
     QString filename = QFileDialog::getOpenFileName(this, tr("Select file"),
                                                     tr(""),
                                                     tr("Project files (*.pjx)"),
-                                                    &selected_filter, options);
+                                                    &selectedFilter, options);
 
     if (filename.isEmpty() == false)
-        load_file(filename);
+        loadFile(filename);
 }
 
-void XMainWindow::save_project()
+void XMainWindow::saveProject()
 {
     project->save();
 }
 
-void XMainWindow::close_project()
+void XMainWindow::closeProject()
 {
-    if (editing_project == false)
+    if (editingProject == false)
         return;
 
-    dialog->active_project(false);
-    set_window_widgets_enabled(false);
+    dialog->activeProject(false);
+    setWindowWidgetsEnabled(false);
     setWindowTitle(APP_NAME);
 
     if (project != nullptr) {
@@ -108,9 +108,9 @@ void XMainWindow::close_project()
     }
 }
 
-void XMainWindow::edit_jtf_info()
+void XMainWindow::editJtfInfo()
 {
-    if (editing_project == false)
+    if (editingProject == false)
         return;
 
     XDialogJTFInfo dlg(this);
@@ -119,11 +119,11 @@ void XMainWindow::edit_jtf_info()
     }
 }
 
-void XMainWindow::jtf_test()
+void XMainWindow::jtfTest()
 {
 }
 
-void XMainWindow::about_us()
+void XMainWindow::aboutUs()
 {
     QString msg;
 
@@ -134,123 +134,123 @@ void XMainWindow::about_us()
     QMessageBox::about(this, tr("About xante-builder"), msg);
 }
 
-void XMainWindow::open_recent_file()
+void XMainWindow::openRecentFile()
 {
     QAction *action = qobject_cast<QAction *>(sender());
 
     if (action)
-        load_file(action->data().toString());
+        loadFile(action->data().toString());
 }
 
-void XMainWindow::create_menu(void)
+void XMainWindow::createMenu(void)
 {
-    QMenu *m_main = menuBar()->addMenu(tr("&Project"));
-    ac_new_project = m_main->addAction(tr("&New project"), this,
-                                       &XMainWindow::new_project);
+    QMenu *mMain = menuBar()->addMenu(tr("&Project"));
+    acNewProject = mMain->addAction(tr("&New project"), this,
+                                       &XMainWindow::newProject);
 
-    ac_new_project->setStatusTip(tr("Creates a new libxante project."));
+    acNewProject->setStatusTip(tr("Creates a new libxante project."));
 
-    m_main->addSeparator();
-    ac_open = m_main->addAction(tr("&Open project"), this,
-                                &XMainWindow::open_project);
+    mMain->addSeparator();
+    acOpen = mMain->addAction(tr("&Open project"), this,
+                                &XMainWindow::openProject);
 
-    ac_open->setStatusTip(tr("Opens a previously created project file."));
-    ac_save = m_main->addAction(tr("&Save project"), this,
-                                &XMainWindow::save_project);
+    acOpen->setStatusTip(tr("Opens a previously created project file."));
+    acSave = mMain->addAction(tr("&Save project"), this,
+                                &XMainWindow::saveProject);
 
-    ac_save->setStatusTip(tr("Saves the project."));
-    ac_close = m_main->addAction(tr("&Close project"), this,
-                                 &XMainWindow::close_project);
+    acSave->setStatusTip(tr("Saves the project."));
+    acClose = mMain->addAction(tr("&Close project"), this,
+                                 &XMainWindow::closeProject);
 
-    ac_close->setStatusTip(tr("Closes the project."));
-    m_main->addSeparator();
+    acClose->setStatusTip(tr("Closes the project."));
+    mMain->addSeparator();
 
     for (int i = 0; i < MaxRecentFiles; i++) {
         QString file = config.getRecentFile(i);
-        ac_recent_files[i] = m_main->addAction(file.isEmpty() ? tr("") : file,
+        acRecentFiles[i] = mMain->addAction(file.isEmpty() ? tr("") : file,
                                                this,
-                                               &XMainWindow::open_recent_file);
+                                               &XMainWindow::openRecentFile);
 
         QString text = tr("&%1 %2").arg(i + 1)
                                    .arg(QFileInfo(file).fileName());
 
         if (file.isEmpty())
-            ac_recent_files[i]->setVisible(false);
+            acRecentFiles[i]->setVisible(false);
         else {
-            ac_recent_files[i]->setText(text);
-            ac_recent_files[i]->setData(file);
+            acRecentFiles[i]->setText(text);
+            acRecentFiles[i]->setData(file);
         }
     }
 
-    m_main->addSeparator();
-    QAction *ac_exit = m_main->addAction(tr("&Quit"), this, &QWidget::close);
-    ac_exit->setStatusTip(tr("Quits the application."));
+    mMain->addSeparator();
+    QAction *acExit = mMain->addAction(tr("&Quit"), this, &QWidget::close);
+    acExit->setStatusTip(tr("Quits the application."));
 
-    QMenu *m_actions = menuBar()->addMenu(tr("&JTF"));
-    ac_jtf_main_info = m_actions->addAction(tr("&Informations"), this,
-                                            &XMainWindow::edit_jtf_info);
+    QMenu *mActions = menuBar()->addMenu(tr("&JTF"));
+    acJtfMainInfo = mActions->addAction(tr("&Informations"), this,
+                                            &XMainWindow::editJtfInfo);
 
-    ac_jtf_main_info->setStatusTip(tr("Edits the JTF main informations."));
-    m_actions->addSeparator();
-    ac_test_jtf = m_actions->addAction(tr("&Test"), this,
-                                       &XMainWindow::jtf_test);
+    acJtfMainInfo->setStatusTip(tr("Edits the JTF main informations."));
+    mActions->addSeparator();
+    acTestJtf = mActions->addAction(tr("&Test"), this,
+                                       &XMainWindow::jtfTest);
 
-    ac_test_jtf->setStatusTip(tr("Puts the current JTF configuration into a "
+    acTestJtf->setStatusTip(tr("Puts the current JTF configuration into a "
                                  "test."));
 
-    QMenu *m_help = menuBar()->addMenu(tr("&Help"));
-    QAction *ac_about = m_help->addAction(tr("&About this application"), this,
-                                          &XMainWindow::about_us);
+    QMenu *mHelp = menuBar()->addMenu(tr("&Help"));
+    QAction *acAbout = mHelp->addAction(tr("&About this application"), this,
+                                          &XMainWindow::aboutUs);
 
-    ac_about->setStatusTip(tr("Shows a little help about this application."));
-    QAction *ac_about_qt = m_help->addAction(tr("About &Qt"), qApp,
+    acAbout->setStatusTip(tr("Shows a little help about this application."));
+    QAction *acAboutQt = mHelp->addAction(tr("About &Qt"), qApp,
                                              &QApplication::aboutQt);
 
-    ac_about_qt->setStatusTip(tr("Shows the current Qt version."));
-    set_window_widgets_enabled(false);
+    acAboutQt->setStatusTip(tr("Shows the current Qt version."));
+    setWindowWidgetsEnabled(false);
 }
 
-void XMainWindow::set_window_widgets_enabled(bool enable)
+void XMainWindow::setWindowWidgetsEnabled(bool enable)
 {
     XTreeModel *model;
 
-    editing_project = enable;
+    editingProject = enable;
 
     /* Enable/Disable menu options */
-    ac_new_project->setEnabled(!enable);
-    ac_open->setEnabled(!enable);
-    ac_save->setEnabled(enable);
-    ac_close->setEnabled(enable);
-    ac_jtf_main_info->setEnabled(enable);
-    ac_test_jtf->setEnabled(enable);
+    acNewProject->setEnabled(!enable);
+    acOpen->setEnabled(!enable);
+    acSave->setEnabled(enable);
+    acClose->setEnabled(enable);
+    acJtfMainInfo->setEnabled(enable);
+    acTestJtf->setEnabled(enable);
 
     for (int j = 0; j < MaxRecentFiles; j++)
-        ac_recent_files[j]->setEnabled(!enable);
+        acRecentFiles[j]->setEnabled(!enable);
 
     /* Populate the tree view */
     model = new XTreeModel(enable, this);
-    dialog->set_tree_content(model, enable);
-    dialog->control_project_widgets(enable);
+    dialog->setTreeContent(model, enable);
+    dialog->controlProjectWidgets(enable);
 }
 
-void XMainWindow::set_current_file(const QString &filename)
+void XMainWindow::setCurrentFile(const QString &filename)
 {
     if (config.setRecentFile(filename) == false)
         return;
 
-    int n_recent_files = qMin(config.recentFilesSize(), (int)MaxRecentFiles);
+    int nRecentFiles = qMin(config.recentFilesSize(), (int)MaxRecentFiles);
 
-    for (int i = 0; i < n_recent_files; i++) {
+    for (int i = 0; i < nRecentFiles; i++) {
         QString file = config.getRecentFile(i);
         QString text = tr("&%1 %2").arg(i + 1)
                                    .arg(QFileInfo(file).fileName());
 
-        ac_recent_files[i]->setText(text);
-        ac_recent_files[i]->setData(file);
-        ac_recent_files[i]->setVisible(true);
+        acRecentFiles[i]->setText(text);
+        acRecentFiles[i]->setData(file);
+        acRecentFiles[i]->setVisible(true);
     }
 
-    for (int j = n_recent_files; j < MaxRecentFiles; j++)
-        ac_recent_files[j]->setVisible(false);
+    for (int j = nRecentFiles; j < MaxRecentFiles; j++)
+        acRecentFiles[j]->setVisible(false);
 }
 

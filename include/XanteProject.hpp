@@ -39,23 +39,23 @@ class XanteJTF;
 class XanteProject {
     public:
         XanteProject(QString filename);
-        XanteProject(QString project_name, QString path, const XanteJTF &jtf);
+        XanteProject(QString projectName, QString path, const XanteJTF &jtf);
         ~XanteProject();
-        QString get_jtf_filename(void);
-        QString get_project_name(void);
-        XanteJTF &get_jtf(void);
+        QString getJtfFilename(void);
+        QString getProjectName(void);
+        XanteJTF &getJtf(void);
         bool create(void);
         bool save(void);
 
     private:
         XanteJTF jtf;
         QFileInfo info;
-        QDir project_root_path;
-        QString project_name, jtf_filename;
+        QDir projectRootPath;
+        QString projectName, jtfFilename;
         int version;
 
-        QString load_project_file(void);
-        void write_project_file(void);
+        QString loadProjectFile(void);
+        void writeProjectFile(void);
 };
 
 #endif

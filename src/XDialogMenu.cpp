@@ -487,30 +487,6 @@ void XDialogMenu::delDynamicFixedOption(void)
     dynamicOptions->takeItem(row);
 }
 
-void XDialogMenu::updateXanteMenu(void)
-{
-    XanteProject &project = XMainWindow::getProject();
-    XanteJTF jtf = project.getJtf();
-    XanteMenu menu = jtf.menuAt(currentMenuIndex);
-
-    /*
-    menu.setName();
-    menu.setType();
-    menu.setMode();
-    menu.setEvent();
-    menu.setDynamic();
-    */
-}
-
-void XDialogMenu::hideEvent(QHideEvent *event)
-{
-    if (event->spontaneous() == false)
-        /* Save content with current data */
-        updateXanteMenu();
-
-    event->accept();
-}
-
 void XDialogMenu::clear(void)
 {
     for (int i = XDialogMenu::LineEdit::Name;
@@ -533,5 +509,132 @@ void XDialogMenu::clear(void)
     {
         checkBox[i]->setChecked(false);
     }
+}
+
+bool XDialogMenu::updateXanteMenuDynamic(XanteMenu &menu)
+{
+    enum XanteMenu::DynamicType type;
+    QString copies, prefix, block, item;
+
+    for (int i = 0; i < XanteMenu::MaxDynamicMenuType; i++) {
+        if (radioButton[i]->isChecked()) {
+            type = (enum XanteMenu::DynamicType)i;
+            break;
+        }
+    }
+
+    switch (type) {
+        case XanteMenu::DynamicType::FixedSize:
+            copies =
+                lineEdit[XDialogMenu::LineEdit::DynamicNumberOfCopies]->text();
+
+            menu.setDynamic(copies.toInt());
+            break;
+
+        case XanteMenu::DynamicType::FixedOptions:
+            for (int i = 0; i < dynamicOptions->count(); i++)
+                menu.setDynamic(dynamicOptions->item(i)->text());
+
+            break;
+
+        case XanteMenu::DynamicType::DynamicOptions:
+            prefix =
+                lineEdit[XDialogMenu::LineEdit::BlockPrefix]->text();
+
+            block =
+                lineEdit[XDialogMenu::LineEdit::DynamicOriginBlock]->text();
+
+            item =
+                lineEdit[XDialogMenu::LineEdit::DynamicOriginItem]->text();
+
+            menu.setDynamic(prefix, block, item);
+            break;
+
+        default:
+            break;
+    }
+
+    return true;
+}
+
+bool XDialogMenu::updateXanteMenuEvents(XanteMenu &menu)
+{
+    QMap<enum XanteMenu::Event,
+        QPair<QCheckBox *, QLineEdit *>> events;
+
+    events.insert(XanteMenu::Event::Selected,
+                  qMakePair(checkBox[XDialogMenu::CheckBox::EvSelected],
+                            lineEdit[XDialogMenu::LineEdit::EventSelected]));
+
+    events.insert(XanteMenu::Event::Exit,
+                  qMakePair(checkBox[XDialogMenu::CheckBox::EvExit],
+                            lineEdit[XDialogMenu::LineEdit::EventExit]));
+
+    QMapIterator<enum XanteMenu::Event, QPair<QCheckBox *, QLineEdit *>> i(events);
+
+    while (i.hasNext()) {
+        i.next();
+
+        enum XanteMenu::Event eventType = i.key();
+        QPair<QCheckBox*, QLineEdit *> ui = i.value();
+        QString text = ui.second->text();
+
+        if (ui.first->isChecked() && (text.isEmpty() == false)) {
+            menu.setEvent(text, eventType);
+        }
+    }
+
+    return true;
+}
+
+bool XDialogMenu::updateXanteMenu(void)
+{
+    XanteProject &project = XMainWindow::getProject();
+    XanteJTF &jtf = project.getJtf();
+    XanteMenu &menu = jtf.menuAt(currentMenuIndex);
+    QString data;
+
+    /* name */
+    data = lineEdit[XDialogMenu::LineEdit::Name]->text();
+
+    if ((data.isEmpty() == false) && (menu.getName() != data))
+        menu.setName(data);
+
+    /* type */
+    enum XanteMenu::Type type =
+        (enum XanteMenu::Type)comboBox[XDialogMenu::ComboBox::Type]->currentIndex();
+
+    menu.setType(type);
+
+    /* dynamic options */
+    if (type == XanteMenu::Type::Dynamic)
+        if (updateXanteMenuDynamic(menu) == false)
+            return false;
+
+    /* access mode */
+    enum XanteMode mode =
+        (enum XanteMode)comboBox[XDialogMenu::ComboBox::Mode]->currentIndex();
+
+    menu.setMode(mode);
+
+    /* events */
+    if (groupBox[XDialogMenu::GroupBox::Events]->isChecked())
+        if (updateXanteMenuEvents(menu) == false)
+            return false;
+
+    return true;
+}
+
+void XDialogMenu::hideEvent(QHideEvent *event)
+{
+    /* Save all modifications */
+    if (event->spontaneous() == false) {
+        if (updateXanteMenu() == false) {
+            event->ignore();
+            return;
+        }
+    }
+
+    event->accept();
 }
 

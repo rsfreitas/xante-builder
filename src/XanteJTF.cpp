@@ -391,8 +391,8 @@ void XanteMenu::parseEventsData(QJsonObject menu)
         QJsonObject events = value.toObject();
         QMap<QString, enum XanteMenu::Event> evMap;
 
-        evMap.insert("selected", XanteMenu::Event::Selected);
-        evMap.insert("exit", XanteMenu::Event::Exit);
+        evMap.insert("item-selected", XanteMenu::Event::Selected);
+        evMap.insert("menu-exit", XanteMenu::Event::Exit);
 
         QMapIterator<QString, enum XanteMenu::Event> i(evMap);
 

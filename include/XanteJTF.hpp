@@ -247,7 +247,8 @@ class XanteMenu
             dynamicType = XanteMenu::DynamicType::FixedSize;
         }
 
-        void setDynamic(QString originBlock, QString originItem) {
+        void setDynamic(QString blockPrefix, QString originBlock, QString originItem) {
+            dynamicBlockPrefix = blockPrefix;
             dynamicOriginBlock = originBlock;
             dynamicOriginItem = originItem;
             dynamicType = XanteMenu::DynamicType::DynamicOptions;

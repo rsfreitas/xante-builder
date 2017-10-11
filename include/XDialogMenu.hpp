@@ -123,7 +123,9 @@ class XDialogMenu : public QWidget
         void setupEventsWidgets(XanteMenu menu);
 
         void disableAllWidgets(void);
-        void updateXanteMenu(void);
+        bool updateXanteMenu(void);
+        bool updateXanteMenuEvents(XanteMenu &menu);
+        bool updateXanteMenuDynamic(XanteMenu &menu);
 };
 
 #endif

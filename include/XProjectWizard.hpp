@@ -66,11 +66,11 @@ class ProjectInfoPage : public QWizardPage
         ProjectInfoPage(QWidget *parent = 0);
 
     protected slots:
-        void choose_dir(void);
+        void chooseDir(void);
 
     private:
         /* UI */
-        QLineEdit *le_name, *le_description, *le_pathname;
+        QLineEdit *leName, *leDescription, *lePathname;
 };
 
 class ProjectConfigPage : public QWizardPage
@@ -82,10 +82,10 @@ class ProjectConfigPage : public QWizardPage
 
     private:
         /* UI */
-        QLineEdit *le_company, *le_plugin, *le_cfg_path, *le_log_path,
-                  *le_version, *le_revision, *le_build;
+        QLineEdit *leCompany, *lePlugin, *leCfgPath, *leLogPath,
+                  *leVersion, *leRevision, *leBuild;
 
-        QComboBox *cb_beta;
+        QComboBox *cbBeta;
 };
 
 class XProjectWizard : public QWizard
@@ -96,10 +96,10 @@ class XProjectWizard : public QWizard
         XProjectWizard(QWidget *parent = 0);
         ~XProjectWizard();
         void accept();
-        XanteProject *get_project(void);
+        XanteProject *getProject(void);
 
     private:
-        bool release_project = true;
+        bool releaseProject = true;
         XanteProject *project = nullptr;
 };
 

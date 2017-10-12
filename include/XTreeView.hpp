@@ -35,41 +35,41 @@ class XTreeView : public QTreeView
     Q_OBJECT
 
     public:
-        int current_selected_menu = 0;
-        int current_selected_item = 0;
+        int currentSelectedMenu = 0;
+        int currentSelectedItem = 0;
 
         XTreeView(QWidget *parent = 0);
         ~XTreeView();
 
-        void control_actions(bool enable);
+        void controlDialogActions(bool enable);
 
     protected:
         void mousePressEvent(QMouseEvent *event);
         void mouseDoubleClickEvent(QMouseEvent *event);
 
     private slots:
-        void add_menu();
-        void rename_menu();
-        void add_item();
-        void copy_item();
-        void paste_item();
-        void cut_item();
-        void remove_item();
-        void change_items_position();
+        void addMenu();
+        void renameMenu();
+        void addItem();
+        void copyItem();
+        void pasteItem();
+        void cutItem();
+        void removeItem();
+        void changeItemsPosition();
 
     signals:
-        void item_selected();
-        void menu_selected();
-        void content_changed();
+        void itemSelected();
+        void menuSelected();
+        void contentChanged();
 
     private:
-        bool selected_line = false;
+        bool selectedLine = false;
         QMenu *menu;
-        QAction *ac_add_menu, *ac_rename_menu, *ac_add_item, *ac_copy,
-                *ac_paste, *ac_cut, *ac_remove, *ac_change;
+        QAction *acAddMenu, *acRenameMenu, *acAddItem, *acCopy,
+                *acPaste, *acCut, *acRemove, *acChange;
 
-        void create_menu(void);
-        void display_selected_item(QModelIndex index);
+        void createRightClickMenu(void);
+        void displaySelectedItem(QModelIndex index);
 };
 
 #endif

@@ -47,15 +47,15 @@ class XDialogMenu : public QWidget
     public:
         XDialogMenu(QWidget *parent = 0);
         ~XDialogMenu();
-        void set_current_project(int selected_menu_index);
-        void set_selection(int selected_menu_index);
+        void setCurrentProject(int selectedMenuIndex);
+        void setSelection(int selectedMenuIndex);
         void clear(void);
 
     public slots:
-        void dynamic_radio_toggled(bool checked);
-        void select_menu_type(int index);
-        void add_dynamic_fixed_option(void);
-        void del_dynamic_fixed_option(void);
+        void dynamicRadioToggled(bool checked);
+        void selectMenuType(int index);
+        void addDynamicFixedOption(void);
+        void delDynamicFixedOption(void);
 
     protected:
         void hideEvent(QHideEvent *event) override;
@@ -98,31 +98,34 @@ class XDialogMenu : public QWidget
             MaxGroupBox
         };
 
-        int current_menu_index = -1;
+        int currentMenuIndex = -1;
 
         /* UI */
-        QVector<QLineEdit *> line_edit;
-        QVector<QCheckBox *> check_box;
-        QVector<QComboBox *> combo_box;
-        QVector<QGroupBox *> group_box;
-        QVector<QRadioButton *> radio_button;
+        QVector<QLineEdit *> lineEdit;
+        QVector<QCheckBox *> checkBox;
+        QVector<QComboBox *> comboBox;
+        QVector<QGroupBox *> groupBox;
+        QVector<QRadioButton *> radioButton;
 
-        QListWidget *dynamic_options;
+        QListWidget *dynamicOptions;
 
-        QHBoxLayout *create_identification_widgets(void);
-        QHBoxLayout *create_type_widgets(void);
-        QGroupBox *create_events_widgets(void);
-        QGroupBox *create_dynamic_details_widgets(void);
-        QGroupBox *create_dm_fixed_size_widgets(void);
-        QGroupBox *create_dm_fixed_options_widgets(void);
-        QGroupBox *create_dm_options_widgets(void);
+        QHBoxLayout *createIdentificationWidgets(void);
+        QHBoxLayout *createTypeWidgets(void);
+        QGroupBox *createEventsWidgets(void);
+        QGroupBox *createDynamicDetailsWidgets(void);
+        QGroupBox *createDynamicFixedSizeWidgets(void);
+        QGroupBox *createDynamicFixedOptionsWidgets(void);
+        QGroupBox *createDynamicOptionsWidgets(void);
 
-        void setup_widgets(void);
-        void setup_widgets(XanteMenu menu);
-        void setup_dynamic_info_widgets(XanteMenu menu);
-        void setup_events_widgets(XanteMenu menu);
+        void setupWidgets(void);
+        void setupWidgets(XanteMenu menu);
+        void setupDynamicInfoWidgets(XanteMenu menu);
+        void setupEventsWidgets(XanteMenu menu);
 
-        void disable_all_widgets(void);
+        void disableAllWidgets(void);
+        bool updateXanteMenu(void);
+        bool updateXanteMenuEvents(XanteMenu &menu);
+        bool updateXanteMenuDynamic(XanteMenu &menu);
 };
 
 #endif

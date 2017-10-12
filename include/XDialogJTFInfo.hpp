@@ -45,11 +45,11 @@ class XDialogJTFInfo : public QDialog
         ~XDialogJTFInfo() {};
 
     private slots:
-        void confirm_ok(void);
-        void confirm_cancel(void);
+        void confirmOk(void);
+        void confirmCancel(void);
 
     private:
-        enum edit_widget {
+        enum editWidget {
             ApplicationName,
             Description,
             Company,
@@ -62,17 +62,17 @@ class XDialogJTFInfo : public QDialog
         };
 
         /* UI */
-        QComboBox *cb_main_menu, *cb_beta;
+        QComboBox *cbMainMenu, *cbBeta;
         QList<QLineEdit *> edit;
 
-        void create_widgets(void);
+        void createWidgets(void);
         void reject(void);
-        void fill_widgets_with_project_data(void);
-        void prepare_main_menu_chooser(void);
-        QHBoxLayout *create_main_menu_chooser(void);
-        QHBoxLayout *create_beta_chooser(void);
-        QHBoxLayout *create_buttons(void);
-        QGroupBox *create_information_widgets(void);
+        void fillWidgetsWithProjectData(void);
+        void prepareMainMenuChooser(void);
+        QHBoxLayout *createMainMenuChooser(void);
+        QHBoxLayout *createBetaChooser(void);
+        QHBoxLayout *createButtons(void);
+        QGroupBox *createInformationWidgets(void);
 };
 
 #endif

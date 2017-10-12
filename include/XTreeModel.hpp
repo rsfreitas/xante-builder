@@ -68,10 +68,10 @@ class XTreeModel : public QAbstractItemModel
         QVariant headerData(int section, Qt::Orientation orientation,
                             int rotel = Qt::DisplayRole) const;
 
-        void setup_model_data(XTreeItem *parent);
+        void setupModelData(XTreeItem *parent);
 
     private:
-        XTreeItem *root_item;
+        XTreeItem *rootItem;
 };
 
 #endif

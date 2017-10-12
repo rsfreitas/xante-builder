@@ -47,19 +47,19 @@ class XDialogItem : public QWidget
     public:
         XDialogItem(QWidget *parent = 0);
         ~XDialogItem();
-        void set_current_project(int selected_menu_index,
-                                 int selected_item_index);
+        void setCurrentProject(int selectedMenuIndex,
+                                 int selectedItemIndex);
 
-        void set_selection(int selected_menu_index, int selected_item_index);
+        void setSelection(int selectedMenuIndex, int selectedItemIndex);
         void clear(void);
 
     private slots:
-        void select_item_type(int index);
-        void add_option(void);
-        void del_option(void);
-        void add_option_help(void);
-        void del_option_help(void);
-        void help_group_toggled(bool on);
+        void selectItemType(int index);
+        void addOption(void);
+        void delOption(void);
+        void addOptionHelp(void);
+        void delOptionHelp(void);
+        void helpGroupToggled(bool on);
 
     protected:
         void hideEvent(QHideEvent *event) override;
@@ -121,37 +121,45 @@ class XDialogItem : public QWidget
             MaxListWidget
         };
 
-        int current_menu_index = -1, current_item_index = -1;
+        int currentMenuIndex = -1, currentItemIndex = -1;
 
         /* UI */
-        QVector<QLineEdit *> line_edit;
-        QVector<QCheckBox *> check_box;
-        QVector<QGroupBox *> group_box;
-        QVector<QComboBox *> combo_box;
-        QVector<QListWidget *> list_widget;
+        QVector<QLineEdit *> lineEdit;
+        QVector<QCheckBox *> checkBox;
+        QVector<QGroupBox *> groupBox;
+        QVector<QComboBox *> comboBox;
+        QVector<QListWidget *> listWidget;
 
-        QHBoxLayout *create_identification_widgets(void);
-        QHBoxLayout *create_type_widgets(void);
-        QHBoxLayout *create_item_details_widgets(void);
-        QHBoxLayout *create_ranges_and_events_widgets(void);
-        QGroupBox *create_item_configuration_widgets(void);
-        QGroupBox *create_item_options_widgets(void);
-        QGroupBox *create_item_help_widgets(void);
-        QGroupBox *create_ranges_widgets(void);
-        QGroupBox *create_events_widgets(void);
+        QHBoxLayout *createIdentificationWidgets(void);
+        QHBoxLayout *createTypeWidgets(void);
+        QHBoxLayout *createItemDetailsWidgets(void);
+        QHBoxLayout *createRangesAndEventsWidgets(void);
+        QGroupBox *createItemConfigurationWidgets(void);
+        QGroupBox *createItemOptionsWidgets(void);
+        QGroupBox *createItemHelpWidgets(void);
+        QGroupBox *createRangesWidgets(void);
+        QGroupBox *createEventsWidgets(void);
 
-        void setup_widgets(void);
-        void setup_dynamic_info_widgets(const XanteItem &item);
-        void setup_events_widgets(const XanteItem &item);
-        void setup_help_widgets(const XanteItem &item);
-        void setup_config_widgets(const XanteItem &item);
-        void setup_input_ranges_widgets(const XanteItem &item);
-        void setup_options_widgets(const XanteItem &item);
+        void setupWidgets(void);
+        void setupDynamicInfoWidgets(const XanteItem &item);
+        void setupEventsWidgets(const XanteItem &item);
+        void setupHelpWidgets(const XanteItem &item);
+        void setupConfigWidgets(const XanteItem &item);
+        void setupInputRangesWidgets(const XanteItem &item);
+        void setupOptionsWidgets(const XanteItem &item);
 
-        void disable_all_widgets(void);
-        void enable_input_ranges(int type);
-        void enable_options(int type);
-        void enable_help(int type);
+        void disableAllWidgets(void);
+        void enableInputRanges(int type);
+        void enableOptions(int type);
+        void enableHelp(int type);
+
+        bool updateXanteItem(void);
+        bool updateXanteItemEvents(XanteItem &item);
+        bool updateXanteItemHelp(XanteItem &item);
+        bool updateXanteItemContent(XanteItem &item);
+        bool updateXanteItemOptions(XanteItem &item);
+        bool updateXanteItemInputRanges(XanteItem &item);
+        bool updateXanteItemConfig(XanteItem &item);
 };
 
 #endif

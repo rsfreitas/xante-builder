@@ -32,23 +32,23 @@
 XMainDialog::XMainDialog(QWidget *parent)
     : QWidget(parent)
 {
-    dialog_item = new XDialogItem(this);
-    dialog_item->setEnabled(false);
-    dialog_menu = new XDialogMenu(this);
-    dialog_menu->setEnabled(false);
+    dialogItem = new XDialogItem(this);
+    dialogItem->setEnabled(false);
+    dialogMenu = new XDialogMenu(this);
+    dialogMenu->setEnabled(false);
 
     tree = new XTreeView(this);
-    connect(tree, SIGNAL(item_selected()), this, SLOT(dialog_item_selected()));
-    connect(tree, SIGNAL(menu_selected()), this, SLOT(dialog_menu_selected()));
-    connect(tree, SIGNAL(content_changed()), this,
-            SLOT(dialog_content_changed()));
+    connect(tree, SIGNAL(itemSelected()), this, SLOT(dialogItemSelected()));
+    connect(tree, SIGNAL(menuSelected()), this, SLOT(dialogMenuSelected()));
+    connect(tree, SIGNAL(contentChanged()), this,
+            SLOT(dialogContentChanged()));
 
     QSplitter *splitter = new QSplitter(this);
     splitter->setOrientation(Qt::Horizontal);
     splitter->addWidget(tree);
-    splitter->addWidget(dialog_menu);
-    splitter->addWidget(dialog_item);
-    dialog_item->hide();
+    splitter->addWidget(dialogMenu);
+    splitter->addWidget(dialogItem);
+    dialogItem->hide();
 
     QHBoxLayout *layout = new QHBoxLayout;
     layout->addWidget(splitter);
@@ -58,46 +58,46 @@ XMainDialog::XMainDialog(QWidget *parent)
 /*
  * Here we fill every widget data with project content.
  */
-void XMainDialog::active_project(bool active)
+void XMainDialog::activeProject(bool active)
 {
     if (active) {
-        dialog_menu->set_current_project(tree->current_selected_menu);
-        dialog_item->set_current_project(tree->current_selected_menu,
-                                         tree->current_selected_item);
+        dialogMenu->setCurrentProject(tree->currentSelectedMenu);
+        dialogItem->setCurrentProject(tree->currentSelectedMenu,
+                                         tree->currentSelectedItem);
     } else {
-        dialog_menu->clear();
-        dialog_item->clear();
+        dialogMenu->clear();
+        dialogItem->clear();
     }
 }
 
-void XMainDialog::set_tree_content(XTreeModel *model, bool enable_menu)
+void XMainDialog::setTreeContent(XTreeModel *model, bool enableMenu)
 {
     tree->setModel(model);
-    tree->control_actions(enable_menu);
+    tree->controlDialogActions(enableMenu);
 }
 
-void XMainDialog::dialog_item_selected()
+void XMainDialog::dialogItemSelected()
 {
-    dialog_menu->hide();
-    dialog_item->show();
-    dialog_item->set_selection(tree->current_selected_menu,
-                               tree->current_selected_item);
+    dialogMenu->hide();
+    dialogItem->show();
+    dialogItem->setSelection(tree->currentSelectedMenu,
+                               tree->currentSelectedItem);
 }
 
-void XMainDialog::dialog_menu_selected()
+void XMainDialog::dialogMenuSelected()
 {
-    dialog_menu->show();
-    dialog_menu->set_selection(tree->current_selected_menu);
-    dialog_item->hide();
+    dialogMenu->show();
+    dialogMenu->setSelection(tree->currentSelectedMenu);
+    dialogItem->hide();
 }
 
-void XMainDialog::dialog_content_changed()
+void XMainDialog::dialogContentChanged()
 {
 }
 
-void XMainDialog::control_project_widgets(bool enable)
+void XMainDialog::controlProjectWidgets(bool enable)
 {
-    dialog_menu->setEnabled(enable);
-    dialog_item->setEnabled(enable);
+    dialogMenu->setEnabled(enable);
+    dialogItem->setEnabled(enable);
 }
 

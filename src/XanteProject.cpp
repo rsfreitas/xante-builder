@@ -32,16 +32,16 @@
 XanteProject::XanteProject(QString filename)
 {
     info = QFileInfo(filename);
-    jtf_filename = load_project_file();
-    jtf.load(jtf_filename);
+    jtfFilename = loadProjectFile();
+    jtf.load(jtfFilename);
 }
 
-XanteProject::XanteProject(QString project_name, QString path, const XanteJTF &jtf)
-    : jtf(jtf), project_name(project_name)
+XanteProject::XanteProject(QString projectName, QString path, const XanteJTF &jtf)
+    : jtf(jtf), projectName(projectName)
 {
-    project_root_path = QDir(path + "/" + project_name);
-    info = QFileInfo(project_root_path.path() + "/" + project_name + ".pjx");
-    jtf_filename = project_root_path.path() + "/jtf/" + project_name + ".jtf";
+    projectRootPath = QDir(path + "/" + projectName);
+    info = QFileInfo(projectRootPath.path() + "/" + projectName + ".pjx");
+    jtfFilename = projectRootPath.path() + "/jtf/" + projectName + ".jtf";
     version = DEFAULT_PROJECT_FILE_VERSION;
 }
 
@@ -49,13 +49,13 @@ XanteProject::~XanteProject()
 {
 }
 
-QString XanteProject::load_project_file(void)
+QString XanteProject::loadProjectFile(void)
 {
     QSettings settings(info.absoluteFilePath(), QSettings::IniFormat);
     QString pathname = info.absolutePath(), filename;
 
     settings.beginGroup("Project");
-    project_name = settings.value("Name").value<QString>();
+    projectName = settings.value("Name").value<QString>();
     version = settings.value("Version").value<int>();
     filename = pathname + "/jtf/" + settings.value("JTF").value<QString>();
     settings.endGroup();
@@ -63,39 +63,39 @@ QString XanteProject::load_project_file(void)
     return filename;
 }
 
-void XanteProject::write_project_file(void)
+void XanteProject::writeProjectFile(void)
 {
     QSettings settings(info.absoluteFilePath(), QSettings::IniFormat);
-    QFileInfo jtf(jtf_filename);
+    QFileInfo jtf(jtfFilename);
 
     settings.beginGroup("Project");
-    settings.setValue("Name", project_name);
+    settings.setValue("Name", projectName);
     settings.setValue("Version", version);
     settings.setValue("JTF", jtf.fileName());
     settings.endGroup();
 }
 
-QString XanteProject::get_jtf_filename(void)
+QString XanteProject::getJtfFilename(void)
 {
-    return jtf_filename;
+    return jtfFilename;
 }
 
-QString XanteProject::get_project_name(void)
+QString XanteProject::getProjectName(void)
 {
-    return project_name;
+    return projectName;
 }
 
 bool XanteProject::create(void)
 {
-    if (jtf.is_empty())
+    if (jtf.isEmpty())
         return false;
 
-    if (project_root_path.exists() == false)
-        project_root_path.mkpath(".");
+    if (projectRootPath.exists() == false)
+        projectRootPath.mkpath(".");
 
-    write_project_file();
-    project_root_path.mkdir("jtf");
-    project_root_path.mkdir("script");
+    writeProjectFile();
+    projectRootPath.mkdir("jtf");
+    projectRootPath.mkdir("script");
     save();
 
     return true;
@@ -103,16 +103,16 @@ bool XanteProject::create(void)
 
 bool XanteProject::save(void)
 {
-    if (jtf.is_empty())
+    if (jtf.isEmpty())
         return false;
 
-    if (jtf.save(jtf_filename) == false)
+    if (jtf.save(jtfFilename) == false)
         return false;
 
     return true;
 }
 
-XanteJTF &XanteProject::get_jtf(void)
+XanteJTF &XanteProject::getJtf(void)
 {
     return jtf;
 }

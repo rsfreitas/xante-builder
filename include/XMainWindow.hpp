@@ -43,37 +43,37 @@ class XMainWindow : public QMainWindow
         XMainWindow(XanteConfig &config);
         ~XMainWindow() {}
 
-        static XanteProject &get_project(void) { return *project; }
+        static XanteProject &getProject(void) { return *project; }
 
     protected:
         void closeEvent(QCloseEvent *event) override;
 
     private slots:
-        void new_project();
-        void open_project();
-        void save_project();
-        void close_project();
-        void edit_jtf_info();
-        void jtf_test();
-        void about_us();
-        void open_recent_file();
+        void newProject();
+        void openProject();
+        void saveProject();
+        void closeProject();
+        void editJtfInfo();
+        void jtfTest();
+        void aboutUs();
+        void openRecentFile();
 
     private:
         static XanteProject *project;
         XanteConfig &config;
-        bool editing_project = false;
+        bool editingProject = false;
 
         /* UI */
-        QAction *ac_open, *ac_close, *ac_save, *ac_jtf_main_info, *ac_test_jtf,
-                *ac_new_project, *ac_recent_files[MaxRecentFiles];
+        QAction *acOpen, *acClose, *acSave, *acJtfMainInfo, *acTestJtf,
+                *acNewProject, *acRecentFiles[MaxRecentFiles];
 
         XMainDialog *dialog;
 
-        void create_menu_actions(void);
-        void create_menu(void);
-        void load_file(const QString &filename);
-        void set_window_widgets_enabled(bool enable);
-        void set_current_file(const QString &filename);
+        void createMenuActions(void);
+        void createMenu(void);
+        void loadFile(const QString &filename);
+        void setWindowWidgetsEnabled(bool enable);
+        void setCurrentFile(const QString &filename);
 };
 
 #endif

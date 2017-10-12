@@ -33,61 +33,61 @@
 XTreeView::XTreeView(QWidget *parent)
     : QTreeView(parent)
 {
-    create_menu();
+    createRightClickMenu();
 }
 
 XTreeView::~XTreeView()
 {
 }
 
-void XTreeView::create_menu(void)
+void XTreeView::createRightClickMenu(void)
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
     menu = new QMenu;
-    ac_add_menu = menu->addAction(tr("Add new menu"), this,
-                                  &XTreeView::add_menu);
+    acAddMenu = menu->addAction(tr("Add new menu"), this,
+                                &XTreeView::addMenu);
 
-    ac_add_menu->setStatusTip(tr("Add a new menu into the JTF file."));
-    ac_rename_menu = menu->addAction(tr("Rename menu"), this,
-                                     &XTreeView::rename_menu);
+    acAddMenu->setStatusTip(tr("Add a new menu into the JTF file."));
+    acRenameMenu = menu->addAction(tr("Rename menu"), this,
+                                   &XTreeView::renameMenu);
 
-    ac_rename_menu->setStatusTip(tr("Rename the selected menu."));
-    ac_add_item = menu->addAction(tr("Add new item"), this,
-                                  &XTreeView::add_item);
+    acRenameMenu->setStatusTip(tr("Rename the selected menu."));
+    acAddItem = menu->addAction(tr("Add new item"), this,
+                                &XTreeView::addItem);
 
-    ac_add_item->setStatusTip(tr("Add a new item into the selected menu."));
+    acAddItem->setStatusTip(tr("Add a new item into the selected menu."));
     menu->addSeparator();
-    ac_copy = menu->addAction(tr("Copy"), this, &XTreeView::copy_item);
-    ac_copy->setStatusTip(tr("Copy the selected item to memory."));
-    ac_paste = menu->addAction(tr("Paste"), this, &XTreeView::paste_item);
-    ac_paste->setStatusTip(tr("Paste the item holded in memory."));
-    ac_cut = menu->addAction(tr("Cut"), this, &XTreeView::cut_item);
-    ac_cut->setStatusTip(tr("Removes the selected item and put it into the memory."));
-    ac_remove = menu->addAction(tr("Remove"), this, &XTreeView::remove_item);
-    ac_remove->setStatusTip(tr("Removes the selected item."));
+    acCopy = menu->addAction(tr("Copy"), this, &XTreeView::copyItem);
+    acCopy->setStatusTip(tr("Copy the selected item to memory."));
+    acPaste = menu->addAction(tr("Paste"), this, &XTreeView::pasteItem);
+    acPaste->setStatusTip(tr("Paste the item holded in memory."));
+    acCut = menu->addAction(tr("Cut"), this, &XTreeView::cutItem);
+    acCut->setStatusTip(tr("Removes the selected item and put it into the memory."));
+    acRemove = menu->addAction(tr("Remove"), this, &XTreeView::removeItem);
+    acRemove->setStatusTip(tr("Removes the selected item."));
     menu->addSeparator();
-    ac_change = menu->addAction(tr("Change items' position"), this,
-                                &XTreeView::change_items_position);
+    acChange = menu->addAction(tr("Change items' position"), this,
+                               &XTreeView::changeItemsPosition);
 
-    ac_change->setStatusTip(tr("Change all items' position inside the current menu."));
+    acChange->setStatusTip(tr("Change all items' position inside the current menu."));
 }
 
-void XTreeView::control_actions(bool enable)
+void XTreeView::controlDialogActions(bool enable)
 {
-    ac_add_menu->setEnabled(enable);
-    ac_rename_menu->setEnabled(enable);
-    ac_add_item->setEnabled(enable);
-    ac_copy->setEnabled(enable);
-    ac_paste->setEnabled(enable);
-    ac_cut->setEnabled(enable);
-    ac_remove->setEnabled(enable);
-    ac_change->setEnabled(enable);
+    acAddMenu->setEnabled(enable);
+    acRenameMenu->setEnabled(enable);
+    acAddItem->setEnabled(enable);
+    acCopy->setEnabled(enable);
+    acPaste->setEnabled(enable);
+    acCut->setEnabled(enable);
+    acRemove->setEnabled(enable);
+    acChange->setEnabled(enable);
 }
 
 void XTreeView::mouseDoubleClickEvent(QMouseEvent *event)
 {
     QModelIndex index = indexAt(event->pos());
-    display_selected_item(index);
+    displaySelectedItem(index);
 }
 
 void XTreeView::mousePressEvent(QMouseEvent *event)
@@ -96,62 +96,62 @@ void XTreeView::mousePressEvent(QMouseEvent *event)
         menu->exec(event->globalPos());
     else {
         QModelIndex index = indexAt(event->pos()),
-                    parent_index = index.parent();
+                    parentIndex = index.parent();
 
-        if (parent_index.isValid() || index.isValid())
-            selected_line = true;
+        if (parentIndex.isValid() || index.isValid())
+            selectedLine = true;
         else
-            selected_line = false;
+            selectedLine = false;
 
         QTreeView::mousePressEvent(event);
     }
 }
 
-void XTreeView::display_selected_item(QModelIndex index)
+void XTreeView::displaySelectedItem(QModelIndex index)
 {
-    QModelIndex parent_index = index.parent();
+    QModelIndex parentIndex = index.parent();
 
     /* Did we select an item? */
-    if (parent_index.isValid()) {
-        current_selected_menu = parent_index.row();
-        current_selected_item = index.row();
-        emit item_selected();
+    if (parentIndex.isValid()) {
+        currentSelectedMenu = parentIndex.row();
+        currentSelectedItem = index.row();
+        emit itemSelected();
     } else if (index.isValid()) { /* Or a menu? */
-        current_selected_menu = index.row();
-        current_selected_item = -1;
-        emit menu_selected();
+        currentSelectedMenu = index.row();
+        currentSelectedItem = -1;
+        emit menuSelected();
     }
 }
 
-void XTreeView::add_menu()
+void XTreeView::addMenu()
 {
 }
 
-void XTreeView::rename_menu()
+void XTreeView::renameMenu()
 {
 }
 
-void XTreeView::add_item()
+void XTreeView::addItem()
 {
 }
 
-void XTreeView::copy_item()
+void XTreeView::copyItem()
 {
 }
 
-void XTreeView::paste_item()
+void XTreeView::pasteItem()
 {
 }
 
-void XTreeView::cut_item()
+void XTreeView::cutItem()
 {
 }
 
-void XTreeView::remove_item()
+void XTreeView::removeItem()
 {
 }
 
-void XTreeView::change_items_position()
+void XTreeView::changeItemsPosition()
 {
 }
 

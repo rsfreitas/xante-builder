@@ -43,16 +43,16 @@
 
 #include "xante_builder.hpp"
 
-static const char *cb_access_mode_name[] = {
+static const char *cbAccessModeName[] = {
     "hidden",
     "view",
     "edit"
 };
 
 #define ACCESS_MODE     \
-    (sizeof(cb_access_mode_name) / sizeof(cb_access_mode_name[0]))
+    (sizeof(cbAccessModeName) / sizeof(cbAccessModeName[0]))
 
-static const char *cb_item_type_name[] = {
+static const char *cbItemTypeName[] = {
     NULL,
     "menu",
     "input-int",
@@ -72,9 +72,9 @@ static const char *cb_item_type_name[] = {
 };
 
 #define ITEM_TYPE       \
-    (sizeof(cb_item_type_name) / sizeof(cb_item_type_name[0]))
+    (sizeof(cbItemTypeName) / sizeof(cbItemTypeName[0]))
 
-QHBoxLayout *XDialogItem::create_identification_widgets(void)
+QHBoxLayout *XDialogItem::createIdentificationWidgets(void)
 {
     QLabel *label;
     QLineEdit *edit;
@@ -84,23 +84,23 @@ QHBoxLayout *XDialogItem::create_identification_widgets(void)
     label = new QLabel(tr("Name:"));
     edit = new QLineEdit;
     label->setBuddy(edit);
-    line_edit[XDialogItem::LineEdit::Name] = edit;
+    lineEdit[XDialogItem::LineEdit::Name] = edit;
     h->addWidget(label);
     h->addWidget(edit);
 
-    /* object_id */
+    /* objectId */
     label = new QLabel(tr("Object ID:"));
     edit = new QLineEdit;
     label->setBuddy(edit);
     edit->setEnabled(false);
-    line_edit[XDialogItem::LineEdit::ObjectId] = edit;
+    lineEdit[XDialogItem::LineEdit::ObjectId] = edit;
     h->addWidget(label);
     h->addWidget(edit);
 
     return h;
 }
 
-QHBoxLayout *XDialogItem::create_type_widgets(void)
+QHBoxLayout *XDialogItem::createTypeWidgets(void)
 {
     QLabel *label;
     QComboBox *cb;
@@ -112,36 +112,36 @@ QHBoxLayout *XDialogItem::create_type_widgets(void)
     label->setBuddy(cb);
 
     for (unsigned int i = 1; i < ITEM_TYPE; i++)
-        cb->addItem(QString(cb_item_type_name[i]));
+        cb->addItem(QString(cbItemTypeName[i]));
 
     h->addWidget(label);
     h->addWidget(cb);
-    connect(cb, SIGNAL(activated(int)), this, SLOT(select_item_type(int)));
-    combo_box[XDialogItem::ComboBox::Type] = cb;
+    connect(cb, SIGNAL(activated(int)), this, SLOT(selectItemType(int)));
+    comboBox[XDialogItem::ComboBox::Type] = cb;
 
     /* mode */
     label = new QLabel(tr("Access mode:"));
     cb = new QComboBox;
 
     for (unsigned int i = 0; i < ACCESS_MODE; i++)
-        cb ->addItem(QString(cb_access_mode_name[i]));
+        cb ->addItem(QString(cbAccessModeName[i]));
 
     h->addWidget(label);
     h->addWidget(cb);
-    combo_box[XDialogItem::ComboBox::Mode] = cb;
+    comboBox[XDialogItem::ComboBox::Mode] = cb;
 
-    /* menu_id */
+    /* menuId */
     label = new QLabel(tr("Referenced menu:"));
     cb = new QComboBox;
 
     h->addWidget(label);
     h->addWidget(cb);
-    combo_box[XDialogItem::ComboBox::MenuReference] = cb;
+    comboBox[XDialogItem::ComboBox::MenuReference] = cb;
 
     return h;
 }
 
-QGroupBox *XDialogItem::create_item_configuration_widgets(void)
+QGroupBox *XDialogItem::createItemConfigurationWidgets(void)
 {
     QLabel *label;
     QLineEdit *edit;
@@ -154,29 +154,29 @@ QGroupBox *XDialogItem::create_item_configuration_widgets(void)
     label->setBuddy(edit);
     h->addWidget(label);
     h->addWidget(edit);
-    line_edit[XDialogItem::LineEdit::DefaultValue] = edit;
+    lineEdit[XDialogItem::LineEdit::DefaultValue] = edit;
 
     label = new QLabel(tr("Block:"));
     edit = new QLineEdit;
     label->setBuddy(edit);
     h->addWidget(label);
     h->addWidget(edit);
-    line_edit[XDialogItem::LineEdit::CfgBlock] = edit;
+    lineEdit[XDialogItem::LineEdit::CfgBlock] = edit;
 
     label = new QLabel(tr("Item:"));
     edit = new QLineEdit;
     label->setBuddy(edit);
     h->addWidget(label);
     h->addWidget(edit);
-    line_edit[XDialogItem::LineEdit::CfgItem] = edit;
+    lineEdit[XDialogItem::LineEdit::CfgItem] = edit;
 
     g->setLayout(h);
-    group_box[XDialogItem::GroupBox::Config] = g;
+    groupBox[XDialogItem::GroupBox::Config] = g;
 
     return g;
 }
 
-QGroupBox *XDialogItem::create_item_options_widgets(void)
+QGroupBox *XDialogItem::createItemOptionsWidgets(void)
 {
     QLabel *label;
     QLineEdit *edit;
@@ -193,37 +193,37 @@ QGroupBox *XDialogItem::create_item_options_widgets(void)
     label->setBuddy(edit);
     hdescription->addWidget(label);
     hdescription->addWidget(edit);
-    line_edit[XDialogItem::LineEdit::Options] = edit;
+    lineEdit[XDialogItem::LineEdit::Options] = edit;
 
-    QPushButton *bt_add = new QPushButton(tr("Add"));
-    QPushButton *bt_del = new QPushButton(tr("Remove"));
-    vbuttons->addWidget(bt_add, 0, Qt::AlignBottom);
-    vbuttons->addWidget(bt_del, 0, Qt::AlignTop);
-    connect(bt_add, SIGNAL(clicked()), this, SLOT(add_option()));
-    connect(bt_del, SIGNAL(clicked()), this, SLOT(del_option()));
+    QPushButton *btAdd = new QPushButton(tr("Add"));
+    QPushButton *btDel = new QPushButton(tr("Remove"));
+    vbuttons->addWidget(btAdd, 0, Qt::AlignBottom);
+    vbuttons->addWidget(btDel, 0, Qt::AlignTop);
+    connect(btAdd, SIGNAL(clicked()), this, SLOT(addOption()));
+    connect(btDel, SIGNAL(clicked()), this, SLOT(delOption()));
 
     lwidget = new QListWidget;
     hbuttons->addWidget(lwidget);
     hbuttons->addLayout(vbuttons);
     lo->setLayout(hbuttons);
-    list_widget[XDialogItem::ListWidget::OptionsLw] = lwidget;
-    group_box[XDialogItem::GroupBox::ListOptions] = lo;
+    listWidget[XDialogItem::ListWidget::OptionsLw] = lwidget;
+    groupBox[XDialogItem::GroupBox::ListOptions] = lo;
 
     v->addLayout(hdescription);
     v->addWidget(lo);
     g->setLayout(v);
-    group_box[XDialogItem::GroupBox::OptionsGb] = g;
+    groupBox[XDialogItem::GroupBox::OptionsGb] = g;
 
     return g;
 }
 
-QGroupBox *XDialogItem::create_item_help_widgets(void)
+QGroupBox *XDialogItem::createItemHelpWidgets(void)
 {
     QLabel *label;
     QLineEdit *edit;
     QListWidget *lwidget;
     QGroupBox *g = new QGroupBox(tr("Help details")),
-              *g_list = new QGroupBox();
+              *gList = new QGroupBox();
     QVBoxLayout *v = new QVBoxLayout,
                 *vbuttons = new QVBoxLayout;
     QHBoxLayout *hbuttons = new QHBoxLayout,
@@ -235,52 +235,52 @@ QGroupBox *XDialogItem::create_item_help_widgets(void)
     label->setBuddy(edit);
     hbrief->addWidget(label);
     hbrief->addWidget(edit);
-    line_edit[XDialogItem::LineEdit::HelpBrief] = edit;
+    lineEdit[XDialogItem::LineEdit::HelpBrief] = edit;
 
     label = new QLabel(tr("Description:"));
     edit = new QLineEdit;
     label->setBuddy(edit);
     hdescription->addWidget(label);
     hdescription->addWidget(edit);
-    line_edit[XDialogItem::LineEdit::HelpDescriptive] = edit;
+    lineEdit[XDialogItem::LineEdit::HelpDescriptive] = edit;
 
-    QPushButton *bt_add = new QPushButton(tr("Add"));
-    QPushButton *bt_del = new QPushButton(tr("Remove"));
-    connect(bt_add, SIGNAL(clicked()), this, SLOT(add_option_help()));
-    connect(bt_del, SIGNAL(clicked()), this, SLOT(del_option_help()));
-    vbuttons->addWidget(bt_add, 0, Qt::AlignBottom);
-    vbuttons->addWidget(bt_del, 0, Qt::AlignTop);
+    QPushButton *btAdd = new QPushButton(tr("Add"));
+    QPushButton *btDel = new QPushButton(tr("Remove"));
+    connect(btAdd, SIGNAL(clicked()), this, SLOT(addOptionHelp()));
+    connect(btDel, SIGNAL(clicked()), this, SLOT(delOptionHelp()));
+    vbuttons->addWidget(btAdd, 0, Qt::AlignBottom);
+    vbuttons->addWidget(btDel, 0, Qt::AlignTop);
 
     lwidget = new QListWidget;
     hbuttons->addWidget(lwidget);
     hbuttons->addLayout(vbuttons);
-    list_widget[XDialogItem::ListWidget::HelpOptions] = lwidget;
-    g_list->setLayout(hbuttons);
-    group_box[XDialogItem::GroupBox::ListHelpOptions] = g_list;
+    listWidget[XDialogItem::ListWidget::HelpOptions] = lwidget;
+    gList->setLayout(hbuttons);
+    groupBox[XDialogItem::GroupBox::ListHelpOptions] = gList;
 
     v->addLayout(hbrief);
     v->addLayout(hdescription);
-    v->addWidget(g_list);
+    v->addWidget(gList);
     g->setCheckable(true);
     g->setChecked(false);
     g->setLayout(v);
-    connect(g, SIGNAL(toggled(bool)), this, SLOT(help_group_toggled(bool)));
-    group_box[XDialogItem::GroupBox::Help] = g;
+    connect(g, SIGNAL(toggled(bool)), this, SLOT(helpGroupToggled(bool)));
+    groupBox[XDialogItem::GroupBox::Help] = g;
 
     return g;
 }
 
-QHBoxLayout *XDialogItem::create_item_details_widgets(void)
+QHBoxLayout *XDialogItem::createItemDetailsWidgets(void)
 {
     QHBoxLayout *h = new QHBoxLayout;
 
-    h->addWidget(create_item_options_widgets());
-    h->addWidget(create_item_help_widgets());
+    h->addWidget(createItemOptionsWidgets());
+    h->addWidget(createItemHelpWidgets());
 
     return h;
 }
 
-QGroupBox *XDialogItem::create_ranges_widgets(void)
+QGroupBox *XDialogItem::createRangesWidgets(void)
 {
     QLabel *label;
     QLineEdit *edit;
@@ -295,7 +295,7 @@ QGroupBox *XDialogItem::create_ranges_widgets(void)
     label->setBuddy(edit);
     h->addWidget(label);
     h->addWidget(edit);
-    line_edit[XDialogItem::LineEdit::InputStringLength] = edit;
+    lineEdit[XDialogItem::LineEdit::InputStringLength] = edit;
     v->addLayout(h);
 
     /* Min */
@@ -305,7 +305,7 @@ QGroupBox *XDialogItem::create_ranges_widgets(void)
     label->setBuddy(edit);
     h->addWidget(label);
     h->addWidget(edit);
-    line_edit[XDialogItem::LineEdit::InputMin] = edit;
+    lineEdit[XDialogItem::LineEdit::InputMin] = edit;
     v->addLayout(h);
 
     /* Max */
@@ -315,42 +315,42 @@ QGroupBox *XDialogItem::create_ranges_widgets(void)
     label->setBuddy(edit);
     h->addWidget(label);
     h->addWidget(edit);
-    line_edit[XDialogItem::LineEdit::InputMax] = edit;
+    lineEdit[XDialogItem::LineEdit::InputMax] = edit;
     v->addLayout(h);
 
     g->setLayout(v);
-    group_box[XDialogItem::GroupBox::InputRanges] = g;
+    groupBox[XDialogItem::GroupBox::InputRanges] = g;
 
     return g;
 }
 
-QGroupBox *XDialogItem::create_events_widgets(void)
+QGroupBox *XDialogItem::createEventsWidgets(void)
 {
     QLabel *label;
     QLineEdit *edit;
     QCheckBox *cb;
     QHBoxLayout *h;
-    QMap<QString, QPair<enum XDialogItem::LineEdit, enum XDialogItem::CheckBox>> events_label;
+    QMap<QString, QPair<enum XDialogItem::LineEdit, enum XDialogItem::CheckBox>> eventsLabel;
     QGroupBox *g = new QGroupBox(tr("Events"));
     QVBoxLayout *v = new QVBoxLayout;
 
-    events_label.insert("Selected",
+    eventsLabel.insert("Selected",
                         qMakePair(XDialogItem::LineEdit::EventSelected,
                                   XDialogItem::CheckBox::EvSelected));
 
-    events_label.insert("Value confirmed",
+    eventsLabel.insert("Value confirmed",
                         qMakePair(XDialogItem::LineEdit::EventValueConfirmed,
                                   XDialogItem::CheckBox::EvValueConfirmed));
 
-    events_label.insert("Value changed",
+    eventsLabel.insert("Value changed",
                         qMakePair(XDialogItem::LineEdit::EventValueChanged,
                                   XDialogItem::CheckBox::EvValueChanged));
 
-    events_label.insert("Exit",
+    eventsLabel.insert("Exit",
                         qMakePair(XDialogItem::LineEdit::EventExit,
                                   XDialogItem::CheckBox::EvExit));
 
-    QMapIterator<QString, QPair<enum XDialogItem::LineEdit, enum XDialogItem::CheckBox>> i(events_label);
+    QMapIterator<QString, QPair<enum XDialogItem::LineEdit, enum XDialogItem::CheckBox>> i(eventsLabel);
 
     while (i.hasNext()) {
         i.next();
@@ -366,8 +366,8 @@ QGroupBox *XDialogItem::create_events_widgets(void)
         h->addWidget(edit);
 
         pair = i.value();
-        line_edit[pair.first] = edit;
-        check_box[pair.second] = cb;
+        lineEdit[pair.first] = edit;
+        checkBox[pair.second] = cb;
 
         v->addLayout(h);
     }
@@ -375,17 +375,17 @@ QGroupBox *XDialogItem::create_events_widgets(void)
     g->setCheckable(true);
     g->setChecked(false);
     g->setLayout(v);
-    group_box[XDialogItem::GroupBox::Events] = g;
+    groupBox[XDialogItem::GroupBox::Events] = g;
 
     return g;
 }
 
-QHBoxLayout *XDialogItem::create_ranges_and_events_widgets(void)
+QHBoxLayout *XDialogItem::createRangesAndEventsWidgets(void)
 {
     QHBoxLayout *h = new QHBoxLayout;
 
-    h->addWidget(create_ranges_widgets());
-    h->addWidget(create_events_widgets());
+    h->addWidget(createRangesWidgets());
+    h->addWidget(createEventsWidgets());
 
     return h;
 }
@@ -393,19 +393,19 @@ QHBoxLayout *XDialogItem::create_ranges_and_events_widgets(void)
 XDialogItem::XDialogItem(QWidget *parent)
     : QWidget(parent)
 {
-    line_edit = QVector<QLineEdit *>(XDialogItem::MaxLineEdit);
-    check_box = QVector<QCheckBox *>(XDialogItem::MaxCheckBox);
-    group_box = QVector<QGroupBox *>(XDialogItem::MaxGroupBox);
-    combo_box = QVector<QComboBox *>(XDialogItem::MaxComboBox);
-    list_widget = QVector<QListWidget *>(XDialogItem::MaxListWidget);
+    lineEdit = QVector<QLineEdit *>(XDialogItem::MaxLineEdit);
+    checkBox = QVector<QCheckBox *>(XDialogItem::MaxCheckBox);
+    groupBox = QVector<QGroupBox *>(XDialogItem::MaxGroupBox);
+    comboBox = QVector<QComboBox *>(XDialogItem::MaxComboBox);
+    listWidget = QVector<QListWidget *>(XDialogItem::MaxListWidget);
 
     QVBoxLayout *layout = new QVBoxLayout;
 
-    layout->addLayout(create_identification_widgets());
-    layout->addLayout(create_type_widgets());
-    layout->addWidget(create_item_configuration_widgets());
-    layout->addLayout(create_item_details_widgets());
-    layout->addLayout(create_ranges_and_events_widgets());
+    layout->addLayout(createIdentificationWidgets());
+    layout->addLayout(createTypeWidgets());
+    layout->addWidget(createItemConfigurationWidgets());
+    layout->addLayout(createItemDetailsWidgets());
+    layout->addLayout(createRangesAndEventsWidgets());
 
     setLayout(layout);
 }
@@ -417,43 +417,43 @@ XDialogItem::~XDialogItem()
 /*
  * Sets the current project that's been edited, so all other informations
  * (or selections inside the main list view) may use it. At the same time,
- * sets the current XanteItem to the @selected_menu_index and the
- * @selected_item_index inside it.
+ * sets the current XanteItem to the @selectedMenuIndex and the
+ * @selectedItemIndex inside it.
  */
-void XDialogItem::set_current_project(int selected_menu_index,
-    int selected_item_index)
+void XDialogItem::setCurrentProject(int selectedMenuIndex,
+    int selectedItemIndex)
 {
-    set_selection(selected_menu_index, selected_item_index);
+    setSelection(selectedMenuIndex, selectedItemIndex);
 }
 
 /*
- * Sets data by using the @selected_menu_index to get its corresponding
+ * Sets data by using the @selectedMenuIndex to get its corresponding
  * XanteItem.
  */
-void XDialogItem::set_selection(int selected_menu_index, int selected_item_index)
+void XDialogItem::setSelection(int selectedMenuIndex, int selectedItemIndex)
 {
-    current_menu_index = selected_menu_index;
-    current_item_index = selected_item_index;
-    setup_widgets();
+    currentMenuIndex = selectedMenuIndex;
+    currentItemIndex = selectedItemIndex;
+    setupWidgets();
 }
 
-void XDialogItem::setup_config_widgets(const XanteItem &item)
+void XDialogItem::setupConfigWidgets(const XanteItem &item)
 {
-    if (item.has_config() == false)
+    if (item.hasConfig() == false)
         return;
 
-    line_edit[XDialogItem::LineEdit::CfgBlock]->setText(item.get_config_block());
-    line_edit[XDialogItem::LineEdit::CfgItem]->setText(item.get_config_item());
+    lineEdit[XDialogItem::LineEdit::CfgBlock]->setText(item.getConfigBlock());
+    lineEdit[XDialogItem::LineEdit::CfgItem]->setText(item.getConfigItem());
 }
 
-void XDialogItem::setup_events_widgets(const XanteItem &item)
+void XDialogItem::setupEventsWidgets(const XanteItem &item)
 {
     int i;
     QList<QPair<enum XanteItem::Event,
                 QPair<enum XDialogItem::LineEdit,
                       enum XDialogItem::CheckBox>>> events;
 
-    if (item.has_events() == false)
+    if (item.hasEvents() == false)
         return;
 
     events.append(qMakePair(XanteItem::Event::Selected,
@@ -472,142 +472,137 @@ void XDialogItem::setup_events_widgets(const XanteItem &item)
                             qMakePair(XDialogItem::LineEdit::EventValueChanged,
                                       XDialogItem::CheckBox::EvValueChanged)));
 
-    group_box[XDialogItem::GroupBox::Events]->setChecked(true);
-    group_box[XDialogItem::GroupBox::Events]->setEnabled(true);
+    groupBox[XDialogItem::GroupBox::Events]->setChecked(true);
+    groupBox[XDialogItem::GroupBox::Events]->setEnabled(true);
 
     for (i = 0; i < events.size(); i++) {
         QPair<enum XanteItem::Event,
               QPair<enum XDialogItem::LineEdit,
                     enum XDialogItem::CheckBox>> p = events.at(i);
 
-        QString event_name = item.get_event(p.first);
+        QString eventName = item.getEvent(p.first);
         QPair<enum XDialogItem::LineEdit,
               enum XDialogItem::CheckBox> pp = p.second;
 
-        if (event_name.isEmpty() == false) {
-            line_edit[pp.first]->setText(event_name);
-            check_box[pp.second]->setChecked(true);
+        if (eventName.isEmpty() == false) {
+            lineEdit[pp.first]->setText(eventName);
+            checkBox[pp.second]->setChecked(true);
         }
     }
 }
 
-void XDialogItem::setup_help_widgets(const XanteItem &item)
+void XDialogItem::setupHelpWidgets(const XanteItem &item)
 {
     QString text;
     int t;
-    bool has_help = false;
+    bool hasHelp = false;
+
+    if (item.hasHelp())
+        hasHelp = true;
 
     /* brief help */
-    text = item.get_brief_help();
+    text = item.getBriefHelp();
 
-    if (text.isEmpty() == false) {
-        line_edit[XDialogItem::LineEdit::HelpBrief]->setText(text);
-        has_help = true;
-    }
+    if (text.isEmpty() == false)
+        lineEdit[XDialogItem::LineEdit::HelpBrief]->setText(text);
 
     /* descriptive help */
-    text = item.get_descriptive_help();
+    text = item.getDescriptiveHelp();
 
-    if (text.isEmpty() == false) {
-        line_edit[XDialogItem::LineEdit::HelpDescriptive]->setText(text);
-        has_help = true;
-    }
+    if (text.isEmpty() == false)
+        lineEdit[XDialogItem::LineEdit::HelpDescriptive]->setText(text);
 
     /* checklist/radio-checklist help options */
-    t = item.get_total_help_options();
+    t = item.getTotalHelpOptions();
 
-    if (t) {
-        for (int i = 0; i < t; i++)
-            list_widget[XDialogItem::ListWidget::HelpOptions]->addItem(item.get_help_option(i));
+    for (int i = 0; i < t; i++)
+        listWidget[XDialogItem::ListWidget::HelpOptions]->addItem(item.getHelpOption(i));
 
-        has_help = true;
-    }
-
-    group_box[XDialogItem::GroupBox::Help]->setChecked(has_help);
+    groupBox[XDialogItem::GroupBox::Help]->setChecked(hasHelp);
 }
 
-void XDialogItem::setup_input_ranges_widgets(const XanteItem &item)
+void XDialogItem::setupInputRangesWidgets(const XanteItem &item)
 {
-    if (item.has_input_ranges() == false)
+    if (item.hasInputRanges() == false)
         return;
 
-    enum XanteItem::Type type = item.get_type();
+    enum XanteItem::Type type = item.getType();
 
     if (type == XanteItem::Type::InputString) {
-        line_edit[XDialogItem::LineEdit::InputStringLength]->setText(
-            QString("%1").arg(item.get_string_length())
+        lineEdit[XDialogItem::LineEdit::InputStringLength]->setText(
+            QString("%1").arg(item.getStringLength())
         );
     } else {
-        line_edit[XDialogItem::LineEdit::InputMin]->setText(
+        lineEdit[XDialogItem::LineEdit::InputMin]->setText(
             QString("%1").arg((type == XanteItem::Type::InputInt)
-                                    ? item.get_min().toInt()
-                                    : item.get_min().toFloat())
+                                    ? item.getMin().toInt()
+                                    : item.getMin().toFloat())
         );
 
-        line_edit[XDialogItem::LineEdit::InputMax]->setText(
+        lineEdit[XDialogItem::LineEdit::InputMax]->setText(
             QString("%1").arg((type == XanteItem::Type::InputInt)
-                                    ? item.get_max().toInt()
-                                    : item.get_max().toFloat())
+                                    ? item.getMax().toInt()
+                                    : item.getMax().toFloat())
         );
     }
 }
 
-void XDialogItem::setup_options_widgets(const XanteItem &item)
+void XDialogItem::setupOptionsWidgets(const XanteItem &item)
 {
-    if (item.has_options() == false)
+    if (item.hasOptions() == false)
         return;
 
-    /* TODO: Use item.get_option_type */
+    /* TODO: Use item.getOptionType */
 
-    enum XanteItem::Type type = item.get_type();
+    enum XanteItem::Type type = item.getType();
 
     if ((type == XanteItem::Type::Checklist) ||
         (type == XanteItem::Type::RadioChecklist))
     {
-        for (int i = 0; i < item.get_total_options(); i++)
-            list_widget[XDialogItem::ListWidget::OptionsLw]->addItem(item.get_option(i));
+        for (int i = 0; i < item.getTotalOptions(); i++)
+            listWidget[XDialogItem::ListWidget::OptionsLw]->addItem(item.getOption(i));
     } else
-        line_edit[XDialogItem::LineEdit::Options]->setText(item.get_option());
+        lineEdit[XDialogItem::LineEdit::Options]->setText(item.getOption());
 }
 
-void XDialogItem::setup_widgets(void)
+void XDialogItem::setupWidgets(void)
 {
-    XanteProject &project = XMainWindow::get_project();
-    XanteJTF &jtf = project.get_jtf();
-    XanteMenu menu = jtf.menu_at(current_menu_index);
-    XanteItem &item = menu.item_at(current_item_index);
+    XanteProject &project = XMainWindow::getProject();
+    XanteJTF &jtf = project.getJtf();
+    XanteMenu menu = jtf.menuAt(currentMenuIndex);
+    XanteItem &item = menu.itemAt(currentItemIndex);
 
     /* Prepare dialog widgets for item */
     clear();
-    select_item_type(item.get_type());
+    selectItemType(item.getType());
 
     /* Common informations */
-    line_edit[XDialogItem::LineEdit::Name]->setText(item.get_name());
-    line_edit[XDialogItem::LineEdit::ObjectId]->setText(item.get_object_id());
-    combo_box[XDialogItem::ComboBox::Type]->setCurrentIndex((int)item.get_type());
-    combo_box[XDialogItem::ComboBox::Mode]->setCurrentIndex((int)item.get_mode());
+    lineEdit[XDialogItem::LineEdit::Name]->setText(item.getName());
+    lineEdit[XDialogItem::LineEdit::ObjectId]->setText(item.getObjectId());
+    comboBox[XDialogItem::ComboBox::Type]->setCurrentIndex((int)item.getType());
+    comboBox[XDialogItem::ComboBox::Mode]->setCurrentIndex((int)item.getMode());
 
     /* Specific informations */
-    setup_config_widgets(item);
-    setup_events_widgets(item);
-    setup_help_widgets(item);
-    setup_input_ranges_widgets(item);
-    setup_options_widgets(item);
+    setupConfigWidgets(item);
+    setupEventsWidgets(item);
+    setupHelpWidgets(item);
+    setupInputRangesWidgets(item);
+    setupOptionsWidgets(item);
 }
 
-void XDialogItem::disable_all_widgets(void)
+void XDialogItem::disableAllWidgets(void)
 {
-    combo_box[XDialogItem::ComboBox::MenuReference]->setEnabled(false);
-    group_box[XDialogItem::GroupBox::Config]->setEnabled(false);
-    group_box[XDialogItem::GroupBox::OptionsGb]->setEnabled(false);
-    group_box[XDialogItem::GroupBox::InputRanges]->setEnabled(false);
-    group_box[XDialogItem::GroupBox::Events]->setChecked(false);
-    group_box[XDialogItem::GroupBox::Events]->setEnabled(false);
+    comboBox[XDialogItem::ComboBox::MenuReference]->setEnabled(false);
+    groupBox[XDialogItem::GroupBox::Config]->setEnabled(false);
+    groupBox[XDialogItem::GroupBox::OptionsGb]->setEnabled(false);
+    groupBox[XDialogItem::GroupBox::InputRanges]->setEnabled(false);
+    groupBox[XDialogItem::GroupBox::Events]->setChecked(false);
+    groupBox[XDialogItem::GroupBox::Events]->setEnabled(false);
 }
 
-void XDialogItem::enable_input_ranges(int type)
+void XDialogItem::enableInputRanges(int type)
 {
-    bool input_string = false, input_min = false, input_max = false;
+    bool inputString = false, inputMin = false, inputMax = false;
 
     if ((type != XanteItem::Type::InputInt) &&
         (type != XanteItem::Type::InputFloat) &&
@@ -617,61 +612,61 @@ void XDialogItem::enable_input_ranges(int type)
         return;
     }
 
-    group_box[XDialogItem::GroupBox::InputRanges]->setEnabled(true);
+    groupBox[XDialogItem::GroupBox::InputRanges]->setEnabled(true);
 
     if ((type == XanteItem::Type::InputInt) ||
         (type == XanteItem::Type::InputFloat))
     {
-        input_min = true;
-        input_max = true;
+        inputMin = true;
+        inputMax = true;
     } else
-        input_string = true;
+        inputString = true;
 
-    line_edit[XDialogItem::LineEdit::InputStringLength]->setEnabled(input_string);
-    line_edit[XDialogItem::LineEdit::InputMin]->setEnabled(input_min);
-    line_edit[XDialogItem::LineEdit::InputMax]->setEnabled(input_max);
+    lineEdit[XDialogItem::LineEdit::InputStringLength]->setEnabled(inputString);
+    lineEdit[XDialogItem::LineEdit::InputMin]->setEnabled(inputMin);
+    lineEdit[XDialogItem::LineEdit::InputMax]->setEnabled(inputMax);
 }
 
-void XDialogItem::enable_options(int type)
+void XDialogItem::enableOptions(int type)
 {
-    bool list_options = false, line_options = false;
+    bool listOptions = false, lineOptions = false;
 
     if ((type == XanteItem::Type::Checklist) ||
         (type == XanteItem::Type::RadioChecklist))
     {
-        list_options = true;
+        listOptions = true;
     } else
-        line_options = true;
+        lineOptions = true;
 
-    group_box[XDialogItem::GroupBox::OptionsGb]->setEnabled(true);
-    line_edit[XDialogItem::LineEdit::Options]->setEnabled(line_options);
-    group_box[XDialogItem::GroupBox::ListOptions]->setEnabled(list_options);
+    groupBox[XDialogItem::GroupBox::OptionsGb]->setEnabled(true);
+    lineEdit[XDialogItem::LineEdit::Options]->setEnabled(lineOptions);
+    groupBox[XDialogItem::GroupBox::ListOptions]->setEnabled(listOptions);
 }
 
-void XDialogItem::enable_help(int type)
+void XDialogItem::enableHelp(int type)
 {
-    bool list_options = false;
+    bool listOptions = false;
 
     if (((type == XanteItem::Type::Checklist) ||
          (type == XanteItem::Type::RadioChecklist)) &&
-        group_box[XDialogItem::GroupBox::Help]->isChecked())
+        groupBox[XDialogItem::GroupBox::Help]->isChecked())
     {
-        list_options = true;
+        listOptions = true;
     }
 
-    group_box[XDialogItem::GroupBox::ListHelpOptions]->setEnabled(list_options);
+    groupBox[XDialogItem::GroupBox::ListHelpOptions]->setEnabled(listOptions);
 }
 
-void XDialogItem::select_item_type(int index)
+void XDialogItem::selectItemType(int index)
 {
     /* Adjusts current widgets according to the selected item type */
     enum XanteItem::Type type = (enum XanteItem::Type)index;
 
-    disable_all_widgets();
+    disableAllWidgets();
 
     switch (type) {
         case XanteItem::Type::Menu:
-            combo_box[XDialogItem::ComboBox::MenuReference]->setEnabled(true);
+            comboBox[XDialogItem::ComboBox::MenuReference]->setEnabled(true);
             break;
 
         case XanteItem::Type::InputInt:
@@ -685,11 +680,11 @@ void XDialogItem::select_item_type(int index)
         case XanteItem::Type::YesNo:
         case XanteItem::Type::Checklist:
         case XanteItem::Type::RadioChecklist:
-            group_box[XDialogItem::GroupBox::Config]->setEnabled(true);
-            group_box[XDialogItem::GroupBox::Events]->setEnabled(true);
-            enable_input_ranges(type);
-            enable_options(type);
-            enable_help(type);
+            groupBox[XDialogItem::GroupBox::Config]->setEnabled(true);
+            groupBox[XDialogItem::GroupBox::Events]->setEnabled(true);
+            enableInputRanges(type);
+            enableOptions(type);
+            enableHelp(type);
             break;
 
         default:
@@ -697,7 +692,7 @@ void XDialogItem::select_item_type(int index)
     }
 }
 
-void XDialogItem::add_option(void)
+void XDialogItem::addOption(void)
 {
     bool ok;
     QString option = QInputDialog::getText(this, tr("New option"),
@@ -707,12 +702,12 @@ void XDialogItem::add_option(void)
     if ((ok == false) || (option.isEmpty()))
         return;
 
-    list_widget[XDialogItem::ListWidget::OptionsLw]->addItem(option);
+    listWidget[XDialogItem::ListWidget::OptionsLw]->addItem(option);
 }
 
-void XDialogItem::del_option(void)
+void XDialogItem::delOption(void)
 {
-    QListWidget *l = list_widget[XDialogItem::ListWidget::OptionsLw];
+    QListWidget *l = listWidget[XDialogItem::ListWidget::OptionsLw];
     int row = l->currentRow();
 
     if (row < 0)
@@ -721,16 +716,7 @@ void XDialogItem::del_option(void)
     l->takeItem(row);
 }
 
-void XDialogItem::hideEvent(QHideEvent *event)
-{
-//    if ((event->spontaneous() == false) && (project != nullptr)) {
-        /* TODO: Save the current item modifications */
-//    }
-
-    event->accept();
-}
-
-void XDialogItem::add_option_help(void)
+void XDialogItem::addOptionHelp(void)
 {
     bool ok;
     QString option = QInputDialog::getText(this, tr("New option"),
@@ -740,12 +726,12 @@ void XDialogItem::add_option_help(void)
     if ((ok == false) || (option.isEmpty()))
         return;
 
-    list_widget[XDialogItem::ListWidget::HelpOptions]->addItem(option);
+    listWidget[XDialogItem::ListWidget::HelpOptions]->addItem(option);
 }
 
-void XDialogItem::del_option_help(void)
+void XDialogItem::delOptionHelp(void)
 {
-    QListWidget *l = list_widget[XDialogItem::ListWidget::HelpOptions];
+    QListWidget *l = listWidget[XDialogItem::ListWidget::HelpOptions];
     int row = l->currentRow();
 
     if (row < 0)
@@ -754,13 +740,13 @@ void XDialogItem::del_option_help(void)
     l->takeItem(row);
 }
 
-void XDialogItem::help_group_toggled(bool on)
+void XDialogItem::helpGroupToggled(bool on)
 {
     if (on == false)
         return;
 
-    /* Are we editing a checklist or a radio_checklist item? */
-    enable_help(combo_box[XDialogItem::ComboBox::Type]->currentIndex());
+    /* Are we editing a checklist or a radioChecklist item? */
+    enableHelp(comboBox[XDialogItem::ComboBox::Type]->currentIndex());
 }
 
 void XDialogItem::clear(void)
@@ -769,28 +755,224 @@ void XDialogItem::clear(void)
          i < XDialogItem::LineEdit::MaxLineEdit;
          i++)
     {
-        line_edit[i]->clear();
+        lineEdit[i]->clear();
     }
 
     for (int i = XDialogItem::ComboBox::Type;
          i < XDialogItem::ComboBox::MaxComboBox;
          i++)
     {
-        combo_box[i]->setCurrentIndex(0);
+        comboBox[i]->setCurrentIndex(0);
     }
 
     for (int i = XDialogItem::CheckBox::EvSelected;
          i < XDialogItem::CheckBox::MaxCheckBox;
          i++)
     {
-        check_box[i]->setChecked(false);
+        checkBox[i]->setChecked(false);
     }
 
     for (int i = XDialogItem::ListWidget::OptionsLw;
          i < XDialogItem::ListWidget::MaxListWidget;
          i++)
     {
-        list_widget[i]->clear();
+        listWidget[i]->clear();
     }
+}
+
+bool XDialogItem::updateXanteItemEvents(XanteItem &item)
+{
+    QMap<enum XanteItem::Event,
+        QPair<QCheckBox *, QLineEdit *>> events;
+
+    events.insert(XanteItem::Event::Selected,
+                  qMakePair(checkBox[XDialogItem::CheckBox::EvSelected],
+                            lineEdit[XDialogItem::LineEdit::EventSelected]));
+
+    events.insert(XanteItem::Event::Exit,
+                  qMakePair(checkBox[XDialogItem::CheckBox::EvExit],
+                            lineEdit[XDialogItem::LineEdit::EventExit]));
+
+    events.insert(XanteItem::Event::ValueConfirmed,
+                  qMakePair(checkBox[XDialogItem::CheckBox::EvValueConfirmed],
+                            lineEdit[XDialogItem::LineEdit::EventValueConfirmed]));
+
+    events.insert(XanteItem::Event::ValueChanged,
+                  qMakePair(checkBox[XDialogItem::CheckBox::EvValueChanged],
+                            lineEdit[XDialogItem::LineEdit::EventValueChanged]));
+
+    QMapIterator<enum XanteItem::Event, QPair<QCheckBox *, QLineEdit *>> i(events);
+
+    while (i.hasNext()) {
+        i.next();
+
+        enum XanteItem::Event eventType = i.key();
+        QPair<QCheckBox*, QLineEdit *> ui = i.value();
+        QString text = ui.second->text();
+
+        if (ui.first->isChecked() && (text.isEmpty() == false)) {
+            item.setEvent(text, eventType);
+        }
+    }
+
+    return true;
+}
+
+bool XDialogItem::updateXanteItemHelp(XanteItem &item)
+{
+    enum XanteItem::Type type = item.getType();
+    QString data;
+
+    if ((type == XanteItem::Type::Checklist) ||
+        (type == XanteItem::Type::RadioChecklist))
+    {
+        QListWidget *l = listWidget[XDialogItem::ListWidget::HelpOptions];
+
+        for (int i = 0; i < l->count(); i++) {
+            data = l->item(i)->text();
+            item.setHelpOption(data);
+        }
+    }
+
+    data = lineEdit[XDialogItem::LineEdit::HelpBrief]->text();
+    item.setBriefHelp(data);
+
+    data = lineEdit[XDialogItem::LineEdit::HelpDescriptive]->text();
+    item.setDescriptiveHelp(data);
+
+    return true;
+}
+
+bool XDialogItem::updateXanteItemOptions(XanteItem &item)
+{
+    enum XanteItem::Type type = item.getType();
+    QString data;
+
+    if ((type == XanteItem::Type::Checklist) ||
+        (type == XanteItem::Type::RadioChecklist))
+    {
+        QListWidget *l = listWidget[XDialogItem::ListWidget::OptionsLw];
+
+        for (int i = 0; i < l->count(); i++) {
+            data = l->item(i)->text();
+            item.setOption(data);
+        }
+    } else {
+        data = lineEdit[XDialogItem::LineEdit::Options]->text();
+        item.setOption(data);
+    }
+
+    return true;
+}
+
+bool XDialogItem::updateXanteItemInputRanges(XanteItem &item)
+{
+    QString data, min, max;
+    enum XanteItem::Type type = item.getType();
+
+    switch (type) {
+        case XanteItem::Type::InputString:
+        case XanteItem::Type::InputPasswd:
+            data = lineEdit[XDialogItem::LineEdit::InputStringLength]->text();
+            item.setStringLength(data.toInt());
+            break;
+
+        case XanteItem::Type::InputInt:
+        case XanteItem::Type::InputFloat:
+            min = lineEdit[XDialogItem::LineEdit::InputMin]->text();
+            max = lineEdit[XDialogItem::LineEdit::InputMax]->text();
+
+            if (type == XanteItem::Type::InputInt)
+                item.setMinMax(min.toInt(), max.toInt());
+            else
+                item.setMinMax(min.toFloat(), max.toFloat());
+
+            break;
+
+        default:
+            break;
+    }
+
+    return true;
+}
+
+bool XDialogItem::updateXanteItemConfig(XanteItem &item)
+{
+    QString data;
+
+    data = lineEdit[XDialogItem::LineEdit::CfgBlock]->text();
+    item.setConfigBlock(data);
+
+    data = lineEdit[XDialogItem::LineEdit::CfgItem]->text();
+    item.setConfigItem(data);
+
+    return true;
+}
+
+bool XDialogItem::updateXanteItem(void)
+{
+    XanteProject &project = XMainWindow::getProject();
+    XanteJTF &jtf = project.getJtf();
+    XanteMenu &menu = jtf.menuAt(currentMenuIndex);
+    XanteItem &item = menu.itemAt(currentItemIndex);
+    QString data;
+
+    /* name */
+    data = lineEdit[XDialogItem::LineEdit::Name]->text();
+
+    if ((data.isEmpty() == false) && (item.getName() != data))
+        item.setName(data);
+
+    /* type */
+    enum XanteItem::Type type =
+        (enum XanteItem::Type)comboBox[XDialogItem::ComboBox::Type]->currentIndex();
+
+    item.setType(type);
+
+    /* access mode */
+    enum XanteMode mode =
+        (enum XanteMode)comboBox[XDialogItem::ComboBox::Mode]->currentIndex();
+
+    item.setMode(mode);
+
+    /* events */
+    if (groupBox[XDialogItem::GroupBox::Events]->isChecked())
+        if (updateXanteItemEvents(item) == false)
+            return false;
+
+    /* help */
+    if (groupBox[XDialogItem::GroupBox::Help]->isChecked())
+        if (updateXanteItemHelp(item) == false)
+            return false;
+
+    /* options */
+    if (item.hasOptions())
+        if (updateXanteItemOptions(item) == false)
+            return false;
+
+    /* input ranges */
+    if (item.hasInputRanges())
+        if (updateXanteItemInputRanges(item) == false)
+            return false;
+
+    /* config */
+    if (item.hasConfig())
+        if (updateXanteItemConfig(item) == false)
+            return false;
+
+    return true;
+}
+
+void XDialogItem::hideEvent(QHideEvent *event)
+{
+    /* Savel all modifications */
+    if (event->spontaneous() == false) {
+        if (updateXanteItem() == false) {
+            event->ignore();
+            return;
+        }
+    }
+
+    event->accept();
 }
 

@@ -35,30 +35,22 @@ XanteConfig::XanteConfig()
     pathname.sprintf("%s/.%s", getenv("HOME"), APP_NAME);
     cfg_filename.sprintf("%s.cfg", APP_NAME);
 
-    read_configuration_file();
+    readFile();
 }
 
 XanteConfig::~XanteConfig()
 {
-    write_configuration_file();
+    writeFile();
 }
 
-void XanteConfig::create_configuration_directory(void)
-{
-    QDir dir(pathname);
-
-    if (dir.exists() == false)
-        dir.mkpath(".");
-}
-
-void XanteConfig::load_default_values(void)
+void XanteConfig::loadDefaultValues(void)
 {
     window_size = QSize(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
     window_position = QPoint(0, 0);
     recent_opened_files = QStringList("");
 }
 
-void XanteConfig::write_configuration_file(void)
+void XanteConfig::writeFile(void)
 {
     QString filename = pathname + "/" + cfg_filename;
     QSettings settings(filename, QSettings::IniFormat);
@@ -73,13 +65,13 @@ void XanteConfig::write_configuration_file(void)
     settings.endGroup();
 }
 
-void XanteConfig::read_configuration_file(void)
+void XanteConfig::readFile(void)
 {
     QString filename = pathname + "/" + cfg_filename;
     QFileInfo file(filename);
 
     if (file.exists() == false) {
-        load_default_values();
+        loadDefaultValues();
         return;
     }
 
@@ -99,7 +91,7 @@ void XanteConfig::read_configuration_file(void)
  * Updates the internal list of recent opened files. If it is a new file, returns
  * true, otherwise returns false.
  */
-bool XanteConfig::set_recent_file(const QString &filename)
+bool XanteConfig::setRecentFile(const QString &filename)
 {
     if (recent_opened_files.contains(filename))
         return false;

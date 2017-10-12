@@ -152,6 +152,14 @@ class XDialogItem : public QWidget
         void enableInputRanges(int type);
         void enableOptions(int type);
         void enableHelp(int type);
+
+        bool updateXanteItem(void);
+        bool updateXanteItemEvents(XanteItem &item);
+        bool updateXanteItemHelp(XanteItem &item);
+        bool updateXanteItemContent(XanteItem &item);
+        bool updateXanteItemOptions(XanteItem &item);
+        bool updateXanteItemInputRanges(XanteItem &item);
+        bool updateXanteItemConfig(XanteItem &item);
 };
 
 #endif

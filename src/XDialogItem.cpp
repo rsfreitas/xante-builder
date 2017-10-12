@@ -716,15 +716,6 @@ void XDialogItem::delOption(void)
     l->takeItem(row);
 }
 
-void XDialogItem::hideEvent(QHideEvent *event)
-{
-//    if ((event->spontaneous() == false) && (project != nullptr)) {
-        /* TODO: Save the current item modifications */
-//    }
-
-    event->accept();
-}
-
 void XDialogItem::addOptionHelp(void)
 {
     bool ok;
@@ -787,5 +778,201 @@ void XDialogItem::clear(void)
     {
         listWidget[i]->clear();
     }
+}
+
+bool XDialogItem::updateXanteItemEvents(XanteItem &item)
+{
+    QMap<enum XanteItem::Event,
+        QPair<QCheckBox *, QLineEdit *>> events;
+
+    events.insert(XanteItem::Event::Selected,
+                  qMakePair(checkBox[XDialogItem::CheckBox::EvSelected],
+                            lineEdit[XDialogItem::LineEdit::EventSelected]));
+
+    events.insert(XanteItem::Event::Exit,
+                  qMakePair(checkBox[XDialogItem::CheckBox::EvExit],
+                            lineEdit[XDialogItem::LineEdit::EventExit]));
+
+    events.insert(XanteItem::Event::ValueConfirmed,
+                  qMakePair(checkBox[XDialogItem::CheckBox::EvValueConfirmed],
+                            lineEdit[XDialogItem::LineEdit::EventValueConfirmed]));
+
+    events.insert(XanteItem::Event::ValueChanged,
+                  qMakePair(checkBox[XDialogItem::CheckBox::EvValueChanged],
+                            lineEdit[XDialogItem::LineEdit::EventValueChanged]));
+
+    QMapIterator<enum XanteItem::Event, QPair<QCheckBox *, QLineEdit *>> i(events);
+
+    while (i.hasNext()) {
+        i.next();
+
+        enum XanteItem::Event eventType = i.key();
+        QPair<QCheckBox*, QLineEdit *> ui = i.value();
+        QString text = ui.second->text();
+
+        if (ui.first->isChecked() && (text.isEmpty() == false)) {
+            item.setEvent(text, eventType);
+        }
+    }
+
+    return true;
+}
+
+bool XDialogItem::updateXanteItemHelp(XanteItem &item)
+{
+    enum XanteItem::Type type = item.getType();
+    QString data;
+
+    if ((type == XanteItem::Type::Checklist) ||
+        (type == XanteItem::Type::RadioChecklist))
+    {
+        QListWidget *l = listWidget[XDialogItem::ListWidget::HelpOptions];
+
+        for (int i = 0; i < l->count(); i++) {
+            data = l->item(i)->text();
+            item.setHelpOption(data);
+        }
+    }
+
+    data = lineEdit[XDialogItem::LineEdit::HelpBrief]->text();
+    item.setBriefHelp(data);
+
+    data = lineEdit[XDialogItem::LineEdit::HelpDescriptive]->text();
+    item.setDescriptiveHelp(data);
+
+    return true;
+}
+
+bool XDialogItem::updateXanteItemOptions(XanteItem &item)
+{
+    enum XanteItem::Type type = item.getType();
+    QString data;
+
+    if ((type == XanteItem::Type::Checklist) ||
+        (type == XanteItem::Type::RadioChecklist))
+    {
+        QListWidget *l = listWidget[XDialogItem::ListWidget::OptionsLw];
+
+        for (int i = 0; i < l->count(); i++) {
+            data = l->item(i)->text();
+            item.setOption(data);
+        }
+    } else {
+        data = lineEdit[XDialogItem::LineEdit::Options]->text();
+        item.setOption(data);
+    }
+
+    return true;
+}
+
+bool XDialogItem::updateXanteItemInputRanges(XanteItem &item)
+{
+    QString data, min, max;
+    enum XanteItem::Type type = item.getType();
+
+    switch (type) {
+        case XanteItem::Type::InputString:
+        case XanteItem::Type::InputPasswd:
+            data = lineEdit[XDialogItem::LineEdit::InputStringLength]->text();
+            item.setStringLength(data.toInt());
+            break;
+
+        case XanteItem::Type::InputInt:
+        case XanteItem::Type::InputFloat:
+            min = lineEdit[XDialogItem::LineEdit::InputMin]->text();
+            max = lineEdit[XDialogItem::LineEdit::InputMax]->text();
+
+            if (type == XanteItem::Type::InputInt)
+                item.setMinMax(min.toInt(), max.toInt());
+            else
+                item.setMinMax(min.toFloat(), max.toFloat());
+
+            break;
+
+        default:
+            break;
+    }
+
+    return true;
+}
+
+bool XDialogItem::updateXanteItemConfig(XanteItem &item)
+{
+    QString data;
+
+    data = lineEdit[XDialogItem::LineEdit::CfgBlock]->text();
+    item.setConfigBlock(data);
+
+    data = lineEdit[XDialogItem::LineEdit::CfgItem]->text();
+    item.setConfigItem(data);
+
+    return true;
+}
+
+bool XDialogItem::updateXanteItem(void)
+{
+    XanteProject &project = XMainWindow::getProject();
+    XanteJTF &jtf = project.getJtf();
+    XanteMenu &menu = jtf.menuAt(currentMenuIndex);
+    XanteItem &item = menu.itemAt(currentItemIndex);
+    QString data;
+
+    /* name */
+    data = lineEdit[XDialogItem::LineEdit::Name]->text();
+
+    if ((data.isEmpty() == false) && (item.getName() != data))
+        item.setName(data);
+
+    /* type */
+    enum XanteItem::Type type =
+        (enum XanteItem::Type)comboBox[XDialogItem::ComboBox::Type]->currentIndex();
+
+    item.setType(type);
+
+    /* access mode */
+    enum XanteMode mode =
+        (enum XanteMode)comboBox[XDialogItem::ComboBox::Mode]->currentIndex();
+
+    item.setMode(mode);
+
+    /* events */
+    if (groupBox[XDialogItem::GroupBox::Events]->isChecked())
+        if (updateXanteItemEvents(item) == false)
+            return false;
+
+    /* help */
+    if (groupBox[XDialogItem::GroupBox::Help]->isChecked())
+        if (updateXanteItemHelp(item) == false)
+            return false;
+
+    /* options */
+    if (item.hasOptions())
+        if (updateXanteItemOptions(item) == false)
+            return false;
+
+    /* input ranges */
+    if (item.hasInputRanges())
+        if (updateXanteItemInputRanges(item) == false)
+            return false;
+
+    /* config */
+    if (item.hasConfig())
+        if (updateXanteItemConfig(item) == false)
+            return false;
+
+    return true;
+}
+
+void XDialogItem::hideEvent(QHideEvent *event)
+{
+    /* Savel all modifications */
+    if (event->spontaneous() == false) {
+        if (updateXanteItem() == false) {
+            event->ignore();
+            return;
+        }
+    }
+
+    event->accept();
 }
 

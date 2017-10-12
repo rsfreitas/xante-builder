@@ -120,7 +120,9 @@ class XanteItem
             if ((type == XanteItem::Type::RadioChecklist) ||
                 (type == XanteItem::Type::Checklist))
             {
-                options.append(option);
+                if (options.contains(option) == false)
+                    options.append(option);
+
                 optionType = XanteItem::OptionType::List;
             } else {
                 fixedOption = option;
@@ -136,6 +138,10 @@ class XanteItem
         void setStringLength(int length) { stringLength = length; }
         void setBriefHelp(QString help) { briefHelp = help; }
         void setDescriptiveHelp(QString help) { descriptiveHelp = help; }
+        void setHelpOption(QString help) {
+            if (helpOptions.contains(help) == false)
+                helpOptions.append(help);
+        }
 
         bool hasEvents(void) const { return events.size() != 0; }
         bool hasOptions(void) const { return (type >= XanteItem::Type::InputInt) &&
@@ -151,6 +157,12 @@ class XanteItem
                    (((type == XanteItem::Type::Checklist) ||
                      (type == XanteItem::Type::RadioChecklist)) &&
                     helpOptions.size() != 0);
+        }
+
+        template <typename T>
+        void setMinMax(T min, T max) {
+            minInputRange = QVariant(min);
+            maxInputRange = QVariant(max);
         }
 
     private:
@@ -255,7 +267,9 @@ class XanteMenu
         }
 
         void setDynamic(QString copy) {
-            copies.append(copy);
+            if (copies.contains(copy) == false)
+                copies.append(copy);
+
             dynamicType = XanteMenu::DynamicType::FixedOptions;
         }
 

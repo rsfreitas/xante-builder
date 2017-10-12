@@ -532,6 +532,7 @@ bool XDialogMenu::updateXanteMenuDynamic(XanteMenu &menu)
             break;
 
         case XanteMenu::DynamicType::FixedOptions:
+            /* TODO: Check if exists first */
             for (int i = 0; i < dynamicOptions->count(); i++)
                 menu.setDynamic(dynamicOptions->item(i)->text());
 

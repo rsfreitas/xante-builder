@@ -920,8 +920,10 @@ bool XDialogItem::updateXanteItem(void)
     /* name */
     data = lineEdit[XDialogItem::LineEdit::Name]->text();
 
-    if ((data.isEmpty() == false) && (item.getName() != data))
+    if ((data.isEmpty() == false) && (item.getName() != data)) {
         item.setName(data);
+        emit treeViewNeedsUpdate();
+    }
 
     /* type */
     enum XanteItem::Type type =
@@ -966,7 +968,7 @@ bool XDialogItem::updateXanteItem(void)
 void XDialogItem::hideEvent(QHideEvent *event)
 {
     /* Savel all modifications */
-    if (event->spontaneous() == false) {
+    if ((event->spontaneous() == false) && XMainWindow::activeProject()) {
         if (updateXanteItem() == false) {
             event->ignore();
             return;

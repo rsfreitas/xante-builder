@@ -60,6 +60,9 @@ class XDialogMenu : public QWidget
     protected:
         void hideEvent(QHideEvent *event) override;
 
+    signals:
+        void treeViewNeedsUpdate();
+
     private:
         enum LineEdit {
             Name,

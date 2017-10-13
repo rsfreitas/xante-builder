@@ -50,6 +50,7 @@ class XMainDialog : public QWidget
         void dialogItemSelected();
         void dialogMenuSelected();
         void dialogContentChanged();
+        void updateTreeView();
 
     private:
         XDialogItem *dialogItem;

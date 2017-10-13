@@ -598,8 +598,10 @@ bool XDialogMenu::updateXanteMenu(void)
     /* name */
     data = lineEdit[XDialogMenu::LineEdit::Name]->text();
 
-    if ((data.isEmpty() == false) && (menu.getName() != data))
+    if ((data.isEmpty() == false) && (menu.getName() != data)) {
         menu.setName(data);
+        emit treeViewNeedsUpdate();
+    }
 
     /* type */
     enum XanteMenu::Type type =
@@ -629,7 +631,7 @@ bool XDialogMenu::updateXanteMenu(void)
 void XDialogMenu::hideEvent(QHideEvent *event)
 {
     /* Save all modifications */
-    if (event->spontaneous() == false) {
+    if ((event->spontaneous() == false) && XMainWindow::activeProject()) {
         if (updateXanteMenu() == false) {
             event->ignore();
             return;

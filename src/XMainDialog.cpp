@@ -43,6 +43,12 @@ XMainDialog::XMainDialog(QWidget *parent)
     connect(tree, SIGNAL(contentChanged()), this,
             SLOT(dialogContentChanged()));
 
+    connect(dialogMenu, SIGNAL(treeViewNeedsUpdate()), this,
+            SLOT(updateTreeView()));
+
+    connect(dialogItem, SIGNAL(treeViewNeedsUpdate()), this,
+            SLOT(updateTreeView()));
+
     QSplitter *splitter = new QSplitter(this);
     splitter->setOrientation(Qt::Horizontal);
     splitter->addWidget(tree);
@@ -74,6 +80,7 @@ void XMainDialog::setTreeContent(XTreeModel *model, bool enableMenu)
 {
     tree->setModel(model);
     tree->controlDialogActions(enableMenu);
+    tree->expandAll();
 }
 
 void XMainDialog::dialogItemSelected()
@@ -99,5 +106,12 @@ void XMainDialog::controlProjectWidgets(bool enable)
 {
     dialogMenu->setEnabled(enable);
     dialogItem->setEnabled(enable);
+}
+
+void XMainDialog::updateTreeView()
+{
+    XTreeModel *model = new XTreeModel(true, this);
+    tree->setModel(model);
+    tree->expandAll();
 }
 

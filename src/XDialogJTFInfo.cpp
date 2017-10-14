@@ -201,7 +201,7 @@ void XDialogJTFInfo::fillWidgetsWithProjectData(void)
 
 void XDialogJTFInfo::prepareMainMenuChooser(void)
 {
-    XanteProject &project = XMainWindow::getProject();
+    XanteProject project = XMainWindow::getProject();
     XanteJTF jtf = project.getJtf();
     int i;
 
@@ -212,7 +212,11 @@ void XDialogJTFInfo::prepareMainMenuChooser(void)
     }
 
     /* Set current option to the current main menu */
-    XanteMenu menu = jtf.getMenu(jtf.getMainMenu());
-    cbMainMenu->setCurrentIndex(cbMainMenu->findText(menu.getName()));
+    try {
+        XanteMenu menu = jtf.getMenu(jtf.getMainMenu());
+        cbMainMenu->setCurrentIndex(cbMainMenu->findText(menu.getName()));
+    } catch (std::exception &e) {
+        // TODO: Handle exception here
+    }
 }
 

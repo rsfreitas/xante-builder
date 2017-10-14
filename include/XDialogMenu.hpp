@@ -62,6 +62,7 @@ class XDialogMenu : public QWidget
 
     signals:
         void treeViewNeedsUpdate();
+        void projectHasChanges();
 
     private:
         enum LineEdit {

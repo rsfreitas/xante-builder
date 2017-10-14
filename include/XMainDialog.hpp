@@ -51,6 +51,10 @@ class XMainDialog : public QWidget
         void dialogMenuSelected();
         void dialogContentChanged();
         void updateTreeView();
+        void projectChanged();
+
+    signals:
+        void projectHasChanges();
 
     private:
         XDialogItem *dialogItem;

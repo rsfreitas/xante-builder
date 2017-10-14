@@ -39,6 +39,7 @@ XMainWindow::XMainWindow(XanteConfig &config)
     : config(config)
 {
     dialog = new XMainDialog(this);
+    connect(dialog, SIGNAL(projectHasChanges()), this, SLOT(projectChanged()));
     createMenu();
     statusBar()->showMessage(APP_NAME);
 
@@ -69,8 +70,10 @@ void XMainWindow::newProject()
 void XMainWindow::loadFile(const QString &filename)
 {
     setCurrentFile(filename);
-    setWindowTitle(QString("%1 [%2]").arg(APP_NAME).arg(filename));
     project = new XanteProject(filename);
+    setWindowTitle(QString("%1 [%2]").arg(APP_NAME)
+                                     .arg(project->getProjectName()));
+
     dialog->activeProject(true);
     setWindowWidgetsEnabled(true);
 }
@@ -91,6 +94,9 @@ void XMainWindow::openProject()
 void XMainWindow::saveProject()
 {
     project->save();
+    acSave->setEnabled(false);
+    setWindowTitle(QString("%1 [%2]").arg(APP_NAME)
+                                     .arg(project->getProjectName()));
 }
 
 void XMainWindow::closeProject()
@@ -159,6 +165,7 @@ void XMainWindow::createMenu(void)
                                 &XMainWindow::saveProject);
 
     acSave->setStatusTip(tr("Saves the project."));
+    acSave->setEnabled(false);
     acClose = mMain->addAction(tr("&Close project"), this,
                                  &XMainWindow::closeProject);
 
@@ -219,7 +226,6 @@ void XMainWindow::setWindowWidgetsEnabled(bool enable)
     /* Enable/Disable menu options */
     acNewProject->setEnabled(!enable);
     acOpen->setEnabled(!enable);
-    acSave->setEnabled(enable);
     acClose->setEnabled(enable);
     acJtfMainInfo->setEnabled(enable);
     acTestJtf->setEnabled(enable);
@@ -252,5 +258,12 @@ void XMainWindow::setCurrentFile(const QString &filename)
 
     for (int j = nRecentFiles; j < MaxRecentFiles; j++)
         acRecentFiles[j]->setVisible(false);
+}
+
+void XMainWindow::projectChanged()
+{
+    acSave->setEnabled(true);
+    setWindowTitle(QString("%1 [%2] *").arg(APP_NAME)
+                                       .arg(project->getProjectName()));
 }
 

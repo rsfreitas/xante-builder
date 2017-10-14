@@ -922,6 +922,7 @@ bool XDialogItem::updateXanteItem(void)
 
     if ((data.isEmpty() == false) && (item.getName() != data)) {
         item.setName(data);
+        /* TODO: update objectId */
         emit treeViewNeedsUpdate();
     }
 
@@ -975,6 +976,7 @@ void XDialogItem::hideEvent(QHideEvent *event)
         }
     }
 
+    emit projectHasChanges();
     event->accept();
 }
 

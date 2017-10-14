@@ -58,6 +58,7 @@ class XMainWindow : public QMainWindow
         void jtfTest();
         void aboutUs();
         void openRecentFile();
+        void projectChanged();
 
     private:
         static XanteProject *project;

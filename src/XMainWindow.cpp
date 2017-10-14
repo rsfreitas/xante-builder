@@ -45,14 +45,14 @@ XMainWindow::XMainWindow(XanteConfig &config)
 
     setCentralWidget(dialog);
     setWindowTitle(APP_NAME);
-    resize(config.getWindowSize());
-    move(config.getWindowPosition());
+    resize(config.windowSize());
+    move(config.windowPosition());
 }
 
 void XMainWindow::closeEvent(QCloseEvent *event)
 {
-    config.setWindowSize(size());
-    config.setWindowPosition(pos());
+    config.windowSize(size());
+    config.windowPosition(pos());
     event->accept();
 }
 
@@ -61,7 +61,7 @@ void XMainWindow::newProject()
     XProjectWizard projectWizard;
 
     if (projectWizard.exec()) {
-        project = projectWizard.getProject();
+        project = projectWizard.buildProject();
         dialog->activeProject(true);
         setWindowWidgetsEnabled(true);
     }
@@ -173,7 +173,7 @@ void XMainWindow::createMenu(void)
     mMain->addSeparator();
 
     for (int i = 0; i < MaxRecentFiles; i++) {
-        QString file = config.getRecentFile(i);
+        QString file = config.recentFile(i);
         acRecentFiles[i] = mMain->addAction(file.isEmpty() ? tr("") : file,
                                                this,
                                                &XMainWindow::openRecentFile);
@@ -241,13 +241,13 @@ void XMainWindow::setWindowWidgetsEnabled(bool enable)
 
 void XMainWindow::setCurrentFile(const QString &filename)
 {
-    if (config.setRecentFile(filename) == false)
+    if (config.recentFile(filename) == false)
         return;
 
     int nRecentFiles = qMin(config.recentFilesSize(), (int)MaxRecentFiles);
 
     for (int i = 0; i < nRecentFiles; i++) {
-        QString file = config.getRecentFile(i);
+        QString file = config.recentFile(i);
         QString text = tr("&%1 %2").arg(i + 1)
                                    .arg(QFileInfo(file).fileName());
 

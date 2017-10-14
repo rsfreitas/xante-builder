@@ -39,19 +39,19 @@ class XanteConfig
         XanteConfig();
         ~XanteConfig();
 
-        void setWindowSize(QSize size) { window_size = size; }
-        void setWindowPosition(QPoint point) { window_position = point; }
-        QSize getWindowSize(void) { return window_size; }
-        QPoint getWindowPosition(void) { return window_position; }
-        const QString getRecentFile(int index) { return recent_opened_files.value(index); }
-        int recentFilesSize(void) { return recent_opened_files.size(); }
-        bool setRecentFile(const QString &filename);
+        void windowSize(QSize size) { m_windowSize = size; }
+        QSize windowSize(void) { return m_windowSize; }
+        void windowPosition(QPoint point) { m_windowPosition = point; }
+        QPoint windowPosition(void) { return m_windowPosition; }
+        const QString recentFile(int index) { return m_recentOpenedFiles.value(index); }
+        bool recentFile(const QString &filename);
+        int recentFilesSize(void) { return m_recentOpenedFiles.size(); }
 
     private:
-        QString cfg_filename, pathname;
-        QSize window_size;
-        QPoint window_position;
-        QStringList recent_opened_files;
+        QString m_cfgFilename, m_pathname;
+        QSize m_windowSize;
+        QPoint m_windowPosition;
+        QStringList m_recentOpenedFiles;
 
         void loadDefaultValues(void);
         void readFile(void);

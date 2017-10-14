@@ -214,7 +214,7 @@ void XProjectWizard::accept()
     QDialog::accept();
 }
 
-XanteProject *XProjectWizard::getProject(void)
+XanteProject *XProjectWizard::buildProject(void)
 {
     QString projectName = field("projectName").toString();
     project = new XanteProject(projectName,

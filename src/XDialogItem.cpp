@@ -974,9 +974,10 @@ void XDialogItem::hideEvent(QHideEvent *event)
             event->ignore();
             return;
         }
+
+        emit projectHasChanges();
     }
 
-    emit projectHasChanges();
     event->accept();
 }
 

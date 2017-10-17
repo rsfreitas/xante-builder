@@ -244,7 +244,7 @@ void XMainWindow::setCurrentFile(const QString &filename)
     if (config.recentFile(filename) == false)
         return;
 
-    int nRecentFiles = qMin(config.recentFilesSize(), (int)MaxRecentFiles);
+    int nRecentFiles = qMin(config.totalRecentFiles(), (int)MaxRecentFiles);
 
     for (int i = 0; i < nRecentFiles; i++) {
         QString file = config.recentFile(i);

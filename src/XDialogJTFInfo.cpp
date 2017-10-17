@@ -182,18 +182,18 @@ void XDialogJTFInfo::fillWidgetsWithProjectData(void)
     XanteJTF jtf = project.getJtf();
 
     /* LineEdit */
-    edit.at(XDialogJTFInfo::ApplicationName)->setText(jtf.getApplicationName());
-    edit.at(XDialogJTFInfo::Description)->setText(jtf.getDescription());;
-    edit.at(XDialogJTFInfo::Company)->setText(jtf.getCompany());
-    edit.at(XDialogJTFInfo::Plugin)->setText(jtf.getPlugin());
-    edit.at(XDialogJTFInfo::CfgPathname)->setText(jtf.getCfgPathname());
-    edit.at(XDialogJTFInfo::LogPathname)->setText(jtf.getLogPathname());
-    edit.at(XDialogJTFInfo::Version)->setText(jtf.getVersion());
-    edit.at(XDialogJTFInfo::Revision)->setText(QString("%1").arg(jtf.getRevision()));
-    edit.at(XDialogJTFInfo::Build)->setText(QString("%1").arg(jtf.getBuild()));
+    edit.at(XDialogJTFInfo::ApplicationName)->setText(jtf.applicationName());
+    edit.at(XDialogJTFInfo::Description)->setText(jtf.description());;
+    edit.at(XDialogJTFInfo::Company)->setText(jtf.company());
+    edit.at(XDialogJTFInfo::Plugin)->setText(jtf.plugin());
+    edit.at(XDialogJTFInfo::CfgPathname)->setText(jtf.cfgPathname());
+    edit.at(XDialogJTFInfo::LogPathname)->setText(jtf.logPathname());
+    edit.at(XDialogJTFInfo::Version)->setText(jtf.version());
+    edit.at(XDialogJTFInfo::Revision)->setText(QString("%1").arg(jtf.revision()));
+    edit.at(XDialogJTFInfo::Build)->setText(QString("%1").arg(jtf.build()));
 
     /* Beta ComboBox */
-    cbBeta->setCurrentIndex(jtf.getBeta() == true ? 0 : 1);
+    cbBeta->setCurrentIndex(jtf.beta() == true ? 0 : 1);
 
     /* Main menu chooser */
     prepareMainMenuChooser();
@@ -208,13 +208,13 @@ void XDialogJTFInfo::prepareMainMenuChooser(void)
     /* Insert all available menus */
     for (i = 0; i < jtf.totalMenus(); i++) {
         XanteMenu menu = jtf.menuAt(i);
-        cbMainMenu->addItem(menu.getName());
+        cbMainMenu->addItem(menu.name());
     }
 
     /* Set current option to the current main menu */
     try {
-        XanteMenu menu = jtf.getMenu(jtf.getMainMenu());
-        cbMainMenu->setCurrentIndex(cbMainMenu->findText(menu.getName()));
+        XanteMenu menu = jtf.getMenu(jtf.mainMenu());
+        cbMainMenu->setCurrentIndex(cbMainMenu->findText(menu.name()));
     } catch (std::exception &e) {
         // TODO: Handle exception here
     }

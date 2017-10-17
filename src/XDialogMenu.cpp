@@ -349,13 +349,14 @@ void XDialogMenu::setupWidgets(void)
  */
 void XDialogMenu::setupDynamicInfoWidgets(XanteMenu menu)
 {
-    enum XanteMenu::DynamicType type = menu.getDynamicType();
+    QPair<QString, QPair<QString, QString>> origin;
+    enum XanteMenu::DynamicType type = menu.dynamicType();
 
     /*
      * If we're dealing with a default menu or an unsupported dynamic menu
      * type, abort.
      */
-    if ((menu.getType() != XanteMenu::Type::Dynamic) ||
+    if ((menu.type() != XanteMenu::Type::Dynamic) ||
         (type >= XanteMenu::DynamicType::MaxDynamicMenuType))
     {
         return;
@@ -363,29 +364,31 @@ void XDialogMenu::setupDynamicInfoWidgets(XanteMenu menu)
 
     radioButton[type]->setChecked(true);
 
-    switch (menu.getDynamicType()) {
+    switch (type) {
         case XanteMenu::DynamicType::FixedSize:
             lineEdit[XDialogMenu::LineEdit::DynamicNumberOfCopies]->setText(
-                QString("%1").arg(menu.getDynamicCopies())
+                QString("%1").arg(menu.dynamicCopies())
             );
 
             break;
 
         case XanteMenu::DynamicType::FixedOptions:
-            dynamicOptions->addItems(menu.getDynamicOptions());
+            dynamicOptions->addItems(menu.dynamicOptions());
             break;
 
         case XanteMenu::DynamicType::DynamicOptions:
+            origin = menu.dynamicOrigin();
+
             lineEdit[XDialogMenu::LineEdit::BlockPrefix]->setText(
-                QString("%1").arg(menu.getBlockPrefix())
+                QString("%1").arg(origin.first)
             );
 
             lineEdit[XDialogMenu::LineEdit::DynamicOriginBlock]->setText(
-                QString("%1").arg(menu.getDynamicOriginBlock())
+                QString("%1").arg(origin.second.first)
             );
 
             lineEdit[XDialogMenu::LineEdit::DynamicOriginItem]->setText(
-                QString("%1").arg(menu.getDynamicOriginItem())
+                QString("%1").arg(origin.second.second)
             );
 
             break;
@@ -424,7 +427,7 @@ void XDialogMenu::setupEventsWidgets(XanteMenu menu)
               QPair<enum XDialogMenu::LineEdit,
                     enum XDialogMenu::CheckBox>> p = events.at(i);
 
-        QString eventName = menu.getEvent(p.first);
+        QString eventName = menu.event(p.first);
         QPair<enum XDialogMenu::LineEdit,
               enum XDialogMenu::CheckBox> pp = p.second;
 
@@ -447,12 +450,12 @@ void XDialogMenu::setupWidgets(XanteMenu menu)
     disableAllWidgets();
 
     /* Enable/Disable dynamics groupbox */
-    selectMenuType((menu.getType() == XanteMenu::Type::Default) ? 0 : 1);
+    selectMenuType((menu.type() == XanteMenu::Type::Default) ? 0 : 1);
 
-    lineEdit[XDialogMenu::LineEdit::Name]->setText(menu.getName());
-    lineEdit[XDialogMenu::LineEdit::ObjectId]->setText(menu.getObjectId());
-    comboBox[XDialogMenu::ComboBox::Type]->setCurrentIndex((int)menu.getType());
-    comboBox[XDialogMenu::ComboBox::Mode]->setCurrentIndex((int)menu.getMode());
+    lineEdit[XDialogMenu::LineEdit::Name]->setText(menu.name());
+    lineEdit[XDialogMenu::LineEdit::ObjectId]->setText(menu.objectId());
+    comboBox[XDialogMenu::ComboBox::Type]->setCurrentIndex((int)menu.type());
+    comboBox[XDialogMenu::ComboBox::Mode]->setCurrentIndex((int)menu.mode());
 
     setupDynamicInfoWidgets(menu);
     setupEventsWidgets(menu);
@@ -528,12 +531,12 @@ bool XDialogMenu::updateXanteMenuDynamic(XanteMenu &menu)
             copies =
                 lineEdit[XDialogMenu::LineEdit::DynamicNumberOfCopies]->text();
 
-            menu.setDynamic(copies.toInt());
+            menu.dynamicCopies(copies.toInt());
             break;
 
         case XanteMenu::DynamicType::FixedOptions:
             for (int i = 0; i < dynamicOptions->count(); i++)
-                menu.setDynamic(dynamicOptions->item(i)->text());
+                menu.dynamicOptions(dynamicOptions->item(i)->text());
 
             break;
 
@@ -547,7 +550,7 @@ bool XDialogMenu::updateXanteMenuDynamic(XanteMenu &menu)
             item =
                 lineEdit[XDialogMenu::LineEdit::DynamicOriginItem]->text();
 
-            menu.setDynamic(prefix, block, item);
+            menu.dynamicOrigin(prefix, block, item);
             break;
 
         default:
@@ -580,7 +583,7 @@ bool XDialogMenu::updateXanteMenuEvents(XanteMenu &menu)
         QString text = ui.second->text();
 
         if (ui.first->isChecked() && (text.isEmpty() == false)) {
-            menu.setEvent(text, eventType);
+            menu.event(text, eventType);
         }
     }
 
@@ -597,9 +600,8 @@ bool XDialogMenu::updateXanteMenu(void)
     /* name */
     data = lineEdit[XDialogMenu::LineEdit::Name]->text();
 
-    if ((data.isEmpty() == false) && (menu.getName() != data)) {
-        menu.setName(data);
-        /* TODO: update objectId */
+    if ((data.isEmpty() == false) && (menu.name() != data)) {
+        menu.name(data);
         emit treeViewNeedsUpdate();
     }
 
@@ -607,7 +609,7 @@ bool XDialogMenu::updateXanteMenu(void)
     enum XanteMenu::Type type =
         (enum XanteMenu::Type)comboBox[XDialogMenu::ComboBox::Type]->currentIndex();
 
-    menu.setType(type);
+    menu.type(type);
 
     /* dynamic options */
     if (type == XanteMenu::Type::Dynamic)
@@ -618,7 +620,7 @@ bool XDialogMenu::updateXanteMenu(void)
     enum XanteMode mode =
         (enum XanteMode)comboBox[XDialogMenu::ComboBox::Mode]->currentIndex();
 
-    menu.setMode(mode);
+    menu.mode(mode);
 
     /* events */
     if (groupBox[XDialogMenu::GroupBox::Events]->isChecked())

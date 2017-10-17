@@ -194,7 +194,7 @@ void XTreeModel::setupModelData(XTreeItem *parent)
         XanteMenu menu = jtf.menuAt(i);
 
         QList<QVariant> childData;
-        childData << menu.getName();
+        childData << menu.name();
         parents.last()->appendChild(new XTreeItem(childData, parents.last()));
 
         for (j = 0; j < menu.totalItems(); j++) {
@@ -202,7 +202,7 @@ void XTreeModel::setupModelData(XTreeItem *parent)
             int childIndex = parents.last()->childCount() - 1;
 
             QList<QVariant> itChildData;
-            itChildData << item.getName();
+            itChildData << item.name();
             parents.last()->child(childIndex)
                           ->appendChild(new XTreeItem(itChildData,
                                                       parents.last()->child(childIndex)));

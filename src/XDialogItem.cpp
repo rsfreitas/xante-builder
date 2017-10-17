@@ -442,8 +442,8 @@ void XDialogItem::setupConfigWidgets(const XanteItem &item)
     if (item.hasConfig() == false)
         return;
 
-    lineEdit[XDialogItem::LineEdit::CfgBlock]->setText(item.getConfigBlock());
-    lineEdit[XDialogItem::LineEdit::CfgItem]->setText(item.getConfigItem());
+    lineEdit[XDialogItem::LineEdit::CfgBlock]->setText(item.configBlock());
+    lineEdit[XDialogItem::LineEdit::CfgItem]->setText(item.configItem());
 }
 
 void XDialogItem::setupEventsWidgets(const XanteItem &item)
@@ -480,7 +480,7 @@ void XDialogItem::setupEventsWidgets(const XanteItem &item)
               QPair<enum XDialogItem::LineEdit,
                     enum XDialogItem::CheckBox>> p = events.at(i);
 
-        QString eventName = item.getEvent(p.first);
+        QString eventName = item.event(p.first);
         QPair<enum XDialogItem::LineEdit,
               enum XDialogItem::CheckBox> pp = p.second;
 
@@ -501,22 +501,22 @@ void XDialogItem::setupHelpWidgets(const XanteItem &item)
         hasHelp = true;
 
     /* brief help */
-    text = item.getBriefHelp();
+    text = item.briefHelp();
 
     if (text.isEmpty() == false)
         lineEdit[XDialogItem::LineEdit::HelpBrief]->setText(text);
 
     /* descriptive help */
-    text = item.getDescriptiveHelp();
+    text = item.descriptiveHelp();
 
     if (text.isEmpty() == false)
         lineEdit[XDialogItem::LineEdit::HelpDescriptive]->setText(text);
 
     /* checklist/radio-checklist help options */
-    t = item.getTotalHelpOptions();
+    t = item.totalHelpOptions();
 
     for (int i = 0; i < t; i++)
-        listWidget[XDialogItem::ListWidget::HelpOptions]->addItem(item.getHelpOption(i));
+        listWidget[XDialogItem::ListWidget::HelpOptions]->addItem(item.helpOption(i));
 
     groupBox[XDialogItem::GroupBox::Help]->setChecked(hasHelp);
 }
@@ -526,23 +526,25 @@ void XDialogItem::setupInputRangesWidgets(const XanteItem &item)
     if (item.hasInputRanges() == false)
         return;
 
-    enum XanteItem::Type type = item.getType();
+    enum XanteItem::Type type = item.type();
 
     if (type == XanteItem::Type::InputString) {
         lineEdit[XDialogItem::LineEdit::InputStringLength]->setText(
-            QString("%1").arg(item.getStringLength())
+            QString("%1").arg(item.stringLength())
         );
     } else {
+        QPair<QVariant, QVariant> mm = item.minMax();
+
         lineEdit[XDialogItem::LineEdit::InputMin]->setText(
             QString("%1").arg((type == XanteItem::Type::InputInt)
-                                    ? item.getMin().toInt()
-                                    : item.getMin().toFloat())
+                                    ? mm.first.toInt()
+                                    : mm.first.toFloat())
         );
 
         lineEdit[XDialogItem::LineEdit::InputMax]->setText(
             QString("%1").arg((type == XanteItem::Type::InputInt)
-                                    ? item.getMax().toInt()
-                                    : item.getMax().toFloat())
+                                    ? mm.second.toInt()
+                                    : mm.second.toFloat())
         );
     }
 }
@@ -552,17 +554,15 @@ void XDialogItem::setupOptionsWidgets(const XanteItem &item)
     if (item.hasOptions() == false)
         return;
 
-    /* TODO: Use item.getOptionType */
-
-    enum XanteItem::Type type = item.getType();
+    enum XanteItem::Type type = item.type();
 
     if ((type == XanteItem::Type::Checklist) ||
         (type == XanteItem::Type::RadioChecklist))
     {
-        for (int i = 0; i < item.getTotalOptions(); i++)
-            listWidget[XDialogItem::ListWidget::OptionsLw]->addItem(item.getOption(i));
+        for (int i = 0; i < item.totalOptions(); i++)
+            listWidget[XDialogItem::ListWidget::OptionsLw]->addItem(item.option(i));
     } else
-        lineEdit[XDialogItem::LineEdit::Options]->setText(item.getOption());
+        lineEdit[XDialogItem::LineEdit::Options]->setText(item.option());
 }
 
 void XDialogItem::setupWidgets(void)
@@ -574,13 +574,13 @@ void XDialogItem::setupWidgets(void)
 
     /* Prepare dialog widgets for item */
     clear();
-    selectItemType(item.getType());
+    selectItemType(item.type());
 
     /* Common informations */
-    lineEdit[XDialogItem::LineEdit::Name]->setText(item.getName());
-    lineEdit[XDialogItem::LineEdit::ObjectId]->setText(item.getObjectId());
-    comboBox[XDialogItem::ComboBox::Type]->setCurrentIndex((int)item.getType());
-    comboBox[XDialogItem::ComboBox::Mode]->setCurrentIndex((int)item.getMode());
+    lineEdit[XDialogItem::LineEdit::Name]->setText(item.name());
+    lineEdit[XDialogItem::LineEdit::ObjectId]->setText(item.objectId());
+    comboBox[XDialogItem::ComboBox::Type]->setCurrentIndex((int)item.type());
+    comboBox[XDialogItem::ComboBox::Mode]->setCurrentIndex((int)item.mode());
 
     /* Specific informations */
     setupConfigWidgets(item);
@@ -811,7 +811,7 @@ bool XDialogItem::updateXanteItemEvents(XanteItem &item)
         QString text = ui.second->text();
 
         if (ui.first->isChecked() && (text.isEmpty() == false)) {
-            item.setEvent(text, eventType);
+            item.event(text, eventType);
         }
     }
 
@@ -820,7 +820,7 @@ bool XDialogItem::updateXanteItemEvents(XanteItem &item)
 
 bool XDialogItem::updateXanteItemHelp(XanteItem &item)
 {
-    enum XanteItem::Type type = item.getType();
+    enum XanteItem::Type type = item.type();
     QString data;
 
     if ((type == XanteItem::Type::Checklist) ||
@@ -830,22 +830,22 @@ bool XDialogItem::updateXanteItemHelp(XanteItem &item)
 
         for (int i = 0; i < l->count(); i++) {
             data = l->item(i)->text();
-            item.setHelpOption(data);
+            item.helpOption(data);
         }
     }
 
     data = lineEdit[XDialogItem::LineEdit::HelpBrief]->text();
-    item.setBriefHelp(data);
+    item.briefHelp(data);
 
     data = lineEdit[XDialogItem::LineEdit::HelpDescriptive]->text();
-    item.setDescriptiveHelp(data);
+    item.descriptiveHelp(data);
 
     return true;
 }
 
 bool XDialogItem::updateXanteItemOptions(XanteItem &item)
 {
-    enum XanteItem::Type type = item.getType();
+    enum XanteItem::Type type = item.type();
     QString data;
 
     if ((type == XanteItem::Type::Checklist) ||
@@ -855,11 +855,11 @@ bool XDialogItem::updateXanteItemOptions(XanteItem &item)
 
         for (int i = 0; i < l->count(); i++) {
             data = l->item(i)->text();
-            item.setOption(data);
+            item.option(data);
         }
     } else {
         data = lineEdit[XDialogItem::LineEdit::Options]->text();
-        item.setOption(data);
+        item.option(data);
     }
 
     return true;
@@ -868,13 +868,13 @@ bool XDialogItem::updateXanteItemOptions(XanteItem &item)
 bool XDialogItem::updateXanteItemInputRanges(XanteItem &item)
 {
     QString data, min, max;
-    enum XanteItem::Type type = item.getType();
+    enum XanteItem::Type type = item.type();
 
     switch (type) {
         case XanteItem::Type::InputString:
         case XanteItem::Type::InputPasswd:
             data = lineEdit[XDialogItem::LineEdit::InputStringLength]->text();
-            item.setStringLength(data.toInt());
+            item.stringLength(data.toInt());
             break;
 
         case XanteItem::Type::InputInt:
@@ -883,9 +883,9 @@ bool XDialogItem::updateXanteItemInputRanges(XanteItem &item)
             max = lineEdit[XDialogItem::LineEdit::InputMax]->text();
 
             if (type == XanteItem::Type::InputInt)
-                item.setMinMax(min.toInt(), max.toInt());
+                item.minMax(min.toInt(), max.toInt());
             else
-                item.setMinMax(min.toFloat(), max.toFloat());
+                item.minMax(min.toFloat(), max.toFloat());
 
             break;
 
@@ -901,10 +901,10 @@ bool XDialogItem::updateXanteItemConfig(XanteItem &item)
     QString data;
 
     data = lineEdit[XDialogItem::LineEdit::CfgBlock]->text();
-    item.setConfigBlock(data);
+    item.configBlock(data);
 
     data = lineEdit[XDialogItem::LineEdit::CfgItem]->text();
-    item.setConfigItem(data);
+    item.configItem(data);
 
     return true;
 }
@@ -920,9 +920,8 @@ bool XDialogItem::updateXanteItem(void)
     /* name */
     data = lineEdit[XDialogItem::LineEdit::Name]->text();
 
-    if ((data.isEmpty() == false) && (item.getName() != data)) {
-        item.setName(data);
-        /* TODO: update objectId */
+    if ((data.isEmpty() == false) && (item.name() != data)) {
+        item.name(data);
         emit treeViewNeedsUpdate();
     }
 
@@ -930,13 +929,13 @@ bool XDialogItem::updateXanteItem(void)
     enum XanteItem::Type type =
         (enum XanteItem::Type)comboBox[XDialogItem::ComboBox::Type]->currentIndex();
 
-    item.setType(type);
+    item.type(type);
 
     /* access mode */
     enum XanteMode mode =
         (enum XanteMode)comboBox[XDialogItem::ComboBox::Mode]->currentIndex();
 
-    item.setMode(mode);
+    item.mode(mode);
 
     /* events */
     if (groupBox[XDialogItem::GroupBox::Events]->isChecked())

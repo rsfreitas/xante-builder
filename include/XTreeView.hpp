@@ -49,7 +49,6 @@ class XTreeView : public QTreeView
 
     private slots:
         void addMenu();
-        void renameMenu();
         void addItem();
         void copyItem();
         void pasteItem();
@@ -61,12 +60,20 @@ class XTreeView : public QTreeView
         void itemSelected();
         void menuSelected();
         void contentChanged();
+        void treeViewNeedsUpdate();
+        void projectHasChanges();
 
     private:
-        bool selectedLine = false;
+        enum SelectedLine {
+            None,
+            ItemLine,
+            MenuLine
+        };
+
+        enum XTreeView::SelectedLine selectedLine = XTreeView::SelectedLine::None;
         QMenu *menu;
-        QAction *acAddMenu, *acRenameMenu, *acAddItem, *acCopy,
-                *acPaste, *acCut, *acRemove, *acChange;
+        QAction *acAddMenu, *acAddItem, *acCopy, *acPaste, *acCut, *acRemove,
+                *acChange;
 
         void createRightClickMenu(void);
         void displaySelectedItem(QModelIndex index);

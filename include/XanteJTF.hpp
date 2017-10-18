@@ -160,12 +160,8 @@ class XanteItem
             {
                 if (m_options.contains(option) == false)
                     m_options.append(option);
-
-                m_optionType = XanteItem::OptionType::List;
-            } else {
+            } else
                 m_fixedOption = option;
-                m_optionType = XanteItem::OptionType::Fixed;
-            }
         }
 
         int totalHelpOptions(void) const { return m_helpOptions.size(); }
@@ -236,6 +232,7 @@ class XanteMenu
         void write(QJsonObject &root) const;
         int totalItems(void) { return m_items.size(); }
         XanteItem &itemAt(int index) { return m_items[index]; }
+        void itemMove(int from, int to) { m_items.move(from, to); }
         bool hasEvents(void) const { return m_events.size() != 0; }
 
         bool operator ==(const XanteMenu &other) const {

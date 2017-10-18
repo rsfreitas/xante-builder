@@ -43,11 +43,17 @@ XMainDialog::XMainDialog(QWidget *parent)
     connect(tree, SIGNAL(contentChanged()), this,
             SLOT(dialogContentChanged()));
 
+    connect(tree, SIGNAL(treeViewNeedsUpdate()), this,
+            SLOT(updateTreeView()));
+
     connect(dialogMenu, SIGNAL(treeViewNeedsUpdate()), this,
             SLOT(updateTreeView()));
 
     connect(dialogItem, SIGNAL(treeViewNeedsUpdate()), this,
             SLOT(updateTreeView()));
+
+    connect(tree, SIGNAL(projectHasChanges()), this,
+            SLOT(projectChanged()));
 
     connect(dialogMenu, SIGNAL(projectHasChanges()), this,
             SLOT(projectChanged()));

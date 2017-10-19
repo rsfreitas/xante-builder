@@ -39,6 +39,7 @@ class QListWidget;
 
 class XanteProject;
 class XanteItem;
+class XanteJTF;
 
 class XDialogItem : public QWidget
 {
@@ -151,6 +152,7 @@ class XDialogItem : public QWidget
         void setupConfigWidgets(const XanteItem &item);
         void setupInputRangesWidgets(const XanteItem &item);
         void setupOptionsWidgets(const XanteItem &item);
+        void setupMenuReferences(const XanteItem &item, XanteJTF &jtf);
 
         void disableAllWidgets(void);
         void enableInputRanges(int type);

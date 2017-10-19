@@ -565,6 +565,28 @@ void XDialogItem::setupOptionsWidgets(const XanteItem &item)
         lineEdit[XDialogItem::LineEdit::Options]->setText(item.option());
 }
 
+void XDialogItem::setupMenuReferences(const XanteItem &item, XanteJTF &jtf)
+{
+    QComboBox *cb = comboBox[XDialogItem::ComboBox::MenuReference];
+
+    if (item.type() != XanteItem::Type::Menu)
+        return;
+
+    cb->clear();
+
+    for (int i = 0; i < jtf.totalMenus(); i++) {
+        XanteMenu m = jtf.menuAt(i);
+        cb->addItem(m.name());
+    }
+
+    try {
+        XanteMenu m = jtf.getMenu(item.referencedMenu());
+        cb->setCurrentIndex(cb->findText(m.name()));
+    } catch (std::exception &e) {
+        // TODO: Handle exception here
+    }
+}
+
 void XDialogItem::setupWidgets(void)
 {
     XanteProject &project = XMainWindow::getProject();
@@ -588,6 +610,7 @@ void XDialogItem::setupWidgets(void)
     setupHelpWidgets(item);
     setupInputRangesWidgets(item);
     setupOptionsWidgets(item);
+    setupMenuReferences(item, jtf);
 }
 
 void XDialogItem::disableAllWidgets(void)
@@ -961,6 +984,11 @@ bool XDialogItem::updateXanteItem(void)
     if (item.hasConfig())
         if (updateXanteItemConfig(item) == false)
             return false;
+
+    if (type == XanteItem::Type::Menu) {
+        XanteMenu m = jtf.menuAt(comboBox[XDialogItem::ComboBox::MenuReference]->currentIndex());
+        item.referencedMenu(m.objectId());
+    }
 
     return true;
 }

@@ -330,6 +330,7 @@ void XDialogMenu::setCurrentProject(int selectedMenuIndex)
 void XDialogMenu::setSelection(int selectedMenuIndex)
 {
     currentMenuIndex = selectedMenuIndex;
+    clear();
     setupWidgets();
 }
 

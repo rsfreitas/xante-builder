@@ -77,6 +77,7 @@ class XTreeView : public QTreeView
 
         void createRightClickMenu(void);
         void displaySelectedItem(QModelIndex index);
+        void emitSignalToUpdate(void);
 };
 
 #endif

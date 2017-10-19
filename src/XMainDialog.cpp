@@ -98,6 +98,7 @@ void XMainDialog::setTreeContent(XTreeModel *model, bool enableMenu)
 void XMainDialog::dialogItemSelected()
 {
     dialogMenu->hide();
+    dialogItem->hide();
     dialogItem->show();
     dialogItem->setSelection(tree->currentSelectedMenu,
                                tree->currentSelectedItem);
@@ -105,9 +106,10 @@ void XMainDialog::dialogItemSelected()
 
 void XMainDialog::dialogMenuSelected()
 {
+    dialogItem->hide();
+    dialogMenu->hide();
     dialogMenu->show();
     dialogMenu->setSelection(tree->currentSelectedMenu);
-    dialogItem->hide();
 }
 
 void XMainDialog::dialogContentChanged()

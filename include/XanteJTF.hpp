@@ -93,6 +93,13 @@ class XanteItem
                     m_helpOptions.size() != 0);
         }
 
+/*        XanteItem &operator=(XanteItem other) {
+            if (&other == this)
+                return *this;
+
+            return *this;
+        }*/
+
         /* Item properties */
         const QString name(void) const { return m_name; }
         void name(QString name);
@@ -229,10 +236,13 @@ class XanteMenu
         XanteMenu(QString applicationName, QString name);
         XanteMenu(QString objectId) : m_objectId(objectId) {}
 
-        void write(QJsonObject &root) const;
         int totalItems(void) { return m_items.size(); }
         XanteItem &itemAt(int index) { return m_items[index]; }
         void itemMove(int from, int to) { m_items.move(from, to); }
+        void addItem(XanteItem item) { m_items.append(item); }
+        void removeItem(int index) { m_items.removeAt(index); }
+
+        void write(QJsonObject &root) const;
         bool hasEvents(void) const { return m_events.size() != 0; }
 
         bool operator ==(const XanteMenu &other) const {
@@ -405,6 +415,7 @@ class XanteJTF
         XanteMenu &getMenu(QString objectId);
         int totalMenus(void) const { return m_menus.size(); }
         void addMenu(XanteMenu menu) { m_menus.append(menu); }
+        void removeMenu(int index) { m_menus.removeAt(index); }
 
     private:
         QString m_applicationName, m_description, m_company, m_plugin,

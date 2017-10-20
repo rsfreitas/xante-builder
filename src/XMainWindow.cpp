@@ -156,21 +156,25 @@ void XMainWindow::createMenu(void)
                                        &XMainWindow::newProject);
 
     acNewProject->setStatusTip(tr("Creates a new libxante project."));
+    acNewProject->setShortcuts(QKeySequence::New);
 
     mMain->addSeparator();
     acOpen = mMain->addAction(tr("&Open project"), this,
                                 &XMainWindow::openProject);
 
     acOpen->setStatusTip(tr("Opens a previously created project file."));
+    acOpen->setShortcuts(QKeySequence::Open);
     acSave = mMain->addAction(tr("&Save project"), this,
-                                &XMainWindow::saveProject);
+                              &XMainWindow::saveProject);
 
     acSave->setStatusTip(tr("Saves the project."));
     acSave->setEnabled(false);
+    acSave->setShortcuts(QKeySequence::Save);
     acClose = mMain->addAction(tr("&Close project"), this,
                                  &XMainWindow::closeProject);
 
     acClose->setStatusTip(tr("Closes the project."));
+    acClose->setShortcuts(QKeySequence::Close);
     mMain->addSeparator();
 
     for (int i = 0; i < MaxRecentFiles; i++) {
@@ -193,6 +197,7 @@ void XMainWindow::createMenu(void)
     mMain->addSeparator();
     QAction *acExit = mMain->addAction(tr("&Quit"), this, &QWidget::close);
     acExit->setStatusTip(tr("Quits the application."));
+    acExit->setShortcuts(QKeySequence::Quit);
 
     QMenu *mActions = menuBar()->addMenu(tr("&JTF"));
     acJtfMainInfo = mActions->addAction(tr("&Informations"), this,
@@ -203,8 +208,9 @@ void XMainWindow::createMenu(void)
     acTestJtf = mActions->addAction(tr("&Test"), this,
                                        &XMainWindow::jtfTest);
 
+    acTestJtf->setShortcuts(QKeySequence::AddTab);
     acTestJtf->setStatusTip(tr("Puts the current JTF configuration into a "
-                                 "test."));
+                               "test."));
 
     QMenu *mHelp = menuBar()->addMenu(tr("&Help"));
     QAction *acAbout = mHelp->addAction(tr("&About this application"), this,

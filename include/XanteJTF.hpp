@@ -70,114 +70,126 @@ class XanteItem
             MaxEvents
         };
 
-        enum OptionType {
-            Fixed,
-            List
-        };
-
         XanteItem() {}
         XanteItem(QString applicationName, QString menuName, QJsonObject item);
         XanteItem(QString applicationName, QString menuName, QString name);
 
         void write(QJsonObject &root) const;
+        bool hasEvents(void) const { return m_events.size() != 0; }
+        bool hasOptions(void) const { return (m_type >= XanteItem::Type::InputInt) &&
+                                             (m_type <= XanteItem::Type::DeleteDynamicMenu); }
+
+        bool hasInputRanges(void) const { return (m_type >= XanteItem::Type::InputInt) &&
+                                                 (m_type <= XanteItem::Type::InputPasswd); }
+
+        bool hasConfig(void) const { return (m_type >= XanteItem::Type::InputInt) &&
+                                            (m_type <= XanteItem::Type::YesNo); }
+
+        bool hasHelp(void) const {
+            return (m_briefHelp.isEmpty() == false) ||
+                   (m_descriptiveHelp.isEmpty() == false) ||
+                   (((m_type == XanteItem::Type::Checklist) ||
+                     (m_type == XanteItem::Type::RadioChecklist)) &&
+                    m_helpOptions.size() != 0);
+        }
+
+/*        XanteItem &operator=(XanteItem other) {
+            if (&other == this)
+                return *this;
+
+            return *this;
+        }*/
 
         /* Item properties */
-        const QString &getName(void) const { return name; }
-        const QString &getObjectId(void) const { return objectId; }
-        const QString getBriefHelp(void) const { return briefHelp; }
-        const QString getDescriptiveHelp(void) const { return descriptiveHelp; }
-        const QString getConfigBlock(void) const { return configBlock; }
-        const QString getConfigItem(void) const { return configItem; }
-        enum XanteItem::OptionType getOptionType(void) const { return optionType; }
-        int getTotalOptions(void) const { return options.size(); }
-        int getTotalHelpOptions(void) const { return helpOptions.size(); }
-        const QString getOption(void) const { return fixedOption; }
-        const QString getOption(int index) const { return options.at(index); }
-        const QString getHelpOption(int index) const { return helpOptions.at(index); }
-        const QString getDefaultValue(void) const { return defaultValue; }
-        const QString getReferencedMenu(void) const { return menuReferenceId; }
-        const QVariant getMin(void) const { return minInputRange; }
-        const QVariant getMax(void) const { return maxInputRange; }
-        enum XanteItem::Type getType(void) const { return type; }
-        enum XanteMode getMode(void) const { return mode; }
-        int getStringLength(void) const { return stringLength; }
-        const QString getEvent(enum XanteItem::Event event) const {
+        const QString name(void) const { return m_name; }
+        void name(QString name);
+
+        const QString objectId(void) const { return m_objectId; }
+        void objectId(QString objectId) { m_objectId = objectId; }
+
+        const QString briefHelp(void) const { return m_briefHelp; }
+        void briefHelp(QString briefHelp) { m_briefHelp = briefHelp; }
+
+        const QString descriptiveHelp(void) const { return m_descriptiveHelp; }
+        void descriptiveHelp(QString descriptiveHelp) { m_descriptiveHelp = descriptiveHelp; }
+
+        const QString configBlock(void) const { return m_configBlock; }
+        void configBlock(QString configBlock) { m_configBlock = configBlock; }
+
+        const QString configItem(void) const { return m_configItem; }
+        void configItem(QString configItem) { m_configItem = configItem; }
+
+        enum XanteItem::Type type(void) const { return m_type; }
+        void type(enum XanteItem::Type type) { m_type = type; }
+
+        enum XanteMode mode(void) const { return m_mode; }
+        void mode(enum XanteMode mode) { m_mode = mode; }
+
+        int stringLength(void) const { return m_stringLength; }
+        void stringLength(int stringLength) { m_stringLength = stringLength; }
+
+        template <typename T>
+        void minMax(T min, T max) {
+            m_minInputRange = QVariant(min);
+            m_maxInputRange = QVariant(max);
+        }
+
+        const QPair<QVariant, QVariant> minMax(void) const {
+            return qMakePair(m_minInputRange, m_maxInputRange);
+        }
+
+        const QString defaultValue(void) const { return m_defaultValue; }
+        void defaultValue(QString value) { m_defaultValue = value; }
+
+        const QString referencedMenu(void) const { return m_menuReferenceId; }
+        void referencedMenu(QString referencedMenu) { m_menuReferenceId = referencedMenu; }
+
+        const QString event(enum XanteItem::Event event) const {
             QMap<enum XanteItem::Event, QString>::const_iterator it;
 
-            for (it = events.constBegin(); it != events.constEnd(); it++)
+            for (it = m_events.constBegin(); it != m_events.constEnd(); it++)
                 if (it.key() == event)
                     return it.value();
 
             return QString("");
         }
 
-        void setName(QString name);
-        void setMode(enum XanteMode mode) { this->mode = mode; }
-        void setType(enum XanteItem::Type type) { this->type = type; }
-        void setConfigBlock(QString configBlock) { this->configBlock = configBlock; }
-        void setConfigItem(QString configItem) { this->configItem = configItem; }
-        void setOption(QString option) {
-            if ((type == XanteItem::Type::RadioChecklist) ||
-                (type == XanteItem::Type::Checklist))
+        void event(QString event, enum XanteItem::Event eventId) {
+            m_events[eventId] = event;
+        }
+
+        int totalOptions(void) const { return m_options.size(); }
+        const QString option(void) const { return m_fixedOption; }
+        const QString option(int index) const { return m_options.at(index); }
+        void option(QString option) {
+            if ((m_type == XanteItem::Type::RadioChecklist) ||
+                (m_type == XanteItem::Type::Checklist))
             {
-                if (options.contains(option) == false)
-                    options.append(option);
-
-                optionType = XanteItem::OptionType::List;
-            } else {
-                fixedOption = option;
-                optionType = XanteItem::OptionType::Fixed;
-            }
+                if (m_options.contains(option) == false)
+                    m_options.append(option);
+            } else
+                m_fixedOption = option;
         }
 
-        void setDefaultValue(QString value) { defaultValue = value; }
-        void setEvent(QString event, enum XanteItem::Event eventId) {
-            events[eventId] = event;
-        }
-
-        void setStringLength(int length) { stringLength = length; }
-        void setBriefHelp(QString help) { briefHelp = help; }
-        void setDescriptiveHelp(QString help) { descriptiveHelp = help; }
-        void setHelpOption(QString help) {
-            if (helpOptions.contains(help) == false)
-                helpOptions.append(help);
-        }
-
-        bool hasEvents(void) const { return events.size() != 0; }
-        bool hasOptions(void) const { return (type >= XanteItem::Type::InputInt) &&
-                                              (type <= XanteItem::Type::DeleteDynamicMenu); }
-        bool hasInputRanges(void) const { return (type >= XanteItem::Type::InputInt) &&
-                                                   (type <= XanteItem::Type::InputPasswd); }
-        bool hasConfig(void) const { return (type >= XanteItem::Type::InputInt) &&
-                                             (type <= XanteItem::Type::YesNo); }
-
-        bool hasHelp(void) const {
-            return (briefHelp.isEmpty() == false) ||
-                   (descriptiveHelp.isEmpty() == false) ||
-                   (((type == XanteItem::Type::Checklist) ||
-                     (type == XanteItem::Type::RadioChecklist)) &&
-                    helpOptions.size() != 0);
-        }
-
-        template <typename T>
-        void setMinMax(T min, T max) {
-            minInputRange = QVariant(min);
-            maxInputRange = QVariant(max);
+        int totalHelpOptions(void) const { return m_helpOptions.size(); }
+        const QString helpOption(int index) const { return m_helpOptions.at(index); }
+        void helpOption(QString help) {
+            if (m_helpOptions.contains(help) == false)
+                m_helpOptions.append(help);
         }
 
     private:
-        QString applicationName, menuName, name, objectId, briefHelp,
-                descriptiveHelp, configBlock, configItem, fixedOption,
-                defaultValue, menuReferenceId;
+        QString m_applicationName, m_menuName, m_name, m_objectId, m_briefHelp,
+                m_descriptiveHelp, m_configBlock, m_configItem, m_fixedOption,
+                m_defaultValue, m_menuReferenceId;
 
-        QVariant minInputRange, maxInputRange;
-        QList<QString> options, helpOptions;
-        QMap<enum XanteItem::Type, QString> typeDescription;
-        QMap<enum XanteItem::Event, QString> events;
-        enum XanteMode mode;
-        enum XanteItem::Type type;
-        enum XanteItem::OptionType optionType;
-        int stringLength;
+        QVariant m_minInputRange, m_maxInputRange;
+        QList<QString> m_options, m_helpOptions;
+        QMap<enum XanteItem::Type, QString> m_typeDescription;
+        QMap<enum XanteItem::Event, QString> m_events;
+        enum XanteMode m_mode;
+        enum XanteItem::Type m_type;
+        int m_stringLength;
 
         void preLoad(void);
         void parse(QJsonObject item);
@@ -222,81 +234,94 @@ class XanteMenu
         XanteMenu() {}
         XanteMenu(QString applicationName, QJsonObject menu);
         XanteMenu(QString applicationName, QString name);
-        XanteMenu(QString objectId) : objectId(objectId) {}
+        XanteMenu(QString objectId) : m_objectId(objectId) {}
+
+        int totalItems(void) { return m_items.size(); }
+        XanteItem &itemAt(int index) { return m_items[index]; }
+        void itemMove(int from, int to) { m_items.move(from, to); }
+        void addItem(XanteItem item) { m_items.append(item); }
+        void removeItem(int index) { m_items.removeAt(index); }
 
         void write(QJsonObject &root) const;
-        int totalItems(void) { return items.size(); }
-        XanteItem &itemAt(int index) { return items[index]; }
+        bool hasEvents(void) const { return m_events.size() != 0; }
+
+        bool operator ==(const XanteMenu &other) const {
+            return m_objectId.compare(other.m_objectId) == 0;
+        }
+
+        bool operator ==(const QString &objectId) const {
+            return m_objectId.compare(objectId) == 0;
+        }
 
         /* Menu properties */
-        const QString getName(void) const { return name; }
-        const QString getObjectId(void) const { return objectId; }
-        enum XanteMenu::Type getType(void) const { return type; }
-        enum XanteMenu::DynamicType getDynamicType(void) const { return dynamicType; }
-        enum XanteMode getMode(void) const { return mode; }
-        int getDynamicCopies(void) const { return dynamicCopies; }
-        const QStringList getDynamicOptions(void) const { return copies; }
-        const QString getDynamicOriginBlock(void) const { return dynamicOriginBlock; }
-        const QString getDynamicOriginItem(void) const { return dynamicOriginItem; }
-        const QString getBlockPrefix(void) const { return dynamicBlockPrefix; }
-        const QString getEvent(enum XanteMenu::Event event) const {
+        const QString name(void) const { return m_name; }
+        void name(QString name);
+
+        const QString objectId(void) const { return m_objectId; }
+        void objectId(QString objectId) { m_objectId = objectId; }
+
+        enum XanteMenu::Type type(void) const { return m_type; }
+        void type(enum XanteMenu::Type type) { m_type = type; }
+
+        enum XanteMenu::DynamicType dynamicType(void) const { return m_dynamicType; }
+        void dynamicType(enum XanteMenu::DynamicType dynamicType) { m_dynamicType = dynamicType; }
+
+        enum XanteMode mode(void) const { return m_mode; }
+        void mode(enum XanteMode mode) { m_mode = mode; }
+
+        const QString event(enum XanteMenu::Event event) const {
             QMap<enum XanteMenu::Event, QString>::const_iterator it;
 
-            for (it = events.constBegin(); it != events.constEnd(); it++)
+            for (it = m_events.constBegin(); it != m_events.constEnd(); it++)
                 if (it.key() == event)
                     return it.value();
 
             return QString("");
         }
 
-        bool hasEvents(void) const { return events.size() != 0; }
-
-        void setName(QString name);
-        void setType(enum XanteMenu::Type type) { this->type = type; }
-        void setMode(enum XanteMode mode) { this->mode = mode; }
-        void setDynamic(int dynamicCopies) {
-            this->dynamicCopies = dynamicCopies;
-            dynamicType = XanteMenu::DynamicType::FixedSize;
+        void event(QString event, enum XanteMenu::Event eventId) {
+            m_events.insert(eventId, event);
         }
 
-        void setDynamic(QString blockPrefix, QString originBlock, QString originItem) {
-            dynamicBlockPrefix = blockPrefix;
-            dynamicOriginBlock = originBlock;
-            dynamicOriginItem = originItem;
-            dynamicType = XanteMenu::DynamicType::DynamicOptions;
+        int dynamicCopies(void) const { return m_dynamicCopies; }
+        void dynamicCopies(int dynamicCopies) {
+            m_dynamicCopies = dynamicCopies;
+            m_dynamicType = XanteMenu::DynamicType::FixedSize;
         }
 
-        void setDynamic(QString copy) {
-            if (copies.contains(copy) == false)
-                copies.append(copy);
+        const QStringList dynamicOptions(void) const { return m_copies; }
+        void dynamicOptions(QString copy) {
+            if (m_copies.contains(copy) == false)
+                m_copies.append(copy);
 
-            dynamicType = XanteMenu::DynamicType::FixedOptions;
+            m_dynamicType = XanteMenu::DynamicType::FixedOptions;
         }
 
-        void setEvent(QString event, enum XanteMenu::Event eventId) {
-            events.insert(eventId, event);
+        const QPair<QString, QPair<QString, QString>> dynamicOrigin(void) {
+            return qMakePair(m_dynamicBlockPrefix,
+                             qMakePair(m_dynamicOriginBlock,
+                                       m_dynamicOriginItem));
         }
 
-        bool operator ==(const XanteMenu &other) const {
-            return objectId.compare(other.getObjectId()) == 0;
-        }
-
-        bool operator ==(const QString &objectId) const {
-            return this->objectId.compare(objectId) == 0;
+        void dynamicOrigin(QString blockPrefix, QString originBlock, QString originItem) {
+            m_dynamicBlockPrefix = blockPrefix;
+            m_dynamicOriginBlock = originBlock;
+            m_dynamicOriginItem = originItem;
+            m_dynamicType = XanteMenu::DynamicType::DynamicOptions;
         }
 
     private:
-        QString applicationName, name, objectId, dynamicBlockPrefix,
-                dynamicOriginBlock, dynamicOriginItem;
+        QString m_applicationName, m_name, m_objectId, m_dynamicBlockPrefix,
+                m_dynamicOriginBlock, m_dynamicOriginItem;
 
-        enum XanteMode mode;
-        enum XanteMenu::Type type;
-        enum XanteMenu::DynamicType dynamicType;
-        int dynamicCopies;
-        QStringList copies;
-        QList<XanteItem> items;
-        QMap<enum XanteMenu::Type, QString> typeDescription;
-        QMap<enum XanteMenu::Event, QString> events;
+        enum XanteMode m_mode;
+        enum XanteMenu::Type m_type;
+        enum XanteMenu::DynamicType m_dynamicType;
+        int m_dynamicCopies;
+        QStringList m_copies;
+        QList<XanteItem> m_items;
+        QMap<enum XanteMenu::Type, QString> m_typeDescription;
+        QMap<enum XanteMenu::Event, QString> m_events;
 
         void preLoad(void);
         void parse(QJsonObject menu);
@@ -320,64 +345,86 @@ class XanteJTF
                  const QString version, const int revision, const int build,
                  const bool beta)
             :
-                applicationName(applicationName),
-                description(description),
-                company(company),
-                plugin(plugin),
-                cfgPathname(cfgPathname),
-                logPathname(logPathname),
-                version(version),
-                revision(revision),
-                build(build),
-                beta(beta)
+                m_applicationName(applicationName),
+                m_description(description),
+                m_company(company),
+                m_plugin(plugin),
+                m_cfgPathname(cfgPathname),
+                m_logPathname(logPathname),
+                m_version(version),
+                m_revision(revision),
+                m_build(build),
+                m_beta(beta)
         {
             buildDefaultMenu();
 
             /*
              * Sets the main menu of a JTF as the first one inside our list.
              */
-            setMainMenu(menus.at(0).getObjectId());
+            mainMenu(m_menus.at(0).objectId());
 
             /* We're not empty anymore */
-            empty = false;
+            m_empty = false;
         }
 
         static QString objectIdCalc(QString applicationName,
-                                      QString menuName,
-                                      QString itemName = nullptr);
+                                    QString menuName,
+                                    QString itemName = nullptr);
 
+        /* Operations */
+        bool isEmpty(void) const { return m_empty; }
         bool save(QString filename);
-        bool isEmpty(void) const { return empty; }
-        void clear(void);
         void load(const QString &filename);
-        void addMenu(XanteMenu menu) { menus.append(menu); }
-        void setMainMenu(QString menuName) { mainMenu = menuName; }
+        void clear(void);
 
         /* JTF information */
-        const QString getMainMenu(void) { return mainMenu; }
-        const QString getApplicationName(void) const { return applicationName; }
-        const QString getDescription(void) const { return description; }
-        const QString getCompany(void) const { return company; }
-        const QString getPlugin(void) const { return plugin; }
-        const QString getCfgPathname(void) const { return cfgPathname; }
-        const QString getLogPathname(void) const { return logPathname; }
-        const QString getVersion(void) const { return version; }
-        int getRevision(void) const { return revision; }
-        int getBuild(void) const { return build; }
-        bool getBeta(void) const { return beta; }
+        const QString mainMenu(void) const { return m_mainMenu; }
+        void mainMenu(QString mainMenu) { m_mainMenu = mainMenu; }
 
-        int totalMenus(void) const { return menus.size(); }
+        const QString applicationName(void) const { return m_applicationName; }
+        void applicationName(QString applicationName) { m_applicationName = applicationName; }
+
+        const QString description(void) const { return m_description; }
+        void description(QString description) { m_description = description; }
+
+        const QString company(void) const { return m_company; }
+        void company(QString company) { m_company = company; }
+
+        const QString plugin(void) const { return m_plugin; }
+        void plugin(QString plugin) { m_plugin = plugin; }
+
+        const QString cfgPathname(void) const { return m_cfgPathname; }
+        void cfgPathname(QString cfgPathname) { m_cfgPathname = cfgPathname; }
+
+        const QString logPathname(void) const { return m_logPathname; }
+        void logPathname(QString logPathname) { m_logPathname = logPathname; }
+
+        const QString version(void) const { return m_version; }
+        void version(QString version) { m_version = version; }
+
+        int revision(void) const { return m_revision; }
+        void revision(int revision) { m_revision = revision; }
+
+        int build(void) const { return m_build; }
+        void build(int build) { m_build = build; }
+
+        bool beta(void) const { return m_beta; }
+        void beta(bool beta) { m_beta = beta; }
+
         XanteMenu &menuAt(int index);
         XanteMenu &getMenu(QString objectId);
+        int totalMenus(void) const { return m_menus.size(); }
+        void addMenu(XanteMenu menu) { m_menus.append(menu); }
+        void removeMenu(int index) { m_menus.removeAt(index); }
 
     private:
-        QString applicationName, description, company, plugin, cfgPathname,
-                logPathname, version, mainMenu;
+        QString m_applicationName, m_description, m_company, m_plugin,
+                m_cfgPathname, m_logPathname, m_version, m_mainMenu;
 
-        int revision, build, fileRevision = 1;
-        bool beta, empty = true;
-        QList<XanteMenu> menus;
-        QJsonObject jtfRoot;
+        int m_revision, m_build, m_fileRevision = 1;
+        bool m_beta, m_empty = true;
+        QList<XanteMenu> m_menus;
+        QJsonObject m_jtfRoot;
 
         void writeJtfData(QJsonObject &root);
         void writeJtfUi(QJsonObject &root);
@@ -395,74 +442,74 @@ class XanteJTF::Builder
     public:
         Builder()
             :
-                version(QString("0.1")),
-                revision(1),
-                build_(1),
-                beta(false){}
+                m_version(QString("0.1")),
+                m_revision(1),
+                m_build(1),
+                m_beta(false){}
 
         Builder &setApplicationName(const QString applicationName) {
-            this->applicationName = applicationName;
+            m_applicationName = applicationName;
             return *this;
         }
 
         Builder &setDescription(const QString description) {
-            this->description = description;
+            m_description = description;
             return *this;
         }
 
         Builder &setCompany(const QString company) {
-            this->company= company;
+            m_company= company;
             return *this;
         }
 
         Builder &setPlugin(const QString plugin) {
-            this->plugin = plugin;
+            m_plugin = plugin;
             return *this;
         }
 
         Builder &setCfgPathname(const QString cfgPathname) {
-            this->cfgPathname = cfgPathname;
+            m_cfgPathname = cfgPathname;
             return *this;
         }
 
         Builder &setLogPathname(const QString logPathname) {
-            this->logPathname = logPathname;
+            m_logPathname = logPathname;
             return *this;
         }
 
         Builder &setVersion(const QString version) {
-            this->version = version;
+            m_version = version;
             return *this;
         }
 
         Builder &setRevision(const int revision) {
-            this->revision = revision;
+            m_revision = revision;
             return *this;
         }
 
         Builder &setBuild(const int build_) {
-            this->build_ = build_;
+            m_build = build_;
             return *this;
         }
 
         Builder &setBeta(const bool beta) {
-            this->beta = beta;
+            m_beta = beta;
             return *this;
         }
 
         XanteJTF build() {
-            return XanteJTF(this->applicationName, this->description,
-                            this->company, this->plugin, this->cfgPathname,
-                            this->logPathname, this->version,
-                            this->revision, this->build_, this->beta);
+            return XanteJTF(m_applicationName, m_description,
+                            m_company, m_plugin, m_cfgPathname,
+                            m_logPathname, m_version,
+                            m_revision, m_build, m_beta);
         }
 
     private:
-        QString applicationName, description, company, plugin, cfgPathname,
-                logPathname, version;
+        QString m_applicationName, m_description, m_company, m_plugin,
+                m_cfgPathname, m_logPathname, m_version;
 
-        int revision, build_;
-        bool beta;
+        int m_revision, m_build;
+        bool m_beta;
 };
 
 #endif

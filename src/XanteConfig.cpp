@@ -32,8 +32,8 @@
 
 XanteConfig::XanteConfig()
 {
-    pathname.sprintf("%s/.%s", getenv("HOME"), APP_NAME);
-    cfg_filename.sprintf("%s.cfg", APP_NAME);
+    m_pathname.sprintf("%s/.%s", getenv("HOME"), APP_NAME);
+    m_cfgFilename.sprintf("%s.cfg", APP_NAME);
 
     readFile();
 }
@@ -45,29 +45,29 @@ XanteConfig::~XanteConfig()
 
 void XanteConfig::loadDefaultValues(void)
 {
-    window_size = QSize(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
-    window_position = QPoint(0, 0);
-    recent_opened_files = QStringList("");
+    m_windowSize = QSize(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
+    m_windowPosition = QPoint(0, 0);
+    m_recentOpenedFiles = QStringList("");
 }
 
 void XanteConfig::writeFile(void)
 {
-    QString filename = pathname + "/" + cfg_filename;
+    QString filename = m_pathname + "/" + m_cfgFilename;
     QSettings settings(filename, QSettings::IniFormat);
 
     settings.beginGroup("Window");
-    settings.setValue("window_size", window_size);
-    settings.setValue("window_position", window_position);
+    settings.setValue("windowSize", m_windowSize);
+    settings.setValue("windowPosition", m_windowPosition);
     settings.endGroup();
 
     settings.beginGroup("RecentFiles");
-    settings.setValue("files", recent_opened_files);
+    settings.setValue("files", m_recentOpenedFiles);
     settings.endGroup();
 }
 
 void XanteConfig::readFile(void)
 {
-    QString filename = pathname + "/" + cfg_filename;
+    QString filename = m_pathname + "/" + m_cfgFilename;
     QFileInfo file(filename);
 
     if (file.exists() == false) {
@@ -78,12 +78,12 @@ void XanteConfig::readFile(void)
     QSettings settings(filename, QSettings::IniFormat);
 
     settings.beginGroup("Window");
-    window_size = settings.value("window_size").value<QSize>();
-    window_position = settings.value("window_position").value<QPoint>();
+    m_windowSize = settings.value("windowSize").value<QSize>();
+    m_windowPosition = settings.value("windowPosition").value<QPoint>();
     settings.endGroup();
 
     settings.beginGroup("RecentFiles");
-    recent_opened_files = settings.value("files").value<QStringList>();
+    m_recentOpenedFiles = settings.value("files").value<QStringList>();
     settings.endGroup();
 }
 
@@ -91,15 +91,15 @@ void XanteConfig::readFile(void)
  * Updates the internal list of recent opened files. If it is a new file, returns
  * true, otherwise returns false.
  */
-bool XanteConfig::setRecentFile(const QString &filename)
+bool XanteConfig::recentFile(const QString &filename)
 {
-    if (recent_opened_files.contains(filename))
+    if (m_recentOpenedFiles.contains(filename))
         return false;
 
-    recent_opened_files.prepend(filename);
+    m_recentOpenedFiles.prepend(filename);
 
-    while (recent_opened_files.size() > MaxRecentFiles)
-        recent_opened_files.removeLast();
+    while (m_recentOpenedFiles.size() > MaxRecentFiles)
+        m_recentOpenedFiles.removeLast();
 
     return true;
 }

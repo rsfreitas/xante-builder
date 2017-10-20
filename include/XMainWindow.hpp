@@ -43,6 +43,7 @@ class XMainWindow : public QMainWindow
         XMainWindow(XanteConfig &config);
         ~XMainWindow() {}
 
+        static bool activeProject(void) { return (project != nullptr); }
         static XanteProject &getProject(void) { return *project; }
 
     protected:
@@ -57,6 +58,7 @@ class XMainWindow : public QMainWindow
         void jtfTest();
         void aboutUs();
         void openRecentFile();
+        void projectChanged();
 
     private:
         static XanteProject *project;

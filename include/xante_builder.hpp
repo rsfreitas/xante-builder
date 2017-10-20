@@ -45,6 +45,7 @@
 #include "XDialogItem.hpp"
 #include "XDialogMenu.hpp"
 #include "XDialogJTFInfo.hpp"
+#include "XDialogItemList.hpp"
 
 #endif
 

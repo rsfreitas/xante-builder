@@ -96,7 +96,7 @@ class XProjectWizard : public QWizard
         XProjectWizard(QWidget *parent = 0);
         ~XProjectWizard();
         void accept();
-        XanteProject *getProject(void);
+        XanteProject *buildProject(void);
 
     private:
         bool releaseProject = true;

@@ -39,6 +39,7 @@ class QListWidget;
 
 class XanteProject;
 class XanteItem;
+class XanteJTF;
 
 class XDialogItem : public QWidget
 {
@@ -52,6 +53,7 @@ class XDialogItem : public QWidget
 
         void setSelection(int selectedMenuIndex, int selectedItemIndex);
         void clear(void);
+        void saveCurrentState(void);
 
     private slots:
         void selectItemType(int index);
@@ -63,6 +65,10 @@ class XDialogItem : public QWidget
 
     protected:
         void hideEvent(QHideEvent *event) override;
+
+    signals:
+        void treeViewNeedsUpdate();
+        void projectHasChanges();
 
     private:
         enum LineEdit {
@@ -147,6 +153,7 @@ class XDialogItem : public QWidget
         void setupConfigWidgets(const XanteItem &item);
         void setupInputRangesWidgets(const XanteItem &item);
         void setupOptionsWidgets(const XanteItem &item);
+        void setupMenuReferences(const XanteItem &item, XanteJTF &jtf);
 
         void disableAllWidgets(void);
         void enableInputRanges(int type);

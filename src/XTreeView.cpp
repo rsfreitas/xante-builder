@@ -27,6 +27,7 @@
 #include <QAction>
 #include <QTreeView>
 #include <QApplication>
+#include <QMessageBox>
 
 #include "xante_builder.hpp"
 
@@ -48,10 +49,6 @@ void XTreeView::createRightClickMenu(void)
                                 &XTreeView::addMenu);
 
     acAddMenu->setStatusTip(tr("Add a new menu into the JTF file."));
-    acRenameMenu = menu->addAction(tr("Rename menu"), this,
-                                   &XTreeView::renameMenu);
-
-    acRenameMenu->setStatusTip(tr("Rename the selected menu."));
     acAddItem = menu->addAction(tr("Add new item"), this,
                                 &XTreeView::addItem);
 
@@ -75,7 +72,6 @@ void XTreeView::createRightClickMenu(void)
 void XTreeView::controlDialogActions(bool enable)
 {
     acAddMenu->setEnabled(enable);
-    acRenameMenu->setEnabled(enable);
     acAddItem->setEnabled(enable);
     acCopy->setEnabled(enable);
     acPaste->setEnabled(enable);
@@ -98,10 +94,18 @@ void XTreeView::mousePressEvent(QMouseEvent *event)
         QModelIndex index = indexAt(event->pos()),
                     parentIndex = index.parent();
 
-        if (parentIndex.isValid() || index.isValid())
-            selectedLine = true;
-        else
-            selectedLine = false;
+        currentSelectedMenu = -1;
+        currentSelectedItem = -1;
+
+        if (parentIndex.isValid()) {
+            selectedLine = XTreeView::SelectedLine::ItemLine;
+            currentSelectedMenu = parentIndex.row();
+            currentSelectedItem = index.row();
+        } else if (index.isValid()) {
+            selectedLine = XTreeView::SelectedLine::MenuLine;
+            currentSelectedMenu = index.row();
+        } else
+            selectedLine = XTreeView::SelectedLine::None;
 
         QTreeView::mousePressEvent(event);
     }
@@ -125,33 +129,151 @@ void XTreeView::displaySelectedItem(QModelIndex index)
 
 void XTreeView::addMenu()
 {
-}
+    if (selectedLine == XTreeView::SelectedLine::None) {
+        QMessageBox::warning(this, tr("Warning"),
+                             tr("You must select a line before inserting a new "
+                                "menu."));
 
-void XTreeView::renameMenu()
-{
+        return;
+    }
+
+    bool ok;
+    QString menuName = QInputDialog::getText(this, tr("Menu name"),
+                                             tr("Enter the new menu name:"),
+                                             QLineEdit::Normal, QString(""),
+                                             &ok);
+
+    if (ok && (menuName.isEmpty() == false)) {
+        XanteProject &project = XMainWindow::getProject();
+        XanteJTF &jtf = project.getJtf();
+        XanteMenu menu(jtf.applicationName(), menuName);
+        jtf.addMenu(menu);
+
+        emitSignalToUpdate();
+    }
 }
 
 void XTreeView::addItem()
 {
+    if (selectedLine != XTreeView::SelectedLine::MenuLine) {
+        QMessageBox::warning(this, tr("Warning"),
+                             tr("You must select a menu line before inserting a "
+                                "new item."));
+
+        return;
+    }
+
+    bool ok;
+    QString itemName = QInputDialog::getText(this, tr("Item name"),
+                                             tr("Enter the new item name:"),
+                                             QLineEdit::Normal, QString(""),
+                                             &ok);
+
+    if (ok && (itemName.isEmpty() == false)) {
+        XanteProject &project = XMainWindow::getProject();
+        XanteJTF &jtf = project.getJtf();
+        XanteMenu &menu = jtf.menuAt(currentSelectedMenu);
+        XanteItem item(jtf.applicationName(), menu.name(), itemName);
+        menu.addItem(item);
+
+        emitSignalToUpdate();
+    }
 }
 
 void XTreeView::copyItem()
 {
+    if (selectedLine == XTreeView::SelectedLine::None) {
+        QMessageBox::warning(this, tr("Warning"),
+                             tr("You must select a line before copying a menu "
+                                "or an item."));
+
+        return;
+    }
 }
 
 void XTreeView::pasteItem()
 {
+    if (selectedLine == XTreeView::SelectedLine::None) {
+        QMessageBox::warning(this, tr("Warning"),
+                             tr("You must select a line before pasting a menu "
+                                "or an item."));
+
+        return;
+    }
 }
 
 void XTreeView::cutItem()
 {
+    if (selectedLine == XTreeView::SelectedLine::None) {
+        QMessageBox::warning(this, tr("Warning"),
+                             tr("You must select a line before cutting a menu "
+                                "or an item."));
+
+        return;
+    }
 }
 
 void XTreeView::removeItem()
 {
+    if (selectedLine == XTreeView::SelectedLine::None) {
+        QMessageBox::warning(this, tr("Warning"),
+                             tr("You must select a line before removing an menu "
+                                "or item."));
+
+        return;
+    }
+
+    XanteProject &project = XMainWindow::getProject();
+    XanteJTF &jtf = project.getJtf();
+
+    if (jtf.totalMenus() == 1) {
+        QMessageBox::critical(this, tr("Error"),
+                              tr("You can't remove the last menu."));
+
+        return;
+    }
+
+    if (QMessageBox::question(this, tr("Removing"),
+                              QString(tr("Are you sure you want to remove the %1?"))
+                                    .arg((selectedLine == XTreeView::SelectedLine::MenuLine)
+                                        ? "menu" : "item")) == QMessageBox::No)
+    {
+        return;
+    }
+
+    if (selectedLine == XTreeView::SelectedLine::MenuLine)
+        jtf.removeMenu(currentSelectedMenu);
+    else {
+        XanteMenu &menu = jtf.menuAt(currentSelectedMenu);
+        menu.removeItem(currentSelectedItem);
+    }
+
+    emitSignalToUpdate();
 }
 
 void XTreeView::changeItemsPosition()
 {
+    if (selectedLine != XTreeView::SelectedLine::MenuLine) {
+        QMessageBox::warning(this, tr("Warning"),
+                             tr("You must select a menu line before editting "
+                                "its item's layout."));
+
+        return;
+    }
+
+    XanteProject &project = XMainWindow::getProject();
+    XanteJTF &jtf = project.getJtf();
+    XanteMenu &menu = jtf.menuAt(currentSelectedMenu);
+
+    XDialogItemList dlg(menu, this);
+
+    if (dlg.exec() == 0)
+        emitSignalToUpdate();
+}
+
+void XTreeView::emitSignalToUpdate(void)
+{
+    emit treeViewNeedsUpdate();
+    emit projectHasChanges();
 }
 

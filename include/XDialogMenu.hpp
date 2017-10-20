@@ -50,6 +50,7 @@ class XDialogMenu : public QWidget
         void setCurrentProject(int selectedMenuIndex);
         void setSelection(int selectedMenuIndex);
         void clear(void);
+        void saveCurrentState(void);
 
     public slots:
         void dynamicRadioToggled(bool checked);
@@ -59,6 +60,10 @@ class XDialogMenu : public QWidget
 
     protected:
         void hideEvent(QHideEvent *event) override;
+
+    signals:
+        void treeViewNeedsUpdate();
+        void projectHasChanges();
 
     private:
         enum LineEdit {

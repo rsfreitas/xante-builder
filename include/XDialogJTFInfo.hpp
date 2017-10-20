@@ -42,7 +42,7 @@ class XDialogJTFInfo : public QDialog
 
     public:
         XDialogJTFInfo(QWidget *parent = 0);
-        ~XDialogJTFInfo() {};
+        ~XDialogJTFInfo() {}
 
     private slots:
         void confirmOk(void);

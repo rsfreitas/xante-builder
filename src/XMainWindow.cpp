@@ -39,19 +39,20 @@ XMainWindow::XMainWindow(XanteConfig &config)
     : config(config)
 {
     dialog = new XMainDialog(this);
+    connect(dialog, SIGNAL(projectHasChanges()), this, SLOT(projectChanged()));
     createMenu();
     statusBar()->showMessage(APP_NAME);
 
     setCentralWidget(dialog);
     setWindowTitle(APP_NAME);
-    resize(config.getWindowSize());
-    move(config.getWindowPosition());
+    resize(config.windowSize());
+    move(config.windowPosition());
 }
 
 void XMainWindow::closeEvent(QCloseEvent *event)
 {
-    config.setWindowSize(size());
-    config.setWindowPosition(pos());
+    config.windowSize(size());
+    config.windowPosition(pos());
     event->accept();
 }
 
@@ -60,7 +61,7 @@ void XMainWindow::newProject()
     XProjectWizard projectWizard;
 
     if (projectWizard.exec()) {
-        project = projectWizard.getProject();
+        project = projectWizard.buildProject();
         dialog->activeProject(true);
         setWindowWidgetsEnabled(true);
     }
@@ -69,8 +70,10 @@ void XMainWindow::newProject()
 void XMainWindow::loadFile(const QString &filename)
 {
     setCurrentFile(filename);
-    setWindowTitle(QString("%1 [%2]").arg(APP_NAME).arg(filename));
     project = new XanteProject(filename);
+    setWindowTitle(QString("%1 [%2]").arg(APP_NAME)
+                                     .arg(project->getProjectName()));
+
     dialog->activeProject(true);
     setWindowWidgetsEnabled(true);
 }
@@ -90,7 +93,11 @@ void XMainWindow::openProject()
 
 void XMainWindow::saveProject()
 {
+    dialog->saveCurrentState();
     project->save();
+    acSave->setEnabled(false);
+    setWindowTitle(QString("%1 [%2]").arg(APP_NAME)
+                                     .arg(project->getProjectName()));
 }
 
 void XMainWindow::closeProject()
@@ -159,6 +166,7 @@ void XMainWindow::createMenu(void)
                                 &XMainWindow::saveProject);
 
     acSave->setStatusTip(tr("Saves the project."));
+    acSave->setEnabled(false);
     acClose = mMain->addAction(tr("&Close project"), this,
                                  &XMainWindow::closeProject);
 
@@ -166,7 +174,7 @@ void XMainWindow::createMenu(void)
     mMain->addSeparator();
 
     for (int i = 0; i < MaxRecentFiles; i++) {
-        QString file = config.getRecentFile(i);
+        QString file = config.recentFile(i);
         acRecentFiles[i] = mMain->addAction(file.isEmpty() ? tr("") : file,
                                                this,
                                                &XMainWindow::openRecentFile);
@@ -219,7 +227,6 @@ void XMainWindow::setWindowWidgetsEnabled(bool enable)
     /* Enable/Disable menu options */
     acNewProject->setEnabled(!enable);
     acOpen->setEnabled(!enable);
-    acSave->setEnabled(enable);
     acClose->setEnabled(enable);
     acJtfMainInfo->setEnabled(enable);
     acTestJtf->setEnabled(enable);
@@ -235,13 +242,13 @@ void XMainWindow::setWindowWidgetsEnabled(bool enable)
 
 void XMainWindow::setCurrentFile(const QString &filename)
 {
-    if (config.setRecentFile(filename) == false)
+    if (config.recentFile(filename) == false)
         return;
 
-    int nRecentFiles = qMin(config.recentFilesSize(), (int)MaxRecentFiles);
+    int nRecentFiles = qMin(config.totalRecentFiles(), (int)MaxRecentFiles);
 
     for (int i = 0; i < nRecentFiles; i++) {
-        QString file = config.getRecentFile(i);
+        QString file = config.recentFile(i);
         QString text = tr("&%1 %2").arg(i + 1)
                                    .arg(QFileInfo(file).fileName());
 
@@ -252,5 +259,12 @@ void XMainWindow::setCurrentFile(const QString &filename)
 
     for (int j = nRecentFiles; j < MaxRecentFiles; j++)
         acRecentFiles[j]->setVisible(false);
+}
+
+void XMainWindow::projectChanged()
+{
+    acSave->setEnabled(true);
+    setWindowTitle(QString("%1 [%2] *").arg(APP_NAME)
+                                       .arg(project->getProjectName()));
 }
 

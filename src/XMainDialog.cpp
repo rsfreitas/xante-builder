@@ -43,6 +43,24 @@ XMainDialog::XMainDialog(QWidget *parent)
     connect(tree, SIGNAL(contentChanged()), this,
             SLOT(dialogContentChanged()));
 
+    connect(tree, SIGNAL(treeViewNeedsUpdate()), this,
+            SLOT(updateTreeView()));
+
+    connect(dialogMenu, SIGNAL(treeViewNeedsUpdate()), this,
+            SLOT(updateTreeView()));
+
+    connect(dialogItem, SIGNAL(treeViewNeedsUpdate()), this,
+            SLOT(updateTreeView()));
+
+    connect(tree, SIGNAL(projectHasChanges()), this,
+            SLOT(projectChanged()));
+
+    connect(dialogMenu, SIGNAL(projectHasChanges()), this,
+            SLOT(projectChanged()));
+
+    connect(dialogItem, SIGNAL(projectHasChanges()), this,
+            SLOT(projectChanged()));
+
     QSplitter *splitter = new QSplitter(this);
     splitter->setOrientation(Qt::Horizontal);
     splitter->addWidget(tree);
@@ -74,11 +92,13 @@ void XMainDialog::setTreeContent(XTreeModel *model, bool enableMenu)
 {
     tree->setModel(model);
     tree->controlDialogActions(enableMenu);
+    tree->expandAll();
 }
 
 void XMainDialog::dialogItemSelected()
 {
     dialogMenu->hide();
+    dialogItem->hide();
     dialogItem->show();
     dialogItem->setSelection(tree->currentSelectedMenu,
                                tree->currentSelectedItem);
@@ -86,9 +106,10 @@ void XMainDialog::dialogItemSelected()
 
 void XMainDialog::dialogMenuSelected()
 {
+    dialogItem->hide();
+    dialogMenu->hide();
     dialogMenu->show();
     dialogMenu->setSelection(tree->currentSelectedMenu);
-    dialogItem->hide();
 }
 
 void XMainDialog::dialogContentChanged()
@@ -99,5 +120,23 @@ void XMainDialog::controlProjectWidgets(bool enable)
 {
     dialogMenu->setEnabled(enable);
     dialogItem->setEnabled(enable);
+}
+
+void XMainDialog::updateTreeView()
+{
+    XTreeModel *model = new XTreeModel(true, this);
+    tree->setModel(model);
+    tree->expandAll();
+}
+
+void XMainDialog::projectChanged()
+{
+    emit projectHasChanges();
+}
+
+void XMainDialog::saveCurrentState(void)
+{
+    dialogItem->saveCurrentState();
+    dialogMenu->saveCurrentState();
 }
 

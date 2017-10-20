@@ -39,40 +39,40 @@
  *
  */
 
-void XanteItem::setName(QString name)
+void XanteItem::name(QString name)
 {
-    this->name = name;
-    objectId = XanteJTF::objectIdCalc(applicationName, menuName, name);
+    m_name = name;
+    m_objectId = XanteJTF::objectIdCalc(m_applicationName, m_menuName, name);
 }
 
 void XanteItem::writeOptions(QJsonObject &root) const
 {
-    if ((type == XanteItem::Type::RadioChecklist) ||
-        (type == XanteItem::Type::Checklist))
+    if ((m_type == XanteItem::Type::RadioChecklist) ||
+        (m_type == XanteItem::Type::Checklist))
     {
         QJsonArray options;
 
-        for (int i = 0; i < this->options.size(); i++)
-            options.append(this->options.at(i));
+        for (int i = 0; i < m_options.size(); i++)
+            options.append(m_options.at(i));
 
         root["options"] = options;
     } else
-        root["options"] = fixedOption;
+        root["options"] = m_fixedOption;
 }
 
 QJsonObject XanteItem::writeInputRanges(void) const
 {
     QJsonObject inputRanges;
 
-    if (type == XanteItem::Type::InputString)
-        inputRanges["string_length"] = stringLength;
+    if (m_type == XanteItem::Type::InputString)
+        inputRanges["string_length"] = m_stringLength;
     else {
-        if (type == XanteItem::Type::InputInt) {
-            inputRanges["max"] = maxInputRange.toInt();
-            inputRanges["min"] = minInputRange.toInt();
-        } else if (type == XanteItem::Type::InputFloat) {
-            inputRanges["max"] = maxInputRange.toFloat();
-            inputRanges["min"] = minInputRange.toFloat();
+        if (m_type == XanteItem::Type::InputInt) {
+            inputRanges["max"] = m_maxInputRange.toInt();
+            inputRanges["min"] = m_minInputRange.toInt();
+        } else if (m_type == XanteItem::Type::InputFloat) {
+            inputRanges["max"] = m_maxInputRange.toFloat();
+            inputRanges["min"] = m_minInputRange.toFloat();
         }
     }
 
@@ -83,8 +83,8 @@ QJsonObject XanteItem::writeConfig(void) const
 {
     QJsonObject config;
 
-    config["block"] = configBlock;
-    config["item"] = configItem;
+    config["block"] = m_configBlock;
+    config["item"] = m_configItem;
 
     return config;
 }
@@ -103,7 +103,7 @@ QJsonObject XanteItem::writeEvents(void) const
 
     while (i.hasNext()) {
         i.next();
-        QString evValue = this->events.value(i.value(), QString(""));
+        QString evValue = m_events.value(i.value(), QString(""));
 
         if (evValue.isEmpty() == false)
             events[i.key()] = evValue;
@@ -116,21 +116,21 @@ QJsonObject XanteItem::writeHelp(void) const
 {
     QJsonObject help;
 
-    if (briefHelp.isEmpty() == false)
-        help["brief"] = briefHelp;
+    if (m_briefHelp.isEmpty() == false)
+        help["brief"] = m_briefHelp;
 
-    if (descriptiveHelp.isEmpty() == false)
-        help["description"] = descriptiveHelp;
+    if (m_descriptiveHelp.isEmpty() == false)
+        help["description"] = m_descriptiveHelp;
 
-    if (((type == XanteItem::Type::Checklist) ||
-         (type == XanteItem::Type::RadioChecklist)) &&
-        helpOptions.size() != 0)
+    if (((m_type == XanteItem::Type::Checklist) ||
+         (m_type == XanteItem::Type::RadioChecklist)) &&
+        m_helpOptions.size() != 0)
     {
         QJsonArray options;
-        int i, t = helpOptions.size();
+        int i, t = m_helpOptions.size();
 
         for (i = 0; i < t; i++)
-            options.append(helpOptions.at(i));
+            options.append(m_helpOptions.at(i));
 
         help["options"] = options;
     }
@@ -143,18 +143,18 @@ QJsonObject XanteItem::writeHelp(void) const
  */
 void XanteItem::write(QJsonObject &root) const
 {
-    root["name"] = name;
-    root["object_id"] = objectId;
-    root["mode"] = mode;
-    root["type"] = typeDescription.value(type);
+    root["name"] = m_name;
+    root["object_id"] = m_objectId;
+    root["mode"] = m_mode;
+    root["type"] = m_typeDescription.value(m_type);
 
-    if (defaultValue.isEmpty() == false)
-        root["default_value"] = defaultValue;
+    if (m_defaultValue.isEmpty() == false)
+        root["default_value"] = m_defaultValue;
 
-    if ((type == XanteItem::Type::Menu) ||
-        (type == XanteItem::Type::DeleteDynamicMenu))
+    if ((m_type == XanteItem::Type::Menu) ||
+        (m_type == XanteItem::Type::DeleteDynamicMenu))
     {
-        root["menu_id"] = menuReferenceId;
+        root["menu_id"] = m_menuReferenceId;
     }
 
     if (hasOptions())
@@ -175,30 +175,30 @@ void XanteItem::write(QJsonObject &root) const
 
 void XanteItem::preLoad(void)
 {
-    typeDescription.insert(XanteItem::Type::Menu, QString("menu"));
-    typeDescription.insert(XanteItem::Type::InputInt, QString("input-int"));
-    typeDescription.insert(XanteItem::Type::InputFloat, QString("input-float"));
-    typeDescription.insert(XanteItem::Type::InputDate, QString("input-date"));
-    typeDescription.insert(XanteItem::Type::InputTime, QString("input-time"));
-    typeDescription.insert(XanteItem::Type::InputString, QString("input-string"));
-    typeDescription.insert(XanteItem::Type::InputPasswd, QString("input-passwd"));
-    typeDescription.insert(XanteItem::Type::Calendar, QString("calendar"));
-    typeDescription.insert(XanteItem::Type::Timebox, QString("timebox"));
-    typeDescription.insert(XanteItem::Type::RadioChecklist, QString("radio-checklist"));
-    typeDescription.insert(XanteItem::Type::Checklist, QString("checklist"));
-    typeDescription.insert(XanteItem::Type::YesNo, QString("yesno"));
-    typeDescription.insert(XanteItem::Type::DynamicMenu, QString("dynamic-menu"));
-    typeDescription.insert(XanteItem::Type::DeleteDynamicMenu, QString("delete-dynamic-menu"));
-    typeDescription.insert(XanteItem::Type::AddDynamicMenu, QString("add-dynamic-menu"));
+    m_typeDescription.insert(XanteItem::Type::Menu, QString("menu"));
+    m_typeDescription.insert(XanteItem::Type::InputInt, QString("input-int"));
+    m_typeDescription.insert(XanteItem::Type::InputFloat, QString("input-float"));
+    m_typeDescription.insert(XanteItem::Type::InputDate, QString("input-date"));
+    m_typeDescription.insert(XanteItem::Type::InputTime, QString("input-time"));
+    m_typeDescription.insert(XanteItem::Type::InputString, QString("input-string"));
+    m_typeDescription.insert(XanteItem::Type::InputPasswd, QString("input-passwd"));
+    m_typeDescription.insert(XanteItem::Type::Calendar, QString("calendar"));
+    m_typeDescription.insert(XanteItem::Type::Timebox, QString("timebox"));
+    m_typeDescription.insert(XanteItem::Type::RadioChecklist, QString("radio-checklist"));
+    m_typeDescription.insert(XanteItem::Type::Checklist, QString("checklist"));
+    m_typeDescription.insert(XanteItem::Type::YesNo, QString("yesno"));
+    m_typeDescription.insert(XanteItem::Type::DynamicMenu, QString("dynamic-menu"));
+    m_typeDescription.insert(XanteItem::Type::DeleteDynamicMenu, QString("delete-dynamic-menu"));
+    m_typeDescription.insert(XanteItem::Type::AddDynamicMenu, QString("add-dynamic-menu"));
 }
 
 XanteItem::XanteItem(QString applicationName, QString menuName, QString name)
-    : applicationName(applicationName), menuName(menuName), name(name)
+    : m_applicationName(applicationName), m_menuName(menuName), m_name(name)
 {
     preLoad();
-    setName(name);
-    setMode(XanteMode::XanteAccessEdit);
-    setType(XanteItem::Type::Menu);
+    this->name(name);
+    mode(XanteMode::XanteAccessEdit);
+    type(XanteItem::Type::Menu);
 }
 
 enum XanteItem::Type XanteItem::toXanteItem(const QString &type)
@@ -243,24 +243,24 @@ void XanteItem::parseCommonData(QJsonObject item)
 
     /* Load item from JSON */
 
-    name = item["name"].toString();
-    objectId = item["object_id"].toString();
-    defaultValue = item["default_value"].toString();
-    menuReferenceId = item["menuId"].toString();
+    m_name = item["name"].toString();
+    m_objectId = item["object_id"].toString();
+    m_defaultValue = item["default_value"].toString();
+    m_menuReferenceId = item["menuId"].toString();
 
     tmp = item["mode"].toInt();
-    mode = (enum XanteMode)tmp;
-    type = toXanteItem(item["type"].toString());
+    m_mode = (enum XanteMode)tmp;
+    m_type = toXanteItem(item["type"].toString());
 
     QJsonValue value = item["options"];
 
     if (value.type() == QJsonValue::String)
-        fixedOption = value.toString();
+        m_fixedOption = value.toString();
     else {
         QJsonArray options = value.toArray();
 
         foreach(const QJsonValue &v, options)
-            this->options.append(v.toString());
+            m_options.append(v.toString());
     }
 }
 
@@ -286,7 +286,7 @@ void XanteItem::parseEventsData(QJsonObject item)
             value = events[i.key()];
 
             if (value.type() == QJsonValue::String)
-                this->events.insert(i.value(), value.toString());
+                m_events.insert(i.value(), value.toString());
         }
     }
 }
@@ -300,8 +300,8 @@ void XanteItem::parseConfigData(QJsonObject item)
 
     QJsonObject config = value.toObject();
 
-    configBlock = config["block"].toString();
-    configItem = config["item"].toString();
+    m_configBlock = config["block"].toString();
+    m_configItem = config["item"].toString();
 }
 
 void XanteItem::parseRangesData(QJsonObject item)
@@ -313,9 +313,9 @@ void XanteItem::parseRangesData(QJsonObject item)
 
     QJsonObject inputRanges = value.toObject();
 
-    stringLength = inputRanges["string_length"].toInt();
-    minInputRange = QVariant(inputRanges["min"].toDouble());
-    maxInputRange = QVariant(inputRanges["max"].toDouble());
+    m_stringLength = inputRanges["string_length"].toInt();
+    m_minInputRange = QVariant(inputRanges["min"].toDouble());
+    m_maxInputRange = QVariant(inputRanges["max"].toDouble());
 }
 
 void XanteItem::parseHelpData(QJsonObject item)
@@ -327,13 +327,13 @@ void XanteItem::parseHelpData(QJsonObject item)
 
     QJsonObject help = value.toObject();
 
-    briefHelp = help["brief"].toString();
-    descriptiveHelp = help["description"].toString();
+    m_briefHelp = help["brief"].toString();
+    m_descriptiveHelp = help["description"].toString();
 
     QJsonArray options = help["options"].toArray();
 
     foreach(const QJsonValue &v, options)
-        helpOptions.append(v.toString());
+        m_helpOptions.append(v.toString());
 }
 
 void XanteItem::parse(QJsonObject item)
@@ -347,7 +347,7 @@ void XanteItem::parse(QJsonObject item)
 
 XanteItem::XanteItem(QString applicationName, QString menuName,
     QJsonObject item)
-    : applicationName(applicationName), menuName(menuName)
+    : m_applicationName(applicationName), m_menuName(menuName)
 {
     preLoad();
     parse(item);
@@ -359,26 +359,26 @@ XanteItem::XanteItem(QString applicationName, QString menuName,
  *
  */
 
-void XanteMenu::setName(QString name)
+void XanteMenu::name(QString name)
 {
-    this->name = name;
-    objectId = XanteJTF::objectIdCalc(applicationName, name);
+    m_name = name;
+    m_objectId = XanteJTF::objectIdCalc(m_applicationName, name);
 }
 
 void XanteMenu::preLoad(void)
 {
-    typeDescription.insert(XanteMenu::Type::Dynamic, QString("dynamic"));
-    typeDescription.insert(XanteMenu::Type::Default, QString("default"));
+    m_typeDescription.insert(XanteMenu::Type::Dynamic, QString("dynamic"));
+    m_typeDescription.insert(XanteMenu::Type::Default, QString("default"));
 }
 
 void XanteMenu::parseCommonData(QJsonObject menu)
 {
     int tmp;
 
-    name = menu["name"].toString();
-    objectId = menu["object_id"].toString();
+    m_name = menu["name"].toString();
+    m_objectId = menu["object_id"].toString();
     tmp = menu["mode"].toInt();
-    mode = (enum XanteMode)tmp;
+    m_mode = (enum XanteMode)tmp;
 }
 
 void XanteMenu::parseEventsData(QJsonObject menu)
@@ -401,7 +401,7 @@ void XanteMenu::parseEventsData(QJsonObject menu)
             value = events[i.key()];
 
             if (value.type() == QJsonValue::String)
-                this->events.insert(i.value(), value.toString());
+                m_events.insert(i.value(), value.toString());
         }
     }
 }
@@ -413,35 +413,35 @@ void XanteMenu::parseDynamicData(QJsonObject menu)
     if ((value.type() == QJsonValue::Undefined) ||
         (value.type() == QJsonValue::Null))
     {
-        type = XanteMenu::Type::Default;
+        m_type = XanteMenu::Type::Default;
     } else {
         QString tmp = value.toString();
 
         if (tmp == "dynamic") {
             QJsonObject dynamic = menu["dynamic"].toObject();
 
-            type = XanteMenu::Type::Dynamic;
+            m_type = XanteMenu::Type::Dynamic;
             value = dynamic["copies"];
 
             if (value.type() == QJsonValue::Double) {
-                dynamicType = XanteMenu::FixedSize;
-                dynamicCopies = value.toInt();
+                m_dynamicType = XanteMenu::FixedSize;
+                m_dynamicCopies = value.toInt();
             } else if (value.type() == QJsonValue::Array) {
                 QJsonArray copies = value.toArray();
-                dynamicType = XanteMenu::FixedOptions;
+                m_dynamicType = XanteMenu::FixedOptions;
 
                 foreach(const QJsonValue &v, copies)
-                    this->copies.append(v.toString());
+                    m_copies.append(v.toString());
             } else {
                 QJsonObject origin = dynamic["origin"].toObject();
 
-                dynamicType = XanteMenu::DynamicOptions;
-                dynamicOriginBlock = origin["block"].toString();
-                dynamicOriginItem = origin["item"].toString();
-                dynamicBlockPrefix = dynamic["block_prefix"].toString();
+                m_dynamicType = XanteMenu::DynamicOptions;
+                m_dynamicOriginBlock = origin["block"].toString();
+                m_dynamicOriginItem = origin["item"].toString();
+                m_dynamicBlockPrefix = dynamic["block_prefix"].toString();
             }
         } else
-            type = XanteMenu::Type::Default;
+            m_type = XanteMenu::Type::Default;
     }
 }
 
@@ -450,8 +450,8 @@ void XanteMenu::parseItems(QJsonObject menu)
     QJsonArray jitems = menu["items"].toArray();
 
     foreach(const QJsonValue &v, jitems) {
-        XanteItem it(applicationName, name, v.toObject());
-        items.append(it);
+        XanteItem it(m_applicationName, m_name, v.toObject());
+        m_items.append(it);
     }
 }
 
@@ -464,23 +464,23 @@ void XanteMenu::parse(QJsonObject menu)
 }
 
 XanteMenu::XanteMenu(QString applicationName, QJsonObject menu)
-    : applicationName(applicationName)
+    : m_applicationName(applicationName)
 {
     preLoad();
     parse(menu);
 }
 
 XanteMenu::XanteMenu(QString applicationName, QString name)
-    : applicationName(applicationName), name(name)
+    : m_applicationName(applicationName), m_name(name)
 {
     preLoad();
-    setMode(XanteMode::XanteAccessEdit);
-    setName(name);
-    setType(XanteMenu::Type::Default);
+    mode(XanteMode::XanteAccessEdit);
+    this->name(name);
+    type(XanteMenu::Type::Default);
 
     /* We always create an empty item for a new menu */
     XanteItem it(applicationName, name, QString("Item"));
-    items.append(it);
+    m_items.append(it);
 }
 
 QJsonObject XanteMenu::writeEvents(void) const
@@ -495,7 +495,7 @@ QJsonObject XanteMenu::writeEvents(void) const
 
     while (i.hasNext()) {
         i.next();
-        QString evValue = this->events.value(i.value(), QString(""));
+        QString evValue = m_events.value(i.value(), QString(""));
 
         if (evValue.isEmpty() == false)
             events[i.key()] = evValue;
@@ -509,21 +509,22 @@ QJsonObject XanteMenu::writeDynamic(void) const
     QJsonArray optArray;
     QJsonObject origin, dynamic;
 
-    switch (dynamicType) {
+    switch (m_dynamicType) {
         case XanteMenu::DynamicType::FixedSize:
-            dynamic["copies"] = dynamicCopies;
+            dynamic["copies"] = m_dynamicCopies;
             break;
 
         case XanteMenu::DynamicType::FixedOptions:
-            for (int i = 0; i < copies.size(); i++)
-                optArray.append(copies.at(i));
+            for (int i = 0; i < m_copies.size(); i++)
+                optArray.append(m_copies.at(i));
 
             dynamic["copies"] = optArray;
             break;
 
         case XanteMenu::DynamicType::DynamicOptions:
-            origin["block"] = dynamicOriginBlock;
-            origin["item"] = dynamicOriginItem;
+            origin["block"] = m_dynamicOriginBlock;
+            origin["item"] = m_dynamicOriginItem;
+            dynamic["block_prefix"] = m_dynamicBlockPrefix;
             dynamic["origin"] = origin;
             break;
 
@@ -538,21 +539,21 @@ void XanteMenu::write(QJsonObject &root) const
 {
     QJsonArray jitems;
 
-    foreach(const XanteItem item, items) {
+    foreach(const XanteItem item, m_items) {
         QJsonObject it;
         item.write(it);
         jitems.append(it);
     }
 
-    root["mode"] = mode;
-    root["name"] = name;
-    root["object_id"] = objectId;
-    root["type"] = typeDescription.value(type);
+    root["mode"] = m_mode;
+    root["name"] = m_name;
+    root["object_id"] = m_objectId;
+    root["type"] = m_typeDescription.value(m_type);
 
     if (hasEvents())
         root["events"] = writeEvents();
 
-    if (type == XanteMenu::Type::Dynamic)
+    if (m_type == XanteMenu::Type::Dynamic)
         root["dynamic"] = writeDynamic();
 
     root["items"] = jitems;
@@ -568,25 +569,25 @@ void XanteJTF::writeJtfInternal(QJsonObject &root)
 {
     QJsonObject japplication;
 
-    japplication["version"] = version;
-    japplication["revision"] = revision;
-    japplication["build"] = build;
-    japplication["beta"] = beta;
+    japplication["version"] = m_version;
+    japplication["revision"] = m_revision;
+    japplication["build"] = m_build;
+    japplication["beta"] = m_beta;
 
-    root["jtf_revision"] = fileRevision;
+    root["jtf_revision"] = m_fileRevision;
     root["language"] = "en-us";
     root["application"] = japplication;
 }
 
 void XanteJTF::writeJtfGeneral(QJsonObject &root)
 {
-    root["name"] = applicationName;
-    root["description"] = description;
-    root["plugin"] = plugin;
-    root["config_pathname"] = cfgPathname;
-    root["log_pathname"] = logPathname;
+    root["name"] = m_applicationName;
+    root["description"] = m_description;
+    root["plugin"] = m_plugin;
+    root["config_pathname"] = m_cfgPathname;
+    root["log_pathname"] = m_logPathname;
     root["log_level"] = "info";
-    root["company"] = company;
+    root["company"] = m_company;
 }
 
 void XanteJTF::writeJtfUi(QJsonObject &root)
@@ -594,19 +595,20 @@ void XanteJTF::writeJtfUi(QJsonObject &root)
     QJsonArray jmenus;
     XanteMenu menu;
 
-    foreach (const XanteMenu menu, menus) {
+    foreach (const XanteMenu menu, m_menus) {
         QJsonObject m;
         menu.write(m);
         jmenus.append(m);
     }
 
-    root["main_menu"] = mainMenu;
+    root["main_menu"] = m_mainMenu;
     root["menus"] = jmenus;
 }
 
 void XanteJTF::writeJtfData(QJsonObject &root)
 {
     QJsonObject jinternal, jui, jgeneral;
+
     writeJtfInternal(jinternal);
     writeJtfUi(jui);
     writeJtfGeneral(jgeneral);
@@ -643,11 +645,11 @@ void XanteJTF::load(const QString &filename)
     file.close();
 
     QJsonDocument d = QJsonDocument::fromJson(data.toUtf8());
-    jtfRoot = d.object();
+    m_jtfRoot = d.object();
     loadJtfFromFile();
 
     /* We're not empty anymore */
-    empty = false;
+    m_empty = false;
 }
 
 void XanteJTF::loadJtfFromFile(void)
@@ -659,42 +661,42 @@ void XanteJTF::loadJtfFromFile(void)
 
 void XanteJTF::loadJtfInternal(void)
 {
-    QJsonValue value = jtfRoot.value(QString("internal"));
+    QJsonValue value = m_jtfRoot.value(QString("internal"));
     QJsonObject internal = value.toObject();
 
-    fileRevision = internal["jtf_revision"].toInt();
+    m_fileRevision = internal["jtf_revision"].toInt();
     value = internal["application"];
     QJsonObject application = value.toObject();
 
-    version = application["version"].toString();
-    revision = application["revision"].toInt();
-    build = application["build"].toInt();
-    beta = application["beta"].toBool();
+    m_version = application["version"].toString();
+    m_revision = application["revision"].toInt();
+    m_build = application["build"].toInt();
+    m_beta = application["beta"].toBool();
 }
 
 void XanteJTF::loadJtfGeneral(void)
 {
-    QJsonValue value = jtfRoot.value(QString("general"));
+    QJsonValue value = m_jtfRoot.value(QString("general"));
     QJsonObject general = value.toObject();
 
-    applicationName = general["name"].toString();
-    description = general["description"].toString();
-    company = general["company"].toString();
-    plugin = general["plugin"].toString();
-    cfgPathname = general["config_pathname"].toString();
-    logPathname = general["log_pathname"].toString();
+    m_applicationName = general["name"].toString();
+    m_description = general["description"].toString();
+    m_company = general["company"].toString();
+    m_plugin = general["plugin"].toString();
+    m_cfgPathname = general["config_pathname"].toString();
+    m_logPathname = general["log_pathname"].toString();
 }
 
 void XanteJTF::loadJtfUi(void)
 {
-    QJsonValue value = jtfRoot.value(QString("ui"));
+    QJsonValue value = m_jtfRoot.value(QString("ui"));
     QJsonObject ui = value.toObject();
     QJsonArray jmenus = ui["menus"].toArray();
-    mainMenu = ui["main_menu"].toString();
+    m_mainMenu = ui["main_menu"].toString();
 
     foreach(const QJsonValue &v, jmenus) {
-        XanteMenu m(applicationName, v.toObject());
-        menus.append(m);
+        XanteMenu m(m_applicationName, v.toObject());
+        m_menus.append(m);
     }
 }
 
@@ -721,27 +723,27 @@ QString XanteJTF::objectIdCalc(QString applicationName, QString menuName,
 
 void XanteJTF::buildDefaultMenu(void)
 {
-    XanteMenu m(applicationName, QString("Main"));
-    menus.append(m);
+    XanteMenu m(m_applicationName, QString("Main"));
+    m_menus.append(m);
 }
 
 XanteMenu &XanteJTF::getMenu(QString objectId)
 {
-    int index = menus.indexOf(objectId);
+    int index = m_menus.indexOf(objectId);
 
     return menuAt(index);
 }
 
 XanteMenu &XanteJTF::menuAt(int index)
 {
-    if ((index < 0) || (index > menus.size()))
+    if ((index < 0) || (index > m_menus.size()))
         throw std::out_of_range("Menu not found.");
 
-    return menus[index];
+    return m_menus[index];
 }
 
 void XanteJTF::clear(void)
 {
-    empty = true;
+    m_empty = true;
 }
 

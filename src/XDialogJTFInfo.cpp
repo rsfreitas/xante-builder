@@ -156,12 +156,41 @@ void XDialogJTFInfo::createWidgets(void)
 
 void XDialogJTFInfo::confirmOk(void)
 {
-    /*
-     * TODO
-     *
-     * 1 - Validate all widgets content.
-     * 2 - Update the JTF object.
-     */
+    XanteProject &project = XMainWindow::getProject();
+    XanteJTF &jtf = project.getJtf();
+    QString data;
+
+    data = edit[XDialogJTFInfo::editWidget::ApplicationName]->text();
+    jtf.applicationName(data);
+
+    data = edit[XDialogJTFInfo::editWidget::Description]->text();
+    jtf.description(data);
+
+    data = edit[XDialogJTFInfo::editWidget::Company]->text();
+    jtf.company(data);
+
+    data = edit[XDialogJTFInfo::editWidget::Plugin]->text();
+    jtf.plugin(data);
+
+    data = edit[XDialogJTFInfo::editWidget::CfgPathname]->text();
+    jtf.cfgPathname(data);
+
+    data = edit[XDialogJTFInfo::editWidget::LogPathname]->text();
+    jtf.logPathname(data);
+
+    data = edit[XDialogJTFInfo::editWidget::Version]->text();
+    jtf.version(data);
+
+    data = edit[XDialogJTFInfo::editWidget::Revision]->text();
+    jtf.revision(data.toInt());
+
+    data = edit[XDialogJTFInfo::editWidget::Build]->text();
+    jtf.build(data.toInt());
+
+    jtf.beta(cbBeta->currentIndex() == 0 ? true : false);
+
+    XanteMenu menu = jtf.menuAt(cbMainMenu->currentIndex());
+    jtf.mainMenu(menu.objectId());
 
     done(0);
 }

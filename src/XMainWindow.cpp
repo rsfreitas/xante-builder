@@ -93,6 +93,7 @@ void XMainWindow::openProject()
 
 void XMainWindow::saveProject()
 {
+    dialog->saveCurrentState();
     project->save();
     acSave->setEnabled(false);
     setWindowTitle(QString("%1 [%2]").arg(APP_NAME)

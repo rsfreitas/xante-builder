@@ -134,3 +134,9 @@ void XMainDialog::projectChanged()
     emit projectHasChanges();
 }
 
+void XMainDialog::saveCurrentState(void)
+{
+    dialogItem->saveCurrentState();
+    dialogMenu->saveCurrentState();
+}
+

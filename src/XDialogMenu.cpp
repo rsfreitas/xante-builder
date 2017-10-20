@@ -646,3 +646,8 @@ void XDialogMenu::hideEvent(QHideEvent *event)
     event->accept();
 }
 
+void XDialogMenu::saveCurrentState(void)
+{
+    updateXanteMenu();
+}
+

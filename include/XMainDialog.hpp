@@ -45,6 +45,7 @@ class XMainDialog : public QWidget
         void activeProject(bool active);
         void setTreeContent(XTreeModel *model, bool enableMenu);
         void controlProjectWidgets(bool enable);
+        void saveCurrentState(void);
 
     private slots:
         void dialogItemSelected();

@@ -444,6 +444,7 @@ void XDialogItem::setupConfigWidgets(const XanteItem &item)
 
     lineEdit[XDialogItem::LineEdit::CfgBlock]->setText(item.configBlock());
     lineEdit[XDialogItem::LineEdit::CfgItem]->setText(item.configItem());
+    lineEdit[XDialogItem::LineEdit::DefaultValue]->setText(item.defaultValue());
 }
 
 void XDialogItem::setupEventsWidgets(const XanteItem &item)
@@ -929,6 +930,9 @@ bool XDialogItem::updateXanteItemConfig(XanteItem &item)
     data = lineEdit[XDialogItem::LineEdit::CfgItem]->text();
     item.configItem(data);
 
+    data = lineEdit[XDialogItem::LineEdit::DefaultValue]->text();
+    item.defaultValue(data);
+
     return true;
 }
 
@@ -1006,5 +1010,10 @@ void XDialogItem::hideEvent(QHideEvent *event)
     }
 
     event->accept();
+}
+
+void XDialogItem::saveCurrentState(void)
+{
+    updateXanteItem();
 }
 

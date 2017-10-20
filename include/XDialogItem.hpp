@@ -53,6 +53,7 @@ class XDialogItem : public QWidget
 
         void setSelection(int selectedMenuIndex, int selectedItemIndex);
         void clear(void);
+        void saveCurrentState(void);
 
     private slots:
         void selectItemType(int index);

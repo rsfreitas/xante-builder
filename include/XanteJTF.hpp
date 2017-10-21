@@ -72,7 +72,7 @@ class XanteItem
 
         XanteItem() {}
         XanteItem(QString applicationName, QString menuName, QJsonObject item);
-        XanteItem(QString applicationName, QString menuName, QString name);
+        XanteItem(QString applicationName, QString menuName, QString objectId, QString name);
 
         void write(QJsonObject &root) const;
         bool hasEvents(void) const { return m_events.size() != 0; }

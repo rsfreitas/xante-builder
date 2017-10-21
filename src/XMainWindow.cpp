@@ -62,6 +62,7 @@ void XMainWindow::newProject()
 
     if (projectWizard.exec()) {
         project = projectWizard.buildProject();
+        setCurrentFile(project->getProjectFilename());
         dialog->activeProject(true);
         setWindowWidgetsEnabled(true);
     }

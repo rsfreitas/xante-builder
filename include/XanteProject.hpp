@@ -43,6 +43,7 @@ class XanteProject {
         ~XanteProject();
         QString getJtfFilename(void);
         QString getProjectName(void);
+        const QString getProjectFilename(void) { return info.absoluteFilePath(); }
         XanteJTF &getJtf(void);
         bool create(void);
         bool save(void);

@@ -173,9 +173,10 @@ void XTreeView::addItem()
         XanteProject &project = XMainWindow::getProject();
         XanteJTF &jtf = project.getJtf();
         XanteMenu &menu = jtf.menuAt(currentSelectedMenu);
-        XanteItem item(jtf.applicationName(), menu.name(), itemName);
-        menu.addItem(item);
+        XanteItem item(jtf.applicationName(), menu.name(), menu.objectId(),
+                       itemName);
 
+        menu.addItem(item);
         emitSignalToUpdate();
     }
 }

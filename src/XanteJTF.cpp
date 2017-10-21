@@ -192,13 +192,15 @@ void XanteItem::preLoad(void)
     m_typeDescription.insert(XanteItem::Type::AddDynamicMenu, QString("add-dynamic-menu"));
 }
 
-XanteItem::XanteItem(QString applicationName, QString menuName, QString name)
+XanteItem::XanteItem(QString applicationName, QString menuName, QString objectId,
+    QString name)
     : m_applicationName(applicationName), m_menuName(menuName), m_name(name)
 {
     preLoad();
     this->name(name);
     mode(XanteMode::XanteAccessEdit);
     type(XanteItem::Type::Menu);
+    referencedMenu(objectId);
 }
 
 enum XanteItem::Type XanteItem::toXanteItem(const QString &type)
@@ -479,7 +481,7 @@ XanteMenu::XanteMenu(QString applicationName, QString name)
     type(XanteMenu::Type::Default);
 
     /* We always create an empty item for a new menu */
-    XanteItem it(applicationName, name, QString("Item"));
+    XanteItem it(applicationName, name, m_objectId, QString("Item"));
     m_items.append(it);
 }
 

@@ -39,6 +39,7 @@ class QListWidget;
 
 class XanteProject;
 class XanteItem;
+class XanteMenu;
 class XanteJTF;
 
 class XDialogItem : public QWidget
@@ -161,12 +162,14 @@ class XDialogItem : public QWidget
         void enableHelp(int type);
 
         bool updateXanteItem(void);
-        bool updateXanteItemEvents(XanteItem &item);
-        bool updateXanteItemHelp(XanteItem &item);
-        bool updateXanteItemContent(XanteItem &item);
-        bool updateXanteItemOptions(XanteItem &item);
-        bool updateXanteItemInputRanges(XanteItem &item);
-        bool updateXanteItemConfig(XanteItem &item);
+        void updateXanteItemEvents(XanteItem &item);
+        void updateXanteItemHelp(XanteItem &item);
+        void updateXanteItemContent(XanteItem &item);
+        void updateXanteItemOptions(XanteItem &item);
+        void updateXanteItemInputRanges(XanteItem &item);
+        void updateXanteItemConfig(XanteItem &item);
+
+        XanteItem createXanteItemFromWidgets(XanteJTF &jtf, const XanteMenu &menu);
 };
 
 #endif

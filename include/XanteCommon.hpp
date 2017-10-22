@@ -17,6 +17,5 @@ enum {
     MaxRecentFiles = 5
 };
 
-
 #endif
 

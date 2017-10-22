@@ -314,7 +314,7 @@ void XDialogMenu::dynamicRadioToggled(bool checked)
 }
 
 /*
- * Sets the current project that's been edited, so all other informations
+ * Sets the current project that is been edited, so all other informations
  * (or selections inside the main list view) may use it. At the same time,
  * sets the current XanteMenu to the @selectedMenuIndex inside it.
  */
@@ -329,8 +329,8 @@ void XDialogMenu::setCurrentProject(int selectedMenuIndex)
  */
 void XDialogMenu::setSelection(int selectedMenuIndex)
 {
-    currentMenuIndex = selectedMenuIndex;
     clear();
+    currentMenuIndex = selectedMenuIndex;
     setupWidgets();
 }
 
@@ -513,6 +513,8 @@ void XDialogMenu::clear(void)
     {
         checkBox[i]->setChecked(false);
     }
+
+    currentMenuIndex = -1;
 }
 
 bool XDialogMenu::updateXanteMenuDynamic(XanteMenu &menu)
@@ -591,20 +593,13 @@ bool XDialogMenu::updateXanteMenuEvents(XanteMenu &menu)
     return true;
 }
 
-bool XDialogMenu::updateXanteMenu(void)
+XanteMenu XDialogMenu::createXanteMenuFromWidgets(XanteJTF &jtf)
 {
-    XanteProject &project = XMainWindow::getProject();
-    XanteJTF &jtf = project.getJtf();
-    XanteMenu &menu = jtf.menuAt(currentMenuIndex);
     QString data;
 
     /* name */
     data = lineEdit[XDialogMenu::LineEdit::Name]->text();
-
-    if ((data.isEmpty() == false) && (menu.name() != data)) {
-        menu.name(data);
-        emit treeViewNeedsUpdate();
-    }
+    XanteMenu menu(jtf.applicationName(), data);
 
     /* type */
     enum XanteMenu::Type type =
@@ -614,8 +609,7 @@ bool XDialogMenu::updateXanteMenu(void)
 
     /* dynamic options */
     if (type == XanteMenu::Type::Dynamic)
-        if (updateXanteMenuDynamic(menu) == false)
-            return false;
+        updateXanteMenuDynamic(menu);
 
     /* access mode */
     enum XanteMode mode =
@@ -625,8 +619,35 @@ bool XDialogMenu::updateXanteMenu(void)
 
     /* events */
     if (groupBox[XDialogMenu::GroupBox::Events]->isChecked())
-        if (updateXanteMenuEvents(menu) == false)
+        updateXanteMenuEvents(menu);
+
+    return menu;
+}
+
+bool XDialogMenu::updateXanteMenu(void)
+{
+    XanteProject &project = XMainWindow::getProject();
+    XanteJTF &jtf = project.getJtf();
+    XanteMenu &menu = jtf.menuAt(currentMenuIndex),
+              newMenu = createXanteMenuFromWidgets(jtf);
+
+    if (menu != newMenu) {
+        qDebug() << menu.debug(false);
+        qDebug() << newMenu.debug(false);
+
+        /* The TreeView must be updated when the names are different. */
+        if (menu.name() != newMenu.name())
+            emit treeViewNeedsUpdate();
+
+        /* TODO: Do we have all the required fields filled? */
+        if (0) {
             return false;
+        }
+
+        /* The MainWindow must know that we have a change to be saved. */
+        emit projectHasChanges();
+        menu = newMenu;
+    }
 
     return true;
 }
@@ -639,8 +660,6 @@ void XDialogMenu::hideEvent(QHideEvent *event)
             event->ignore();
             return;
         }
-
-        emit projectHasChanges();
     }
 
     event->accept();

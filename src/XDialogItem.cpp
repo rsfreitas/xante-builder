@@ -415,7 +415,7 @@ XDialogItem::~XDialogItem()
 }
 
 /*
- * Sets the current project that's been edited, so all other informations
+ * Sets the current project that is been edited, so all other informations
  * (or selections inside the main list view) may use it. At the same time,
  * sets the current XanteItem to the @selectedMenuIndex and the
  * @selectedItemIndex inside it.
@@ -432,6 +432,7 @@ void XDialogItem::setCurrentProject(int selectedMenuIndex,
  */
 void XDialogItem::setSelection(int selectedMenuIndex, int selectedItemIndex)
 {
+    clear();
     currentMenuIndex = selectedMenuIndex;
     currentItemIndex = selectedItemIndex;
     setupWidgets();
@@ -474,7 +475,6 @@ void XDialogItem::setupEventsWidgets(const XanteItem &item)
                                       XDialogItem::CheckBox::EvValueChanged)));
 
     groupBox[XDialogItem::GroupBox::Events]->setChecked(true);
-    groupBox[XDialogItem::GroupBox::Events]->setEnabled(true);
 
     for (i = 0; i < events.size(); i++) {
         QPair<enum XanteItem::Event,
@@ -596,7 +596,6 @@ void XDialogItem::setupWidgets(void)
     XanteItem &item = menu.itemAt(currentItemIndex);
 
     /* Prepare dialog widgets for item */
-    clear();
     selectItemType(item.type());
 
     /* Common informations */
@@ -688,6 +687,11 @@ void XDialogItem::selectItemType(int index)
 
     disableAllWidgets();
 
+    /* Enable common widgets */
+    groupBox[XDialogItem::GroupBox::Events]->setEnabled(true);
+    enableHelp(type);
+
+    /* And specifics for each type */
     switch (type) {
         case XanteItem::Type::Menu:
             comboBox[XDialogItem::ComboBox::MenuReference]->setEnabled(true);
@@ -705,10 +709,8 @@ void XDialogItem::selectItemType(int index)
         case XanteItem::Type::Checklist:
         case XanteItem::Type::RadioChecklist:
             groupBox[XDialogItem::GroupBox::Config]->setEnabled(true);
-            groupBox[XDialogItem::GroupBox::Events]->setEnabled(true);
             enableInputRanges(type);
             enableOptions(type);
-            enableHelp(type);
             break;
 
         default:
@@ -802,9 +804,12 @@ void XDialogItem::clear(void)
     {
         listWidget[i]->clear();
     }
+
+    currentMenuIndex = -1;
+    currentItemIndex = -1;
 }
 
-bool XDialogItem::updateXanteItemEvents(XanteItem &item)
+void XDialogItem::updateXanteItemEvents(XanteItem &item)
 {
     QMap<enum XanteItem::Event,
         QPair<QCheckBox *, QLineEdit *>> events;
@@ -838,11 +843,9 @@ bool XDialogItem::updateXanteItemEvents(XanteItem &item)
             item.event(text, eventType);
         }
     }
-
-    return true;
 }
 
-bool XDialogItem::updateXanteItemHelp(XanteItem &item)
+void XDialogItem::updateXanteItemHelp(XanteItem &item)
 {
     enum XanteItem::Type type = item.type();
     QString data;
@@ -863,11 +866,9 @@ bool XDialogItem::updateXanteItemHelp(XanteItem &item)
 
     data = lineEdit[XDialogItem::LineEdit::HelpDescriptive]->text();
     item.descriptiveHelp(data);
-
-    return true;
 }
 
-bool XDialogItem::updateXanteItemOptions(XanteItem &item)
+void XDialogItem::updateXanteItemOptions(XanteItem &item)
 {
     enum XanteItem::Type type = item.type();
     QString data;
@@ -885,11 +886,9 @@ bool XDialogItem::updateXanteItemOptions(XanteItem &item)
         data = lineEdit[XDialogItem::LineEdit::Options]->text();
         item.option(data);
     }
-
-    return true;
 }
 
-bool XDialogItem::updateXanteItemInputRanges(XanteItem &item)
+void XDialogItem::updateXanteItemInputRanges(XanteItem &item)
 {
     QString data, min, max;
     enum XanteItem::Type type = item.type();
@@ -916,11 +915,9 @@ bool XDialogItem::updateXanteItemInputRanges(XanteItem &item)
         default:
             break;
     }
-
-    return true;
 }
 
-bool XDialogItem::updateXanteItemConfig(XanteItem &item)
+void XDialogItem::updateXanteItemConfig(XanteItem &item)
 {
     QString data;
 
@@ -932,25 +929,19 @@ bool XDialogItem::updateXanteItemConfig(XanteItem &item)
 
     data = lineEdit[XDialogItem::LineEdit::DefaultValue]->text();
     item.defaultValue(data);
-
-    return true;
 }
 
-bool XDialogItem::updateXanteItem(void)
+/*
+ * Creates a XanteItem object from the widgets current content.
+ */
+XanteItem XDialogItem::createXanteItemFromWidgets(XanteJTF &jtf,
+    const XanteMenu &menu)
 {
-    XanteProject &project = XMainWindow::getProject();
-    XanteJTF &jtf = project.getJtf();
-    XanteMenu &menu = jtf.menuAt(currentMenuIndex);
-    XanteItem &item = menu.itemAt(currentItemIndex);
     QString data;
 
     /* name */
     data = lineEdit[XDialogItem::LineEdit::Name]->text();
-
-    if ((data.isEmpty() == false) && (item.name() != data)) {
-        item.name(data);
-        emit treeViewNeedsUpdate();
-    }
+    XanteItem item(jtf.applicationName(), menu.name(), data);
 
     /* type */
     enum XanteItem::Type type =
@@ -966,32 +957,66 @@ bool XDialogItem::updateXanteItem(void)
 
     /* events */
     if (groupBox[XDialogItem::GroupBox::Events]->isChecked())
-        if (updateXanteItemEvents(item) == false)
-            return false;
+        updateXanteItemEvents(item);
 
     /* help */
     if (groupBox[XDialogItem::GroupBox::Help]->isChecked())
-        if (updateXanteItemHelp(item) == false)
-            return false;
+        updateXanteItemHelp(item);
 
     /* options */
     if (item.hasOptions())
-        if (updateXanteItemOptions(item) == false)
-            return false;
+        updateXanteItemOptions(item);
 
     /* input ranges */
     if (item.hasInputRanges())
-        if (updateXanteItemInputRanges(item) == false)
-            return false;
+        updateXanteItemInputRanges(item);
 
     /* config */
     if (item.hasConfig())
-        if (updateXanteItemConfig(item) == false)
-            return false;
+        updateXanteItemConfig(item);
 
     if (type == XanteItem::Type::Menu) {
         XanteMenu m = jtf.menuAt(comboBox[XDialogItem::ComboBox::MenuReference]->currentIndex());
         item.referencedMenu(m.objectId());
+    }
+
+    return item;
+}
+
+/**
+ * @name updateXanteItem
+ * @brief Updates the current edited XanteItem data.
+ *
+ * This function is responsible to update the current edited XanteItem
+ * informations with data from the widgets.
+ *
+ * @return If an invalid change has been made returns false, otherwise returns
+ *         true, even if no change has been made.
+ */
+bool XDialogItem::updateXanteItem(void)
+{
+    XanteProject &project = XMainWindow::getProject();
+    XanteJTF &jtf = project.getJtf();
+    XanteMenu &menu = jtf.menuAt(currentMenuIndex);
+    XanteItem &item = menu.itemAt(currentItemIndex),
+              newItem = createXanteItemFromWidgets(jtf, menu);
+
+    if (item != newItem) {
+        qDebug() << item.debug();
+        qDebug() << newItem.debug();
+
+        /* The TreeView must be updated when the names are different. */
+        if (item.name() != newItem.name())
+            emit treeViewNeedsUpdate();
+
+        /* TODO: Do we have all the required fields filled? */
+        if (0) {
+            return false;
+        }
+
+        /* The MainWindow must know that we have a change to be saved. */
+        emit projectHasChanges();
+        item = newItem;
     }
 
     return true;
@@ -1005,8 +1030,6 @@ void XDialogItem::hideEvent(QHideEvent *event)
             event->ignore();
             return;
         }
-
-        emit projectHasChanges();
     }
 
     event->accept();

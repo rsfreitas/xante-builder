@@ -30,6 +30,7 @@
 #include <QByteArray>
 #include <QVector>
 #include <QMap>
+#include <QMessageBox>
 
 #include "xante_builder.hpp"
 
@@ -192,15 +193,28 @@ void XanteItem::preLoad(void)
     m_typeDescription.insert(XanteItem::Type::AddDynamicMenu, QString("add-dynamic-menu"));
 }
 
-XanteItem::XanteItem(QString applicationName, QString menuName, QString objectId,
-    QString name)
+/**
+ * @name XanteItem
+ * @brief A XanteItem object constructor.
+ *
+ * This constructor is used to create a XanteItem object when the user requires.
+ *
+ * @param [in] applicationName: The current application name.
+ * @param [in] menuName: The menu name which this item will belong to.
+ * @param [in] name: The item name.
+ */
+XanteItem::XanteItem(QString applicationName, QString menuName, QString name)
     : m_applicationName(applicationName), m_menuName(menuName), m_name(name)
 {
     preLoad();
+
+    /*
+     * Altough we already initialized the @m_name, the name() function is called
+     * here so the item objectId is also initialized.
+     */
     this->name(name);
     mode(XanteMode::XanteAccessEdit);
     type(XanteItem::Type::Menu);
-    referencedMenu(objectId);
 }
 
 enum XanteItem::Type XanteItem::toXanteItem(const QString &type)
@@ -248,7 +262,7 @@ void XanteItem::parseCommonData(QJsonObject item)
     m_name = item["name"].toString();
     m_objectId = item["object_id"].toString();
     m_defaultValue = item["default_value"].toString();
-    m_menuReferenceId = item["menuId"].toString();
+    m_menuReferenceId = item["menu_id"].toString();
 
     tmp = item["mode"].toInt();
     m_mode = (enum XanteMode)tmp;
@@ -347,6 +361,16 @@ void XanteItem::parse(QJsonObject item)
     parseHelpData(item);
 }
 
+/**
+ * @name XanteItem
+ * @brief A XanteItem object constructor.
+ *
+ * This constructor is used to create a XanteItem object when the user requires.
+ *
+ * @param [in] applicationName: The current application name.
+ * @param [in] menuName: The menu name which this item will belong to.
+ * @param [in] item: The item information in JSON format.
+ */
 XanteItem::XanteItem(QString applicationName, QString menuName,
     QJsonObject item)
     : m_applicationName(applicationName), m_menuName(menuName)
@@ -481,7 +505,7 @@ XanteMenu::XanteMenu(QString applicationName, QString name)
     type(XanteMenu::Type::Default);
 
     /* We always create an empty item for a new menu */
-    XanteItem it(applicationName, name, m_objectId, QString("Item"));
+    XanteItem it(applicationName, name, QString("Item"));
     m_items.append(it);
 }
 
@@ -625,6 +649,9 @@ bool XanteJTF::save(QString filename)
     QFile file(filename);
 
     if (file.open(QIODevice::WriteOnly) == false) {
+        QMessageBox::critical(NULL, QObject::tr("Saving"),
+                              QObject::tr("Failed to open JTF file for writing."));
+
         return false;
     }
 
@@ -636,32 +663,7 @@ bool XanteJTF::save(QString filename)
     return true;
 }
 
-void XanteJTF::load(const QString &filename)
-{
-    QFile file;
-    QString data;
-
-    file.setFileName(filename);
-    file.open(QIODevice::ReadOnly | QIODevice::Text);
-    data = file.readAll();
-    file.close();
-
-    QJsonDocument d = QJsonDocument::fromJson(data.toUtf8());
-    m_jtfRoot = d.object();
-    loadJtfFromFile();
-
-    /* We're not empty anymore */
-    m_empty = false;
-}
-
-void XanteJTF::loadJtfFromFile(void)
-{
-    loadJtfInternal();
-    loadJtfGeneral();
-    loadJtfUi();
-}
-
-void XanteJTF::loadJtfInternal(void)
+bool XanteJTF::loadJtfInternal(void)
 {
     QJsonValue value = m_jtfRoot.value(QString("internal"));
     QJsonObject internal = value.toObject();
@@ -674,9 +676,11 @@ void XanteJTF::loadJtfInternal(void)
     m_revision = application["revision"].toInt();
     m_build = application["build"].toInt();
     m_beta = application["beta"].toBool();
+
+    return true;
 }
 
-void XanteJTF::loadJtfGeneral(void)
+bool XanteJTF::loadJtfGeneral(void)
 {
     QJsonValue value = m_jtfRoot.value(QString("general"));
     QJsonObject general = value.toObject();
@@ -687,9 +691,11 @@ void XanteJTF::loadJtfGeneral(void)
     m_plugin = general["plugin"].toString();
     m_cfgPathname = general["config_pathname"].toString();
     m_logPathname = general["log_pathname"].toString();
+
+    return true;
 }
 
-void XanteJTF::loadJtfUi(void)
+bool XanteJTF::loadJtfUi(void)
 {
     QJsonValue value = m_jtfRoot.value(QString("ui"));
     QJsonObject ui = value.toObject();
@@ -700,12 +706,48 @@ void XanteJTF::loadJtfUi(void)
         XanteMenu m(m_applicationName, v.toObject());
         m_menus.append(m);
     }
+
+    return true;
+}
+
+bool XanteJTF::loadJtfFromFile(void)
+{
+    if ((loadJtfInternal() == false) ||
+        (loadJtfGeneral() == false) ||
+        (loadJtfUi() == false))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool XanteJTF::load(const QString &filename)
+{
+    QFile file;
+    QString data;
+
+    file.setFileName(filename);
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+    data = file.readAll();
+    file.close();
+
+    QJsonDocument d = QJsonDocument::fromJson(data.toUtf8());
+    m_jtfRoot = d.object();
+
+    if (loadJtfFromFile() == false)
+        return false;
+
+    /* We're not empty anymore */
+    m_empty = false;
+
+    return true;
 }
 
 /*
- * Here we calculate an object's objectId property. It is composed of the
+ * Here we calculate the object objectId property. It is composed of the
  * application name and the menu name, if we're talking about a menu. If it
- * is an item, the item's name is also used.
+ * is an item, the item name is also used.
  */
 QString XanteJTF::objectIdCalc(QString applicationName, QString menuName,
     QString itemName)
@@ -739,7 +781,7 @@ XanteMenu &XanteJTF::getMenu(QString objectId)
 XanteMenu &XanteJTF::menuAt(int index)
 {
     if ((index < 0) || (index > m_menus.size()))
-        throw std::out_of_range("Menu not found.");
+        throw std::out_of_range(QObject::tr("Menu not found.").toLocal8Bit().data());
 
     return m_menus[index];
 }

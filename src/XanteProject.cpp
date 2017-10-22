@@ -33,7 +33,9 @@ XanteProject::XanteProject(QString filename)
 {
     info = QFileInfo(filename);
     jtfFilename = loadProjectFile();
-    jtf.load(jtfFilename);
+
+    if (jtf.load(jtfFilename) == false)
+        throw std::runtime_error(QObject::tr("Unable to load JTF file").toLocal8Bit().data());
 }
 
 XanteProject::XanteProject(QString projectName, QString path, const XanteJTF &jtf)

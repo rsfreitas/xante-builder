@@ -34,5 +34,6 @@ SOURCES += main.cpp         \
         XDialogMenu.cpp     \
         XDialogItem.cpp     \
         XDialogJTFInfo.cpp  \
-        XDialogItemList.cpp
+        XDialogItemList.cpp \
+        XanteUtils.cpp
 

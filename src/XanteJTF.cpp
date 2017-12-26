@@ -666,15 +666,23 @@ bool XanteJTF::save(QString filename)
 bool XanteJTF::loadJtfInternal(void)
 {
     QJsonValue value = m_jtfRoot.value(QString("internal"));
+
+    if (value.isObject() == false)
+        return false;
+
     QJsonObject internal = value.toObject();
 
     m_fileRevision = internal["jtf_revision"].toInt();
     value = internal["application"];
+
+    if (value.isObject() == false)
+        return false;
+
     QJsonObject application = value.toObject();
 
     m_version = application["version"].toString();
     m_revision = application["revision"].toInt();
-    m_build = application["build"].toInt();
+    m_build = application["build"].toInt(-1);
     m_beta = application["beta"].toBool();
 
     return true;
@@ -683,6 +691,10 @@ bool XanteJTF::loadJtfInternal(void)
 bool XanteJTF::loadJtfGeneral(void)
 {
     QJsonValue value = m_jtfRoot.value(QString("general"));
+
+    if (value.isObject() == false)
+        return false;
+
     QJsonObject general = value.toObject();
 
     m_applicationName = general["name"].toString();

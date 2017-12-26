@@ -43,6 +43,10 @@ XanteConfig::~XanteConfig()
     writeFile();
 }
 
+/**
+ * @name loadDefaultValues
+ * @brief Creates default values for every supported configuration.
+ */
 void XanteConfig::loadDefaultValues(void)
 {
     m_windowSize = QSize(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
@@ -50,6 +54,10 @@ void XanteConfig::loadDefaultValues(void)
     m_recentOpenedFiles = QStringList("");
 }
 
+/**
+ * @name writeFile
+ * @brief Saves the current application configuration into a configuration file.
+ */
 void XanteConfig::writeFile(void)
 {
     QString filename = m_pathname + "/" + m_cfgFilename;
@@ -65,6 +73,10 @@ void XanteConfig::writeFile(void)
     settings.endGroup();
 }
 
+/**
+ * @name readFile
+ * @brief Loads every supported configuration from the configuration file.
+ */
 void XanteConfig::readFile(void)
 {
     QString filename = m_pathname + "/" + m_cfgFilename;

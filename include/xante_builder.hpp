@@ -33,7 +33,7 @@
 #define APP_NAME                    "xante-builder"
 
 /* Internal classes */
-#include "XanteCommon.hpp"
+#include "XanteUtils.hpp"
 #include "XanteConfig.hpp"
 #include "XanteJTF.hpp"
 #include "XanteProject.hpp"

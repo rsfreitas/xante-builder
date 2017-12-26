@@ -82,9 +82,7 @@ void XMainWindow::loadFile(const QString &filename)
     try {
         project = new XanteProject(filename);
     } catch (std::exception &e) {
-        QMessageBox::critical(this, tr("Error"),
-                              e.what());
-
+        QMessageBox::critical(this, tr("Error"), e.what());
         return;
     }
 
@@ -124,7 +122,17 @@ void XMainWindow::closeProject()
     if (editingProject == false)
         return;
 
+    if (hasChanges) {
+        if (QMessageBox::question(this, tr("Save changes"),
+                                  tr("The current project has unsaved changes. "
+                                     "Do you want to save?")) == QMessageBox::Yes)
+        {
+            saveProject();
+        }
+    }
+
     dialog->activeProject(false);
+    acSave->setEnabled(false);
     setWindowWidgetsEnabled(false);
     setWindowTitle(APP_NAME);
     hasChanges = false;

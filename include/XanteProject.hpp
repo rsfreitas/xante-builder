@@ -32,15 +32,16 @@ class XanteJTF;
  * @name XanteProject
  * @brief A class to handle a project file.
  *
- * A project file is has information about a libxante application, where, this
- * application will be constituted of a JTF file, its translations, a script
+ * A project file has information about a libxante application, where, this
+ * application will be consisting of a JTF file, its translations, a script
  * to call the application and a template of its plugin.
  */
 class XanteProject {
     public:
         XanteProject(QString filename);
         XanteProject(QString projectName, QString path, const XanteJTF &jtf);
-        ~XanteProject();
+        ~XanteProject() {}
+
         QString getJtfFilename(void);
         QString getProjectName(void);
         const QString getProjectFilename(void) { return info.absoluteFilePath(); }

@@ -58,7 +58,9 @@ class XanteItem
             YesNo,
             DynamicMenu,
             DeleteDynamicMenu,
-            AddDynamicMenu
+            AddDynamicMenu,
+
+            MaxTypes
         };
 
         enum Event {

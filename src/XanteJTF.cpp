@@ -609,7 +609,7 @@ void XanteJTF::writeJtfGeneral(QJsonObject &root)
 {
     root["name"] = m_applicationName;
     root["description"] = m_description;
-    root["plugin"] = m_plugin;
+    root["module"] = m_plugin;
     root["config_pathname"] = m_cfgPathname;
     root["log_pathname"] = m_logPathname;
     root["log_level"] = "info";
@@ -700,7 +700,7 @@ bool XanteJTF::loadJtfGeneral(void)
     m_applicationName = general["name"].toString();
     m_description = general["description"].toString();
     m_company = general["company"].toString();
-    m_plugin = general["plugin"].toString();
+    m_plugin = general["module"].toString();
     m_cfgPathname = general["config_pathname"].toString();
     m_logPathname = general["log_pathname"].toString();
 

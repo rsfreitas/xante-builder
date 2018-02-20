@@ -950,8 +950,8 @@ XanteItem XDialogItem::createXanteItemFromWidgets(XanteJTF &jtf,
     item.type(type);
 
     /* access mode */
-    enum XanteMode mode =
-        (enum XanteMode)comboBox[XDialogItem::ComboBox::Mode]->currentIndex();
+    enum XanteAccessMode mode =
+        (enum XanteAccessMode)comboBox[XDialogItem::ComboBox::Mode]->currentIndex();
 
     item.mode(mode);
 

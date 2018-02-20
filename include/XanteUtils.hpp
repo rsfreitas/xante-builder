@@ -28,11 +28,6 @@
 #ifndef _XANTEUTILS_HPP
 #define _XANTEUTILS_HPP          1
 
-/* Common constants */
-enum {
-    MaxRecentFiles = 5
-};
-
 namespace XanteUtils
 {
     void loadIcons(void);

@@ -28,7 +28,7 @@
 
 #include <QMainWindow>
 
-#include <XanteUtils.hpp>
+#include <libxante.h>
 
 class QAction;
 class XanteConfig;

@@ -412,9 +412,9 @@ void XDialogMenu::setupEventsWidgets(XanteMenu menu)
     if (menu.hasEvents() == false)
         return;
 
-    events.append(qMakePair(XanteMenu::Event::Selected,
+/*    events.append(qMakePair(XanteMenu::Event::Selected,
                             qMakePair(XDialogMenu::LineEdit::EventSelected,
-                                      XDialogMenu::CheckBox::EvSelected)));
+                                      XDialogMenu::CheckBox::EvSelected)));*/
 
     events.append(qMakePair(XanteMenu::Event::Exit,
                             qMakePair(XDialogMenu::LineEdit::EventExit,
@@ -568,9 +568,9 @@ bool XDialogMenu::updateXanteMenuEvents(XanteMenu &menu)
     QMap<enum XanteMenu::Event,
         QPair<QCheckBox *, QLineEdit *>> events;
 
-    events.insert(XanteMenu::Event::Selected,
+/*    events.insert(XanteMenu::Event::Selected,
                   qMakePair(checkBox[XDialogMenu::CheckBox::EvSelected],
-                            lineEdit[XDialogMenu::LineEdit::EventSelected]));
+                            lineEdit[XDialogMenu::LineEdit::EventSelected]));*/
 
     events.insert(XanteMenu::Event::Exit,
                   qMakePair(checkBox[XDialogMenu::CheckBox::EvExit],
@@ -612,8 +612,8 @@ XanteMenu XDialogMenu::createXanteMenuFromWidgets(XanteJTF &jtf)
         updateXanteMenuDynamic(menu);
 
     /* access mode */
-    enum XanteMode mode =
-        (enum XanteMode)comboBox[XDialogMenu::ComboBox::Mode]->currentIndex();
+    enum XanteAccessMode mode =
+        (enum XanteAccessMode)comboBox[XDialogMenu::ComboBox::Mode]->currentIndex();
 
     menu.mode(mode);
 

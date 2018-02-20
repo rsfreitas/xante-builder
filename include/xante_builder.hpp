@@ -32,10 +32,11 @@
 
 #define APP_NAME                    "xante-builder"
 
+/* External libraries */
+#include "libxante.h"
+
 /* Internal classes */
 #include "XanteUtils.hpp"
-#include "XanteConfig.hpp"
-#include "XanteJTF.hpp"
 #include "XanteProject.hpp"
 #include "XProjectWizard.hpp"
 #include "XMainWindow.hpp"

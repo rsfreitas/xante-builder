@@ -29,7 +29,7 @@
 #include <QWidget>
 #include <QVector>
 
-#include "XanteJTF.hpp"
+#include "libxante.h"
 
 class QLineEdit;
 class QComboBox;
@@ -131,6 +131,8 @@ class XDialogMenu : public QWidget
         bool updateXanteMenu(void);
         bool updateXanteMenuEvents(XanteMenu &menu);
         bool updateXanteMenuDynamic(XanteMenu &menu);
+
+        XanteMenu createXanteMenuFromWidgets(XanteJTF &jtf);
 };
 
 #endif

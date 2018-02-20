@@ -31,53 +31,61 @@
  *
  */
 
-XTreeItem::XTreeItem(const QList<QVariant> &data, XTreeItem *parent)
+XTreeItem::XTreeItem(const QList<QVariant> &data, int itemType,
+    XTreeItem *parent) : m_itemData(data), m_parentItem(parent)
 {
-    parentItem = parent;
-    itemData = data;
+/*    if (itemType != XanteItem::Type::Unknown) {
+        QPixmap pixmap = QPixmap(QString(""));
+        m_icon = pixmap.scaled(18, 18);
+    }*/
 }
 
 XTreeItem::~XTreeItem()
 {
-    qDeleteAll(childItems);
+    qDeleteAll(m_childItems);
 }
 
 void XTreeItem::appendChild(XTreeItem *item)
 {
-    childItems.append(item);
+    m_childItems.append(item);
 }
 
 XTreeItem *XTreeItem::child(int row)
 {
-    return childItems.value(row);
+    return m_childItems.value(row);
 }
 
 int XTreeItem::childCount() const
 {
-    return childItems.count();
+    return m_childItems.count();
 }
 
 int XTreeItem::columnCount() const
 {
-    return itemData.count();
+    return m_itemData.count();
 }
 
 QVariant XTreeItem::data(int column) const
 {
-    return itemData.value(column);
+    return m_itemData.value(column);
 }
 
 XTreeItem *XTreeItem::parent()
 {
-    return parentItem;
+    return m_parentItem;
 }
 
 int XTreeItem::row() const
 {
-    if (parentItem)
-        return parentItem->childItems.indexOf(const_cast<XTreeItem *>(this));
+    if (m_parentItem)
+        return m_parentItem->m_childItems.indexOf(const_cast<XTreeItem *>(this));
 
     return 0;
+}
+
+QPixmap XTreeItem::icon() const
+{
+    return m_icon;
 }
 
 /*
@@ -121,6 +129,26 @@ QVariant XTreeModel::data(const QModelIndex &index, int role) const
 
     XTreeItem *item = static_cast<XTreeItem *>(index.internalPointer());
     return item->data(index.column());
+
+    //XTreeItem *item = static_cast<XTreeItem *>(index.internalPointer());
+
+//        printf("1 %s\n", __FUNCTION__);
+//    if (role == Qt::DecorationRole) {
+/*        {
+            QList<QByteArray> l = QImageReader::supportedImageFormats();
+            printf("%s: %d\n", __FUNCTION__, l.size());
+        }
+        QPixmap pixmap;
+        bool x = pixmap.load("/home/rodrigo/git/github/personal/xante-builder/resource/item.jpg");
+        printf("2 %s: %d - %d, %d\n", __FUNCTION__, pixmap.isNull(), x,
+                QFileInfo::exists("/home/rodrigo/git/github/personal/xante-builder/resource/item.jpg"));
+        return QVariant::fromValue(pixmap);
+//        return pixmap;*/
+/*        return QVariant::fromValue(item->icon());
+    } else if (role != Qt::DisplayRole)
+        return QVariant();
+
+    return item->data(index.column());*/
 }
 
 QModelIndex XTreeModel::index(int row, int column, const QModelIndex &parent) const
@@ -195,7 +223,9 @@ void XTreeModel::setupModelData(XTreeItem *parent)
 
         QList<QVariant> childData;
         childData << menu.name();
-        parents.last()->appendChild(new XTreeItem(childData, parents.last()));
+        parents.last()->appendChild(new XTreeItem(childData,
+                                                  XanteItem::Type::Unknown,
+                                                  parents.last()));
 
         for (j = 0; j < menu.totalItems(); j++) {
             XanteItem item = menu.itemAt(j);
@@ -204,7 +234,7 @@ void XTreeModel::setupModelData(XTreeItem *parent)
             QList<QVariant> itChildData;
             itChildData << item.name();
             parents.last()->child(childIndex)
-                          ->appendChild(new XTreeItem(itChildData,
+                          ->appendChild(new XTreeItem(itChildData, item.type(),
                                                       parents.last()->child(childIndex)));
         }
     }

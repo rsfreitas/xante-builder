@@ -51,6 +51,15 @@ XMainWindow::XMainWindow(XanteConfig &config)
 
 void XMainWindow::closeEvent(QCloseEvent *event)
 {
+    if (editingProject && hasChanges) {
+        if (QMessageBox::question(this, tr("Save changes"),
+                                  tr("The current project has unsaved changes. "
+                                     "Do you want to save?")) == QMessageBox::Yes)
+        {
+            saveProject();
+        }
+    }
+
     config.windowSize(size());
     config.windowPosition(pos());
     event->accept();
@@ -62,6 +71,7 @@ void XMainWindow::newProject()
 
     if (projectWizard.exec()) {
         project = projectWizard.buildProject();
+        setCurrentFile(project->getProjectFilename());
         dialog->activeProject(true);
         setWindowWidgetsEnabled(true);
     }
@@ -69,8 +79,14 @@ void XMainWindow::newProject()
 
 void XMainWindow::loadFile(const QString &filename)
 {
+    try {
+        project = new XanteProject(filename);
+    } catch (std::exception &e) {
+        QMessageBox::critical(this, tr("Error"), e.what());
+        return;
+    }
+
     setCurrentFile(filename);
-    project = new XanteProject(filename);
     setWindowTitle(QString("%1 [%2]").arg(APP_NAME)
                                      .arg(project->getProjectName()));
 
@@ -96,6 +112,7 @@ void XMainWindow::saveProject()
     dialog->saveCurrentState();
     project->save();
     acSave->setEnabled(false);
+    hasChanges = false;
     setWindowTitle(QString("%1 [%2]").arg(APP_NAME)
                                      .arg(project->getProjectName()));
 }
@@ -105,9 +122,20 @@ void XMainWindow::closeProject()
     if (editingProject == false)
         return;
 
+    if (hasChanges) {
+        if (QMessageBox::question(this, tr("Save changes"),
+                                  tr("The current project has unsaved changes. "
+                                     "Do you want to save?")) == QMessageBox::Yes)
+        {
+            saveProject();
+        }
+    }
+
     dialog->activeProject(false);
+    acSave->setEnabled(false);
     setWindowWidgetsEnabled(false);
     setWindowTitle(APP_NAME);
+    hasChanges = false;
 
     if (project != nullptr) {
         delete project;
@@ -121,9 +149,7 @@ void XMainWindow::editJtfInfo()
         return;
 
     XDialogJTFInfo dlg(this);
-
-    if (dlg.exec()) {
-    }
+    dlg.exec();
 }
 
 void XMainWindow::jtfTest()
@@ -156,21 +182,25 @@ void XMainWindow::createMenu(void)
                                        &XMainWindow::newProject);
 
     acNewProject->setStatusTip(tr("Creates a new libxante project."));
+    acNewProject->setShortcuts(QKeySequence::New);
 
     mMain->addSeparator();
     acOpen = mMain->addAction(tr("&Open project"), this,
                                 &XMainWindow::openProject);
 
     acOpen->setStatusTip(tr("Opens a previously created project file."));
+    acOpen->setShortcuts(QKeySequence::Open);
     acSave = mMain->addAction(tr("&Save project"), this,
-                                &XMainWindow::saveProject);
+                              &XMainWindow::saveProject);
 
     acSave->setStatusTip(tr("Saves the project."));
     acSave->setEnabled(false);
+    acSave->setShortcuts(QKeySequence::Save);
     acClose = mMain->addAction(tr("&Close project"), this,
                                  &XMainWindow::closeProject);
 
     acClose->setStatusTip(tr("Closes the project."));
+    acClose->setShortcuts(QKeySequence::Close);
     mMain->addSeparator();
 
     for (int i = 0; i < MaxRecentFiles; i++) {
@@ -193,18 +223,21 @@ void XMainWindow::createMenu(void)
     mMain->addSeparator();
     QAction *acExit = mMain->addAction(tr("&Quit"), this, &QWidget::close);
     acExit->setStatusTip(tr("Quits the application."));
+    acExit->setShortcuts(QKeySequence::Quit);
 
     QMenu *mActions = menuBar()->addMenu(tr("&JTF"));
     acJtfMainInfo = mActions->addAction(tr("&Informations"), this,
                                             &XMainWindow::editJtfInfo);
 
     acJtfMainInfo->setStatusTip(tr("Edits the JTF main informations."));
+    acJtfMainInfo->setShortcuts(QKeySequence::Italic);
     mActions->addSeparator();
     acTestJtf = mActions->addAction(tr("&Test"), this,
                                        &XMainWindow::jtfTest);
 
+    acTestJtf->setShortcuts(QKeySequence::AddTab);
     acTestJtf->setStatusTip(tr("Puts the current JTF configuration into a "
-                                 "test."));
+                               "test."));
 
     QMenu *mHelp = menuBar()->addMenu(tr("&Help"));
     QAction *acAbout = mHelp->addAction(tr("&About this application"), this,
@@ -264,6 +297,7 @@ void XMainWindow::setCurrentFile(const QString &filename)
 void XMainWindow::projectChanged()
 {
     acSave->setEnabled(true);
+    hasChanges = true;
     setWindowTitle(QString("%1 [%2] *").arg(APP_NAME)
                                        .arg(project->getProjectName()));
 }

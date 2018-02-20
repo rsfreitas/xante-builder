@@ -29,13 +29,35 @@
 
 #define DEFAULT_PROJECT_FILE_VERSION            1
 
+/**
+ * @name XanteProject
+ * @brief The class constructor.
+ *
+ * This constructor creates a XanteProject object from a project file, i.e.,
+ * an existing project.
+ *
+ * @param [in] filename: The project filename.
+ */
 XanteProject::XanteProject(QString filename)
 {
     info = QFileInfo(filename);
     jtfFilename = loadProjectFile();
-    jtf.load(jtfFilename);
+
+    if (jtf.load(jtfFilename) == false)
+        throw std::runtime_error(QObject::tr("Unable to load JTF file").toLocal8Bit().data());
 }
 
+/**
+ * @name XanteProject
+ * @brief The class constructor
+ *
+ * This constructor creates a XanteProject from its bare informations. It's used
+ * when a new project is created by the application.
+ *
+ * @param [in] projectName: The project name.
+ * @param [in] path: The path where the project will be saved.
+ * @param [in] jtf: The previously created JTF content.
+ */
 XanteProject::XanteProject(QString projectName, QString path, const XanteJTF &jtf)
     : jtf(jtf), projectName(projectName)
 {
@@ -43,10 +65,6 @@ XanteProject::XanteProject(QString projectName, QString path, const XanteJTF &jt
     info = QFileInfo(projectRootPath.path() + "/" + projectName + ".pjx");
     jtfFilename = projectRootPath.path() + "/jtf/" + projectName + ".jtf";
     version = DEFAULT_PROJECT_FILE_VERSION;
-}
-
-XanteProject::~XanteProject()
-{
 }
 
 QString XanteProject::loadProjectFile(void)

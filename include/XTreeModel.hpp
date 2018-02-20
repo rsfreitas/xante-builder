@@ -27,14 +27,16 @@
 #define _XTREEMODEL_HPP          1
 
 #include <QTreeView>
+#include <QPixmap>
 
 class XanteProject;
 
 class XTreeItem
 {
     public:
-        XTreeItem(const QList<QVariant> &data, XTreeItem *parent = 0);
         ~XTreeItem();
+        XTreeItem(const QList<QVariant> &data, int itemType = -1,
+                  XTreeItem *parent = 0);
 
         void appendChild(XTreeItem *child);
         XTreeItem *child(int row);
@@ -43,11 +45,15 @@ class XTreeItem
         QVariant data(int column) const;
         int row() const;
         XTreeItem *parent();
+        QPixmap icon() const;
 
     private:
-        QList<XTreeItem *> childItems;
-        QList<QVariant> itemData;
-        XTreeItem *parentItem;
+        QList<XTreeItem *> m_childItems;
+        QList<QVariant> m_itemData;
+        QMap<int, QString> m_iconName;
+        QPixmap m_icon;
+        QString m_path;
+        XTreeItem *m_parentItem;
 };
 
 class XTreeModel : public QAbstractItemModel

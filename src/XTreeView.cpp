@@ -63,10 +63,10 @@ void XTreeView::createRightClickMenu(void)
     acRemove = menu->addAction(tr("Remove"), this, &XTreeView::removeItem);
     acRemove->setStatusTip(tr("Removes the selected item."));
     menu->addSeparator();
-    acChange = menu->addAction(tr("Change items' position"), this,
+    acChange = menu->addAction(tr("Change items position"), this,
                                &XTreeView::changeItemsPosition);
 
-    acChange->setStatusTip(tr("Change all items' position inside the current menu."));
+    acChange->setStatusTip(tr("Change all items position inside the current menu."));
 }
 
 void XTreeView::controlDialogActions(bool enable)
@@ -174,8 +174,9 @@ void XTreeView::addItem()
         XanteJTF &jtf = project.getJtf();
         XanteMenu &menu = jtf.menuAt(currentSelectedMenu);
         XanteItem item(jtf.applicationName(), menu.name(), itemName);
-        menu.addItem(item);
 
+        item.referencedMenu(menu.objectId());
+        menu.addItem(item);
         emitSignalToUpdate();
     }
 }
@@ -256,7 +257,7 @@ void XTreeView::changeItemsPosition()
     if (selectedLine != XTreeView::SelectedLine::MenuLine) {
         QMessageBox::warning(this, tr("Warning"),
                              tr("You must select a menu line before editting "
-                                "its item's layout."));
+                                "its items order."));
 
         return;
     }

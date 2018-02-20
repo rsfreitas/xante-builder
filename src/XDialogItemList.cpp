@@ -32,7 +32,7 @@
 XDialogItemList::XDialogItemList(XanteMenu &menu, QWidget *parent)
     : QDialog(parent), m_menu(menu)
 {
-    setWindowTitle(tr("Menu items' adjustment"));
+    setWindowTitle(tr("Menu items adjustment"));
     createWidgets();
     fillWidgetsWithProjectData();
 }

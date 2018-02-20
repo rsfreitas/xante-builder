@@ -40,9 +40,6 @@ XMainDialog::XMainDialog(QWidget *parent)
     tree = new XTreeView(this);
     connect(tree, SIGNAL(itemSelected()), this, SLOT(dialogItemSelected()));
     connect(tree, SIGNAL(menuSelected()), this, SLOT(dialogMenuSelected()));
-    connect(tree, SIGNAL(contentChanged()), this,
-            SLOT(dialogContentChanged()));
-
     connect(tree, SIGNAL(treeViewNeedsUpdate()), this,
             SLOT(updateTreeView()));
 
@@ -110,10 +107,6 @@ void XMainDialog::dialogMenuSelected()
     dialogMenu->hide();
     dialogMenu->show();
     dialogMenu->setSelection(tree->currentSelectedMenu);
-}
-
-void XMainDialog::dialogContentChanged()
-{
 }
 
 void XMainDialog::controlProjectWidgets(bool enable)

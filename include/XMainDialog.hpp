@@ -50,7 +50,6 @@ class XMainDialog : public QWidget
     private slots:
         void dialogItemSelected();
         void dialogMenuSelected();
-        void dialogContentChanged();
         void updateTreeView();
         void projectChanged();
 

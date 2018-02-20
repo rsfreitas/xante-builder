@@ -28,7 +28,7 @@
 
 #include <QMainWindow>
 
-#include <XanteCommon.hpp>
+#include <libxante.h>
 
 class QAction;
 class XanteConfig;
@@ -63,7 +63,7 @@ class XMainWindow : public QMainWindow
     private:
         static XanteProject *project;
         XanteConfig &config;
-        bool editingProject = false;
+        bool editingProject = false, hasChanges = false;
 
         /* UI */
         QAction *acOpen, *acClose, *acSave, *acJtfMainInfo, *acTestJtf,

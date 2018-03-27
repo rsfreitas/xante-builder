@@ -29,7 +29,7 @@
 #include <QWidget>
 #include <QVector>
 
-#include "libxante.h"
+#include "xante/libxante.h"
 
 class QLineEdit;
 class QComboBox;

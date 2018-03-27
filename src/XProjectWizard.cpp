@@ -70,7 +70,7 @@ void ConclusionPage::initializePage()
 ProjectInfoPage::ProjectInfoPage(QWidget *parent)
     : QWizardPage(parent)
 {
-    setTitle(tr("Project Informations"));
+    setTitle(tr("Project Information"));
 
     QLabel *lname = new QLabel(tr("Project name:"));
     leName = new QLineEdit;

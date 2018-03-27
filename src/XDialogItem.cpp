@@ -415,7 +415,7 @@ XDialogItem::~XDialogItem()
 }
 
 /*
- * Sets the current project that is been edited, so all other informations
+ * Sets the current project that is been edited, so all other information
  * (or selections inside the main list view) may use it. At the same time,
  * sets the current XanteItem to the @selectedMenuIndex and the
  * @selectedItemIndex inside it.
@@ -598,13 +598,13 @@ void XDialogItem::setupWidgets(void)
     /* Prepare dialog widgets for item */
     selectItemType(item.type());
 
-    /* Common informations */
+    /* Common information */
     lineEdit[XDialogItem::LineEdit::Name]->setText(item.name());
     lineEdit[XDialogItem::LineEdit::ObjectId]->setText(item.objectId());
     comboBox[XDialogItem::ComboBox::Type]->setCurrentIndex((int)item.type());
     comboBox[XDialogItem::ComboBox::Mode]->setCurrentIndex((int)item.mode());
 
-    /* Specific informations */
+    /* Specific information */
     setupConfigWidgets(item);
     setupEventsWidgets(item);
     setupHelpWidgets(item);
@@ -988,7 +988,7 @@ XanteItem XDialogItem::createXanteItemFromWidgets(XanteJTF &jtf,
  * @brief Updates the current edited XanteItem data.
  *
  * This function is responsible to update the current edited XanteItem
- * informations with data from the widgets.
+ * information with data from the widgets.
  *
  * @return If an invalid change has been made returns false, otherwise returns
  *         true, even if no change has been made.

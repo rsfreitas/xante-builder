@@ -314,7 +314,7 @@ void XDialogMenu::dynamicRadioToggled(bool checked)
 }
 
 /*
- * Sets the current project that is been edited, so all other informations
+ * Sets the current project that is been edited, so all other information
  * (or selections inside the main list view) may use it. At the same time,
  * sets the current XanteMenu to the @selectedMenuIndex inside it.
  */
@@ -345,7 +345,7 @@ void XDialogMenu::setupWidgets(void)
 }
 
 /*
- * Adjusts current selected XanteMenu dynamic informations in the UI if it
+ * Adjusts current selected XanteMenu dynamic information in the UI if it
  * contains them.
  */
 void XDialogMenu::setupDynamicInfoWidgets(XanteMenu menu)

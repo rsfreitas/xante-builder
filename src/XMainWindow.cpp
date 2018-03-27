@@ -226,10 +226,10 @@ void XMainWindow::createMenu(void)
     acExit->setShortcuts(QKeySequence::Quit);
 
     QMenu *mActions = menuBar()->addMenu(tr("&JTF"));
-    acJtfMainInfo = mActions->addAction(tr("&Informations"), this,
+    acJtfMainInfo = mActions->addAction(tr("&Information"), this,
                                             &XMainWindow::editJtfInfo);
 
-    acJtfMainInfo->setStatusTip(tr("Edits the JTF main informations."));
+    acJtfMainInfo->setStatusTip(tr("Edits the JTF main information."));
     acJtfMainInfo->setShortcuts(QKeySequence::Italic);
     mActions->addSeparator();
     acTestJtf = mActions->addAction(tr("&Test"), this,

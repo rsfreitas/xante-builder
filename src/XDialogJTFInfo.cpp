@@ -38,7 +38,7 @@
 XDialogJTFInfo::XDialogJTFInfo(QWidget *parent)
     : QDialog(parent)
 {
-    setWindowTitle(tr("JTF file main informations"));
+    setWindowTitle(tr("JTF file main information"));
     createWidgets();
     fillWidgetsWithProjectData();
 }
@@ -113,7 +113,7 @@ QGroupBox *XDialogJTFInfo::createInformationWidgets(void)
     };
 
     QVBoxLayout *v = new QVBoxLayout;
-    QGroupBox *gb = new QGroupBox(tr("JTF Informations"));
+    QGroupBox *gb = new QGroupBox(tr("JTF Information"));
     int i, t;
 
     t = sizeof(pageItems) / sizeof(pageItems[0]);

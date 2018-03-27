@@ -51,7 +51,7 @@ XanteProject::XanteProject(QString filename)
  * @name XanteProject
  * @brief The class constructor
  *
- * This constructor creates a XanteProject from its bare informations. It's used
+ * This constructor creates a XanteProject from its bare information. It's used
  * when a new project is created by the application.
  *
  * @param [in] projectName: The project name.

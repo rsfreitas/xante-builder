@@ -5,10 +5,11 @@
 TEMPLATE = app
 TARGET = xante-builder
 DEPENDPATH += ../include src
-INCLUDEPATH += ../include
+INCLUDEPATH += ../include /usr/local/include/xante
 
+QMAKE_LFLAGS +=
 QT += widgets core
-LIBS +=
+LIBS += /usr/local/lib/libxante.a
 CONFIG += debug
 
 # Input
@@ -23,11 +24,9 @@ HEADERS += ../include/XMainWindow.hpp   \
         ../include/XDialogItemList.hpp
 
 SOURCES += main.cpp         \
-        XanteConfig.cpp     \
         XanteProject.cpp    \
         XMainWindow.cpp     \
         XProjectWizard.cpp  \
-        XanteJTF.cpp        \
         XMainDialog.cpp     \
         XTreeView.cpp       \
         XTreeModel.cpp      \

@@ -30,7 +30,7 @@
 
 int main(int argc, char **argv)
 {
-    XanteConfig config;
+    XanteConfig config(APP_NAME);
     QApplication app(argc, argv);
 
     XMainWindow window(config);

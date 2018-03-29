@@ -113,7 +113,6 @@ bool XanteProject::create(void)
 
     writeProjectFile();
     projectRootPath.mkdir("jtf");
-    projectRootPath.mkdir("script");
     save();
 
     return true;

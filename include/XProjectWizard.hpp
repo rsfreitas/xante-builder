@@ -70,7 +70,8 @@ class ProjectInfoPage : public QWizardPage
 
     private:
         /* UI */
-        QLineEdit *leName, *leDescription, *lePathname;
+        QLineEdit *leName, *leDescription, *lePathname, *leAuthor;
+        QComboBox *cbLanguage;
 };
 
 class ProjectConfigPage : public QWizardPage
@@ -101,6 +102,8 @@ class XProjectWizard : public QWizard
     private:
         bool releaseProject = true;
         XanteProject *project = nullptr;
+
+        void callSourceTemplate();
 };
 
 #endif

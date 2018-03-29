@@ -78,7 +78,7 @@ void XMainDialog::activeProject(bool active)
     if (active) {
         dialogMenu->setCurrentProject(tree->currentSelectedMenu);
         dialogItem->setCurrentProject(tree->currentSelectedMenu,
-                                         tree->currentSelectedItem);
+                                      tree->currentSelectedItem);
     } else {
         dialogMenu->clear();
         dialogItem->clear();
@@ -98,7 +98,7 @@ void XMainDialog::dialogItemSelected()
     dialogItem->hide();
     dialogItem->show();
     dialogItem->setSelection(tree->currentSelectedMenu,
-                               tree->currentSelectedItem);
+                             tree->currentSelectedItem);
 }
 
 void XMainDialog::dialogMenuSelected()

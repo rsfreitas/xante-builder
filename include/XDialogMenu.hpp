@@ -28,6 +28,7 @@
 
 #include <QWidget>
 #include <QVector>
+#include <QTableWidget>
 
 #include "xante/libxante.h"
 
@@ -69,21 +70,12 @@ class XDialogMenu : public QWidget
         enum LineEdit {
             Name,
             ObjectId,
-            EventSelected,
-            EventExit,
             DynamicOriginBlock,
             DynamicOriginItem,
             DynamicNumberOfCopies,
             BlockPrefix,
 
             MaxLineEdit
-        };
-
-        enum CheckBox {
-            EvSelected,
-            EvExit,
-
-            MaxCheckBox
         };
 
         enum ComboBox {
@@ -107,11 +99,10 @@ class XDialogMenu : public QWidget
 
         /* UI */
         QVector<QLineEdit *> lineEdit;
-        QVector<QCheckBox *> checkBox;
         QVector<QComboBox *> comboBox;
         QVector<QGroupBox *> groupBox;
         QVector<QRadioButton *> radioButton;
-
+        QTableWidget *tbEvents;
         QListWidget *dynamicOptions;
 
         QHBoxLayout *createIdentificationWidgets(void);
@@ -129,8 +120,8 @@ class XDialogMenu : public QWidget
 
         void disableAllWidgets(void);
         bool updateXanteMenu(void);
-        bool updateXanteMenuEvents(XanteMenu &menu);
-        bool updateXanteMenuDynamic(XanteMenu &menu);
+        void updateXanteMenuEvents(XanteMenu &menu);
+        void updateXanteMenuDynamic(XanteMenu &menu);
 
         XanteMenu createXanteMenuFromWidgets(XanteJTF &jtf);
 };

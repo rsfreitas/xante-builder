@@ -35,6 +35,7 @@
 #include <QPushButton>
 #include <QListWidget>
 #include <QInputDialog>
+#include <QHeaderView>
 
 #include "xante_builder.hpp"
 
@@ -117,42 +118,18 @@ QHBoxLayout *XDialogMenu::createTypeWidgets(void)
 
 QGroupBox *XDialogMenu::createEventsWidgets(void)
 {
-    QGroupBox *gb;
-    QCheckBox *cb;
-    QLabel *label;
-    QLineEdit *edit;
-    QHBoxLayout *h1, *h2;
-    QVBoxLayout *v = new QVBoxLayout;
+    QGroupBox *gb = new QGroupBox(tr("Events"));
+    QHBoxLayout *l = new QHBoxLayout;
 
-    h1 = new QHBoxLayout;
-    h2 = new QHBoxLayout;
-    gb = new QGroupBox(tr("Events"));
+    tbEvents = new QTableWidget(1, 1);
+    tbEvents->setHorizontalHeaderLabels(QStringList() << tr("Function name"));
+    tbEvents->setVerticalHeaderLabels(QStringList() << tr("Exit event"));
+    tbEvents->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
+    l->addWidget(tbEvents);
     gb->setCheckable(true);
     gb->setChecked(false);
-
-    cb = new QCheckBox(tr("Selected event"));
-    label = new QLabel(tr("Function name:"));
-    edit = new QLineEdit;
-    label->setBuddy(edit);
-    h1->addWidget(cb);
-    h1->addWidget(label);
-    h1->addWidget(edit);
-    checkBox[XDialogMenu::CheckBox::EvSelected] = cb;
-    lineEdit[XDialogMenu::LineEdit::EventSelected] = edit;
-
-    cb = new QCheckBox(tr("Exit event"));
-    label = new QLabel(tr("Function name:"));
-    edit = new QLineEdit;
-    label->setBuddy(edit);
-    h2->addWidget(cb);
-    h2->addWidget(label);
-    h2->addWidget(edit);
-    checkBox[XDialogMenu::CheckBox::EvExit] = cb;
-    lineEdit[XDialogMenu::LineEdit::EventExit] = edit;
-
-    v->addLayout(h1);
-    v->addLayout(h2);
-    gb->setLayout(v);
+    gb->setLayout(l);
     groupBox[XDialogMenu::GroupBox::Events] = gb;
 
     return gb;
@@ -282,7 +259,7 @@ XDialogMenu::XDialogMenu(QWidget *parent)
     : QWidget(parent)
 {
     lineEdit = QVector<QLineEdit *>(XDialogMenu::MaxLineEdit);
-    checkBox = QVector<QCheckBox *>(XDialogMenu::MaxCheckBox);
+//    checkBox = QVector<QCheckBox *>(XDialogMenu::MaxCheckBox);
     comboBox = QVector<QComboBox *>(XDialogMenu::MaxComboBox);
     groupBox = QVector<QGroupBox *>(XDialogMenu::MaxGroupBox);
     radioButton = QVector<QRadioButton *>(XanteMenu::MaxDynamicMenuType);
@@ -321,27 +298,6 @@ void XDialogMenu::dynamicRadioToggled(bool checked)
 void XDialogMenu::setCurrentProject(int selectedMenuIndex)
 {
     setSelection(selectedMenuIndex);
-}
-
-/*
- * Sets data by using the @selectedMenuIndex to get its corresponding
- * XanteMenu.
- */
-void XDialogMenu::setSelection(int selectedMenuIndex)
-{
-    clear();
-    currentMenuIndex = selectedMenuIndex;
-    setupWidgets();
-}
-
-void XDialogMenu::setupWidgets(void)
-{
-    XanteProject &project = XMainWindow::getProject();
-
-    XanteJTF jtf = project.getJtf();
-    XanteMenu menu = jtf.menuAt(currentMenuIndex);
-
-    setupWidgets(menu);
 }
 
 /*
@@ -404,38 +360,22 @@ void XDialogMenu::setupDynamicInfoWidgets(XanteMenu menu)
  */
 void XDialogMenu::setupEventsWidgets(XanteMenu menu)
 {
-    int i;
-    QList<QPair<enum XanteMenu::Event,
-                QPair<enum XDialogMenu::LineEdit,
-                      enum XDialogMenu::CheckBox>>> events;
+    groupBox[XDialogMenu::GroupBox::Events]->setEnabled(true);
 
     if (menu.hasEvents() == false)
         return;
 
-/*    events.append(qMakePair(XanteMenu::Event::Selected,
-                            qMakePair(XDialogMenu::LineEdit::EventSelected,
-                                      XDialogMenu::CheckBox::EvSelected)));*/
-
-    events.append(qMakePair(XanteMenu::Event::Exit,
-                            qMakePair(XDialogMenu::LineEdit::EventExit,
-                                      XDialogMenu::CheckBox::EvExit)));
-
     groupBox[XDialogMenu::GroupBox::Events]->setChecked(true);
-    groupBox[XDialogMenu::GroupBox::Events]->setEnabled(true);
 
-    for (i = 0; i < events.size(); i++) {
-        QPair<enum XanteMenu::Event,
-              QPair<enum XDialogMenu::LineEdit,
-                    enum XDialogMenu::CheckBox>> p = events.at(i);
+    for (int i = XanteMenu::Event::Exit, row = 0;
+         i < XanteMenu::Event::MaxEvents;
+         i++, row++)
+    {
+        QTableWidgetItem *item = new QTableWidgetItem(
+            QString(menu.event(static_cast<enum XanteMenu::Event>(i)))
+        );
 
-        QString eventName = menu.event(p.first);
-        QPair<enum XDialogMenu::LineEdit,
-              enum XDialogMenu::CheckBox> pp = p.second;
-
-        if (eventName.isEmpty() == false) {
-            lineEdit[pp.first]->setText(eventName);
-            checkBox[pp.second]->setChecked(true);
-        }
+        tbEvents->setItem(row, 0, item);
     }
 }
 
@@ -444,6 +384,12 @@ void XDialogMenu::disableAllWidgets(void)
     groupBox[XDialogMenu::GroupBox::Events]->setChecked(false);
     groupBox[XDialogMenu::GroupBox::Events]->setEnabled(false);
     groupBox[XDialogMenu::GroupBox::Dynamic]->setEnabled(false);
+}
+
+void XDialogMenu::selectMenuType(int index)
+{
+    groupBox[XDialogMenu::GroupBox::Dynamic]->setEnabled((index == 0) ? false
+                                                                       : true);
 }
 
 void XDialogMenu::setupWidgets(XanteMenu menu)
@@ -462,10 +408,47 @@ void XDialogMenu::setupWidgets(XanteMenu menu)
     setupEventsWidgets(menu);
 }
 
-void XDialogMenu::selectMenuType(int index)
+void XDialogMenu::setupWidgets(void)
 {
-    groupBox[XDialogMenu::GroupBox::Dynamic]->setEnabled((index == 0) ? false
-                                                                       : true);
+    XanteProject &project = XMainWindow::getProject();
+    XanteJTF jtf = project.getJtf();
+
+    try {
+        XanteMenu menu = jtf.menuAt(currentMenuIndex);
+        setupWidgets(menu);
+    } catch (std::exception &e) {
+    }
+}
+
+void XDialogMenu::clear(void)
+{
+    for (int i = XDialogMenu::LineEdit::Name;
+         i < XDialogMenu::LineEdit::MaxLineEdit;
+         i++)
+    {
+        lineEdit[i]->clear();
+    }
+
+    for (int i = XDialogMenu::ComboBox::Type;
+         i < XDialogMenu::ComboBox::MaxComboBox;
+         i++)
+    {
+        comboBox[i]->setCurrentIndex(0);
+    }
+
+    tbEvents->clearContents();
+    currentMenuIndex = -1;
+}
+
+/*
+ * Sets data on the User Interface by using the @selectedMenuIndex to get its
+ * corresponding XanteMenu (which was previously loaded).
+ */
+void XDialogMenu::setSelection(int selectedMenuIndex)
+{
+    clear();
+    currentMenuIndex = selectedMenuIndex;
+    setupWidgets();
 }
 
 void XDialogMenu::addDynamicFixedOption(void)
@@ -491,33 +474,7 @@ void XDialogMenu::delDynamicFixedOption(void)
     dynamicOptions->takeItem(row);
 }
 
-void XDialogMenu::clear(void)
-{
-    for (int i = XDialogMenu::LineEdit::Name;
-         i < XDialogMenu::LineEdit::MaxLineEdit;
-         i++)
-    {
-        lineEdit[i]->clear();
-    }
-
-    for (int i = XDialogMenu::ComboBox::Type;
-         i < XDialogMenu::ComboBox::MaxComboBox;
-         i++)
-    {
-        comboBox[i]->setCurrentIndex(0);
-    }
-
-    for (int i = XDialogMenu::CheckBox::EvSelected;
-         i < XDialogMenu::CheckBox::MaxCheckBox;
-         i++)
-    {
-        checkBox[i]->setChecked(false);
-    }
-
-    currentMenuIndex = -1;
-}
-
-bool XDialogMenu::updateXanteMenuDynamic(XanteMenu &menu)
+void XDialogMenu::updateXanteMenuDynamic(XanteMenu &menu)
 {
     enum XanteMenu::DynamicType type;
     QString copies, prefix, block, item;
@@ -559,38 +516,17 @@ bool XDialogMenu::updateXanteMenuDynamic(XanteMenu &menu)
         default:
             break;
     }
-
-    return true;
 }
 
-bool XDialogMenu::updateXanteMenuEvents(XanteMenu &menu)
+void XDialogMenu::updateXanteMenuEvents(XanteMenu &menu)
 {
-    QMap<enum XanteMenu::Event,
-        QPair<QCheckBox *, QLineEdit *>> events;
+    for (int i = 0; i < tbEvents->rowCount(); i++) {
+        QTableWidgetItem *item = tbEvents->item(i, 0);
+        QString fname = item->text();
 
-/*    events.insert(XanteMenu::Event::Selected,
-                  qMakePair(checkBox[XDialogMenu::CheckBox::EvSelected],
-                            lineEdit[XDialogMenu::LineEdit::EventSelected]));*/
-
-    events.insert(XanteMenu::Event::Exit,
-                  qMakePair(checkBox[XDialogMenu::CheckBox::EvExit],
-                            lineEdit[XDialogMenu::LineEdit::EventExit]));
-
-    QMapIterator<enum XanteMenu::Event, QPair<QCheckBox *, QLineEdit *>> i(events);
-
-    while (i.hasNext()) {
-        i.next();
-
-        enum XanteMenu::Event eventType = i.key();
-        QPair<QCheckBox*, QLineEdit *> ui = i.value();
-        QString text = ui.second->text();
-
-        if (ui.first->isChecked() && (text.isEmpty() == false)) {
-            menu.event(text, eventType);
-        }
+        if (fname.isEmpty() == false)
+            menu.event(fname, static_cast<enum XanteMenu::Event>(i));
     }
-
-    return true;
 }
 
 XanteMenu XDialogMenu::createXanteMenuFromWidgets(XanteJTF &jtf)

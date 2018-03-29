@@ -62,7 +62,7 @@ class XDialogJTFInfo : public QDialog
         };
 
         /* UI */
-        QComboBox *cbMainMenu, *cbBeta;
+        QComboBox *cbMainMenu, *cbBeta, *cbEscKey, *cbSuspendKey, *cbStopKey;
         QList<QLineEdit *> edit;
 
         void createWidgets(void);
@@ -70,9 +70,10 @@ class XDialogJTFInfo : public QDialog
         void fillWidgetsWithProjectData(void);
         void prepareMainMenuChooser(void);
         QHBoxLayout *createMainMenuChooser(void);
-        QHBoxLayout *createBetaChooser(void);
+        QPair<QComboBox *, QHBoxLayout *> createChooser(QString name);
         QHBoxLayout *createButtons(void);
         QGroupBox *createInformationWidgets(void);
+        QGroupBox *createBlockedKeysWidgets(void);
 };
 
 #endif

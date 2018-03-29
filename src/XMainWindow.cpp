@@ -154,6 +154,12 @@ void XMainWindow::editJtfInfo()
 
 void XMainWindow::jtfTest()
 {
+    QProcess p;
+
+    p.start(QString("xterm -geometry 100x33+0+0 -e jerminus -j %1 -N -T")
+                    .arg(project->getJtfFilename()));
+
+    p.waitForFinished();
 }
 
 void XMainWindow::aboutUs()

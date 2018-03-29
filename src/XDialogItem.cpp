@@ -145,7 +145,7 @@ QGroupBox *XDialogItem::createItemConfigurationWidgets(void)
 {
     QLabel *label;
     QLineEdit *edit;
-    QGroupBox *g = new QGroupBox(tr("Configuration"));
+    QGroupBox *g = new QGroupBox(tr("Settings (config)"));
     QHBoxLayout *h = new QHBoxLayout;
 
     /* default value */

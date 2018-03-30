@@ -40,6 +40,7 @@
 #include <QMapIterator>
 #include <QInputDialog>
 #include <QAction>
+#include <QHeaderView>
 
 #include "xante_builder.hpp"
 
@@ -54,21 +55,37 @@ static const char *cbAccessModeName[] = {
 
 static const char *cbItemTypeName[] = {
     NULL,
-    "menu",
-    "input-int",
-    "input-float",
-    "input-date",
-    "input-time",
-    "input-string",
-    "input-passwd",
-    "calendar",
-    "timebox",
-    "radio-checklist",
-    "checklist",
-    "yesno",
-    "dynamic-menu",
-    "delete-dynamic-menu",
-    "add-dynamic-menu"
+    XANTE_STR_WIDGET_MENU,
+    XANTE_STR_WIDGET_INPUT_INT,
+    XANTE_STR_WIDGET_INPUT_FLOAT,
+    XANTE_STR_WIDGET_INPUT_DATE,
+    XANTE_STR_WIDGET_INPUT_TIME,
+    XANTE_STR_WIDGET_INPUT_STRING,
+    XANTE_STR_WIDGET_INPUT_PASSWD,
+    XANTE_STR_WIDGET_CALENDAR,
+    XANTE_STR_WIDGET_TIMEBOX,
+    XANTE_STR_WIDGET_RADIO_CHECKLIST,
+    XANTE_STR_WIDGET_CHECKLIST,
+    XANTE_STR_WIDGET_YESNO,
+    XANTE_STR_WIDGET_DYNAMIC_MENU,
+    XANTE_STR_WIDGET_DELETE_DYNAMIC_MENU,
+    XANTE_STR_WIDGET_ADD_DYNAMIC_MENU,
+/*    XANTE_STR_WIDGET_CUSTOM
+    XANTE_STR_WIDGET_PROGRESS
+    XANTE_STR_WIDGET_SPINNER_SYNC
+    XANTE_STR_WIDGET_DOTS_SYNC
+    XANTE_STR_WIDGET_RANGE
+    XANTE_STR_WIDGET_FILE_SELECT
+    XANTE_STR_WIDGET_DIR_SELECT
+    XANTE_STR_WIDGET_FILE_VIEW
+    XANTE_STR_WIDGET_TAILBOX
+    XANTE_STR_WIDGET_SCROLLTEXT
+    XANTE_STR_WIDGET_UPDATE_OBJECT
+    XANTE_STR_WIDGET_INPUTSCROLL
+    XANTE_STR_WIDGET_MIXEDFORM
+    XANTE_STR_WIDGET_BUILDLIST
+    XANTE_STR_WIDGET_SPREADSHEET
+    XANTE_STR_GADGET_CLOCK*/
 };
 
 #define ITEM_TYPE       \
@@ -326,7 +343,7 @@ QGroupBox *XDialogItem::createRangesWidgets(void)
 
 QGroupBox *XDialogItem::createEventsWidgets(void)
 {
-    QLabel *label;
+/*  QLabel *label;
     QLineEdit *edit;
     QCheckBox *cb;
     QHBoxLayout *h;
@@ -377,7 +394,27 @@ QGroupBox *XDialogItem::createEventsWidgets(void)
     g->setLayout(v);
     groupBox[XDialogItem::GroupBox::Events] = g;
 
-    return g;
+    return g;*/
+    QGroupBox *gb = new QGroupBox(tr("Events"));
+    QHBoxLayout *l = new QHBoxLayout;
+
+    tbEvents = new QTableWidget(XANTE_ITEM_DEFAULT_EVENTS, 1);
+    tbEvents->setHorizontalHeaderLabels(QStringList() << tr("Function name"));
+    tbEvents->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    tbEvents->setVerticalHeaderLabels(QStringList() << tr("Selected")
+                                                    << tr("Confirm value")
+                                                    << tr("Value changed")
+                                                    << tr("Exit")
+                                                    << tr("Extra button pressed"));
+
+
+    l->addWidget(tbEvents);
+    gb->setCheckable(true);
+    gb->setChecked(false);
+    gb->setLayout(l);
+    groupBox[XDialogItem::GroupBox::Events] = gb;
+
+    return gb;
 }
 
 QHBoxLayout *XDialogItem::createRangesAndEventsWidgets(void)
@@ -394,7 +431,6 @@ XDialogItem::XDialogItem(QWidget *parent)
     : QWidget(parent)
 {
     lineEdit = QVector<QLineEdit *>(XDialogItem::MaxLineEdit);
-    checkBox = QVector<QCheckBox *>(XDialogItem::MaxCheckBox);
     groupBox = QVector<QGroupBox *>(XDialogItem::MaxGroupBox);
     comboBox = QVector<QComboBox *>(XDialogItem::MaxComboBox);
     listWidget = QVector<QListWidget *>(XDialogItem::MaxListWidget);
@@ -450,45 +486,55 @@ void XDialogItem::setupConfigWidgets(const XanteItem &item)
 
 void XDialogItem::setupEventsWidgets(const XanteItem &item)
 {
-    int i;
-    QList<QPair<enum XanteItem::Event,
-                QPair<enum XDialogItem::LineEdit,
-                      enum XDialogItem::CheckBox>>> events;
+    QList<enum XanteItem::Event> events;
+
+    groupBox[XDialogItem::GroupBox::Events]->setChecked(false);
+    groupBox[XDialogItem::GroupBox::Events]->setEnabled(true);
 
     if (item.hasEvents() == false)
         return;
 
-    events.append(qMakePair(XanteItem::Event::Selected,
-                            qMakePair(XDialogItem::LineEdit::EventSelected,
-                                      XDialogItem::CheckBox::EvSelected)));
+    events.append(XanteItem::Event::Selected);
+    events.append(XanteItem::Event::Exit);
+    events.append(XanteItem::Event::ValueConfirmed);
+    events.append(XanteItem::Event::ValueChanged);
+    events.append(XanteItem::Event::ExtraButtonPressed);
 
-    events.append(qMakePair(XanteItem::Event::Exit,
-                            qMakePair(XDialogItem::LineEdit::EventExit,
-                                      XDialogItem::CheckBox::EvExit)));
+    switch (item.type()) {
+        case XanteItem::Type::Inputscroll:
+            events.append(XanteItem::Event::ValueStrlen);
+            events.append(XanteItem::Event::ValueCheck);
+            break;
 
-    events.append(qMakePair(XanteItem::Event::ValueConfirmed,
-                            qMakePair(XDialogItem::LineEdit::EventValueConfirmed,
-                                      XDialogItem::CheckBox::EvValueConfirmed)));
+        case XanteItem::Type::SpinnerSync:
+        case XanteItem::Type::DotsSync:
+            events.append(XanteItem::Event::SyncRoutine);
+            break;
 
-    events.append(qMakePair(XanteItem::Event::ValueChanged,
-                            qMakePair(XDialogItem::LineEdit::EventValueChanged,
-                                      XDialogItem::CheckBox::EvValueChanged)));
+        case XanteItem::Type::UpdateObject:
+        case XanteItem::Type::Progress:
+            events.append(XanteItem::Event::UpdateRoutine);
+            break;
+
+        case XanteItem::Type::Custom:
+            events.append(XanteItem::Event::CustomFunction);
+            break;
+
+        default:
+            break;
+    }
 
     groupBox[XDialogItem::GroupBox::Events]->setChecked(true);
+    QListIterator<enum XanteItem::Event> i(events);
+    int row = 0;
 
-    for (i = 0; i < events.size(); i++) {
-        QPair<enum XanteItem::Event,
-              QPair<enum XDialogItem::LineEdit,
-                    enum XDialogItem::CheckBox>> p = events.at(i);
+    while (i.hasNext()) {
+        QTableWidgetItem *it = new QTableWidgetItem(
+            QString(item.event(i.next()))
+        );
 
-        QString eventName = item.event(p.first);
-        QPair<enum XDialogItem::LineEdit,
-              enum XDialogItem::CheckBox> pp = p.second;
-
-        if (eventName.isEmpty() == false) {
-            lineEdit[pp.first]->setText(eventName);
-            checkBox[pp.second]->setChecked(true);
-        }
+        tbEvents->setItem(row, 0, it);
+        row += 1;
     }
 }
 
@@ -575,12 +621,12 @@ void XDialogItem::setupMenuReferences(const XanteItem &item, XanteJTF &jtf)
 
     cb->clear();
 
-    for (int i = 0; i < jtf.totalMenus(); i++) {
-        XanteMenu m = jtf.menuAt(i);
-        cb->addItem(m.name());
-    }
-
     try {
+        for (int i = 0; i < jtf.totalMenus(); i++) {
+            XanteMenu m = jtf.menuAt(i);
+            cb->addItem(m.name());
+        }
+
         XanteMenu m = jtf.getMenu(item.referencedMenu());
         cb->setCurrentIndex(cb->findText(m.name()));
     } catch (std::exception &e) {
@@ -593,24 +639,28 @@ void XDialogItem::setupWidgets(void)
     XanteProject &project = XMainWindow::getProject();
     XanteJTF &jtf = project.getJtf();
     XanteMenu menu = jtf.menuAt(currentMenuIndex);
-    XanteItem &item = menu.itemAt(currentItemIndex);
 
-    /* Prepare dialog widgets for item */
-    selectItemType(item.type());
+    try {
+        XanteItem &item = menu.itemAt(currentItemIndex);
 
-    /* Common information */
-    lineEdit[XDialogItem::LineEdit::Name]->setText(item.name());
-    lineEdit[XDialogItem::LineEdit::ObjectId]->setText(item.objectId());
-    comboBox[XDialogItem::ComboBox::Type]->setCurrentIndex((int)item.type());
-    comboBox[XDialogItem::ComboBox::Mode]->setCurrentIndex((int)item.mode());
+        /* Prepare dialog widgets for item */
+        selectItemType(item.type());
 
-    /* Specific information */
-    setupConfigWidgets(item);
-    setupEventsWidgets(item);
-    setupHelpWidgets(item);
-    setupInputRangesWidgets(item);
-    setupOptionsWidgets(item);
-    setupMenuReferences(item, jtf);
+        /* Common information */
+        lineEdit[XDialogItem::LineEdit::Name]->setText(item.name());
+        lineEdit[XDialogItem::LineEdit::ObjectId]->setText(item.objectId());
+        comboBox[XDialogItem::ComboBox::Type]->setCurrentIndex((int)item.type());
+        comboBox[XDialogItem::ComboBox::Mode]->setCurrentIndex((int)item.mode());
+
+        /* Specific information */
+        setupConfigWidgets(item);
+        setupEventsWidgets(item);
+        setupHelpWidgets(item);
+        setupInputRangesWidgets(item);
+        setupOptionsWidgets(item);
+        setupMenuReferences(item, jtf);
+    } catch (std::exception &e) {
+    }
 }
 
 void XDialogItem::disableAllWidgets(void)
@@ -713,6 +763,20 @@ void XDialogItem::selectItemType(int index)
             enableOptions(type);
             break;
 
+        case XanteItem::Type::Inputscroll:
+            break;
+
+        case XanteItem::Type::SpinnerSync:
+        case XanteItem::Type::DotsSync:
+            break;
+
+        case XanteItem::Type::UpdateObject:
+        case XanteItem::Type::Progress:
+            break;
+
+        case XanteItem::Type::Custom:
+            break;
+
         default:
             break;
     }
@@ -791,13 +855,6 @@ void XDialogItem::clear(void)
         comboBox[i]->setCurrentIndex(0);
     }
 
-    for (int i = XDialogItem::CheckBox::EvSelected;
-         i < XDialogItem::CheckBox::MaxCheckBox;
-         i++)
-    {
-        checkBox[i]->setChecked(false);
-    }
-
     for (int i = XDialogItem::ListWidget::OptionsLw;
          i < XDialogItem::ListWidget::MaxListWidget;
          i++)
@@ -805,43 +862,28 @@ void XDialogItem::clear(void)
         listWidget[i]->clear();
     }
 
+    tbEvents->clearContents();
     currentMenuIndex = -1;
     currentItemIndex = -1;
+
+    /* Also, remove rows which aren't default item events */
+    for (int i = XANTE_ITEM_DEFAULT_EVENTS; i < tbEvents->rowCount(); i++)
+        tbEvents->removeRow(i);
 }
 
 void XDialogItem::updateXanteItemEvents(XanteItem &item)
 {
-    QMap<enum XanteItem::Event,
-        QPair<QCheckBox *, QLineEdit *>> events;
+    qDebug() << tbEvents->rowCount();
+    for (int i = 0; i < tbEvents->rowCount(); i++) {
+        QTableWidgetItem *it = tbEvents->item(i, 0);
 
-    events.insert(XanteItem::Event::Selected,
-                  qMakePair(checkBox[XDialogItem::CheckBox::EvSelected],
-                            lineEdit[XDialogItem::LineEdit::EventSelected]));
+        if (NULL == it)
+            continue;
 
-    events.insert(XanteItem::Event::Exit,
-                  qMakePair(checkBox[XDialogItem::CheckBox::EvExit],
-                            lineEdit[XDialogItem::LineEdit::EventExit]));
+        QString fname = it->text();
 
-    events.insert(XanteItem::Event::ValueConfirmed,
-                  qMakePair(checkBox[XDialogItem::CheckBox::EvValueConfirmed],
-                            lineEdit[XDialogItem::LineEdit::EventValueConfirmed]));
-
-    events.insert(XanteItem::Event::ValueChanged,
-                  qMakePair(checkBox[XDialogItem::CheckBox::EvValueChanged],
-                            lineEdit[XDialogItem::LineEdit::EventValueChanged]));
-
-    QMapIterator<enum XanteItem::Event, QPair<QCheckBox *, QLineEdit *>> i(events);
-
-    while (i.hasNext()) {
-        i.next();
-
-        enum XanteItem::Event eventType = i.key();
-        QPair<QCheckBox*, QLineEdit *> ui = i.value();
-        QString text = ui.second->text();
-
-        if (ui.first->isChecked() && (text.isEmpty() == false)) {
-            item.event(text, eventType);
-        }
+        if (fname.isEmpty() == false)
+            item.event(fname, static_cast<enum XanteItem::Event>(i));
     }
 }
 

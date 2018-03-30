@@ -522,6 +522,10 @@ void XDialogMenu::updateXanteMenuEvents(XanteMenu &menu)
 {
     for (int i = 0; i < tbEvents->rowCount(); i++) {
         QTableWidgetItem *item = tbEvents->item(i, 0);
+
+        if (NULL == item)
+            continue;
+
         QString fname = item->text();
 
         if (fname.isEmpty() == false)

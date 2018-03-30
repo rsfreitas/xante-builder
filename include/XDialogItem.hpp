@@ -28,6 +28,7 @@
 
 #include <QWidget>
 #include <QVector>
+#include <QTableWidget>
 
 class QLineEdit;
 class QComboBox;
@@ -75,10 +76,6 @@ class XDialogItem : public QWidget
         enum LineEdit {
             Name,
             ObjectId,
-            EventSelected,
-            EventExit,
-            EventValueConfirmed,
-            EventValueChanged,
             CfgBlock,
             CfgItem,
             Options,
@@ -98,15 +95,6 @@ class XDialogItem : public QWidget
             MenuReference,
 
             MaxComboBox
-        };
-
-        enum CheckBox {
-            EvSelected,
-            EvExit,
-            EvValueConfirmed,
-            EvValueChanged,
-
-            MaxCheckBox
         };
 
         enum GroupBox {
@@ -132,10 +120,10 @@ class XDialogItem : public QWidget
 
         /* UI */
         QVector<QLineEdit *> lineEdit;
-        QVector<QCheckBox *> checkBox;
         QVector<QGroupBox *> groupBox;
         QVector<QComboBox *> comboBox;
         QVector<QListWidget *> listWidget;
+        QTableWidget *tbEvents;
 
         QHBoxLayout *createIdentificationWidgets(void);
         QHBoxLayout *createTypeWidgets(void);

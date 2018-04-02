@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Thu Jun  8 18:39:25 2017
+ * Created at: Mon Apr  2 10:45:05 -03 2018
  * Project: xante-builder
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -23,31 +23,39 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _XANTE_BUILDER_HPP
-#define _XANTE_BUILDER_HPP          1
+#ifndef _XDIALOGSYSTEMSETTINGS_HPP
+#define _XDIALOGSYSTEMSETTINGS_HPP              1
 
-#define MAJOR_VERSION               0
-#define MINOR_VERSION               1
-#define RELEASE                     1
+#include <QDialog>
+#include <QWidget>
 
-#define APP_NAME                    "xante-builder"
+class QGroupBox;
+class QHBoxLayout;
+class QLineEdit;
+class XanteBuilderConfig;
 
-/* External libraries */
-#include "xante/libxante.h"
+class XDialogSystemSettings : public QDialog
+{
+    Q_OBJECT
 
-/* Internal classes */
-#include "XanteUtils.hpp"
-#include "XanteProject.hpp"
-#include "XProjectWizard.hpp"
-#include "XMainWindow.hpp"
-#include "XMainDialog.hpp"
-#include "XTreeView.hpp"
-#include "XTreeModel.hpp"
-#include "XDialogItem.hpp"
-#include "XDialogMenu.hpp"
-#include "XDialogJTFInfo.hpp"
-#include "XDialogItemList.hpp"
-#include "XDialogSystemSettings.hpp"
+    public:
+        XDialogSystemSettings(XanteBuilderConfig &config, QWidget *parent = 0);
+        ~XDialogSystemSettings() {}
+
+    private slots:
+        void confirmOk(void);
+        void confirmCancel(void);
+        void chooseSourceTemplatePath(void);
+        void chooseJerminusPath(void);
+
+    private:
+        QLineEdit *leSourceTemplatePath, *leJerminusPath;
+        XanteBuilderConfig &config;
+
+        void createWidgets(void);
+        QHBoxLayout *createButtons(void);
+        QGroupBox *createUtilitiesWidgets(void);
+};
 
 #endif
 

@@ -417,6 +417,8 @@ void XDialogMenu::setupWidgets(void)
         XanteMenu menu = jtf.menuAt(currentMenuIndex);
         setupWidgets(menu);
     } catch (std::exception &e) {
+        /* Ok, something went wrong. Return the index to the first object. */
+        currentMenuIndex = 0;
     }
 }
 

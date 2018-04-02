@@ -30,10 +30,8 @@
 
 int main(int argc, char **argv)
 {
-    XanteConfig config(APP_NAME);
     QApplication app(argc, argv);
-
-    XMainWindow window(config);
+    XMainWindow window;
     window.show();
 
     return app.exec();

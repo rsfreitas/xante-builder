@@ -32,16 +32,50 @@
 
 class QAction;
 class XanteConfig;
+class XanteConfigObject;
 class XanteProject;
 class XMainDialog;
+
+class XanteBuilderConfig : public XanteConfigObject
+{
+    public:
+        XanteBuilderConfig(const QString &app_name);
+        ~XanteBuilderConfig();
+
+        void loadSettings(QSettings &settings);
+        void writeSettings(QSettings &settings);
+
+        void sourceTemplatePath(QString &path) { m_sourceTemplatePath = path; }
+        const QString sourceTemplatePath(void) const { return m_sourceTemplatePath; }
+
+        void jerminusPath(QString &path) { m_jerminusPath = path; }
+        const QString jerminusPath(void) const { return m_jerminusPath; }
+
+        /* Default libxante's settings */
+        void windowSize(QSize s) { config->windowSize(s); }
+        QSize windowSize(void) const { return config->windowSize(); }
+
+        void windowPosition(QPoint p) { config->windowPosition(p); }
+        QPoint windowPosition(void) const { return config->windowPosition(); }
+
+        const QString recentFile(int index) const { return config->recentFile(index); }
+        bool recentFile(const QString &filename) { return config->recentFile(filename); }
+        int totalRecentFiles(void) const { return config->totalRecentFiles(); }
+
+    private:
+        XanteConfig *config;
+        QString m_sourceTemplatePath, m_jerminusPath;
+
+        void startWithDefaultValues(void);
+};
 
 class XMainWindow : public QMainWindow
 {
     Q_OBJECT
 
     public:
-        XMainWindow(XanteConfig &config);
-        ~XMainWindow() {}
+        XMainWindow();
+        ~XMainWindow();
 
         static bool activeProject(void) { return (project != nullptr); }
         static XanteProject &getProject(void) { return *project; }
@@ -59,15 +93,16 @@ class XMainWindow : public QMainWindow
         void aboutUs();
         void openRecentFile();
         void projectChanged();
+        void systemSettings();
 
     private:
         static XanteProject *project;
-        XanteConfig &config;
+        XanteBuilderConfig *config;
         bool editingProject = false, hasChanges = false;
 
         /* UI */
         QAction *acOpen, *acClose, *acSave, *acJtfMainInfo, *acTestJtf,
-                *acNewProject, *acRecentFiles[MaxRecentFiles];
+                *acNewProject, *acRecentFiles[MaxRecentFiles], *acSettings;
 
         XMainDialog *dialog;
 

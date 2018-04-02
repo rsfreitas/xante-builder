@@ -638,9 +638,9 @@ void XDialogItem::setupWidgets(void)
 {
     XanteProject &project = XMainWindow::getProject();
     XanteJTF &jtf = project.getJtf();
-    XanteMenu menu = jtf.menuAt(currentMenuIndex);
 
     try {
+        XanteMenu menu = jtf.menuAt(currentMenuIndex);
         XanteItem &item = menu.itemAt(currentItemIndex);
 
         /* Prepare dialog widgets for item */
@@ -660,6 +660,9 @@ void XDialogItem::setupWidgets(void)
         setupOptionsWidgets(item);
         setupMenuReferences(item, jtf);
     } catch (std::exception &e) {
+        /* Ok, something went wrong. Return the index to the first object. */
+        currentMenuIndex = 0;
+        currentItemIndex = 0;
     }
 }
 

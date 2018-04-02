@@ -38,7 +38,7 @@
 XDialogJTFInfo::XDialogJTFInfo(QWidget *parent)
     : QDialog(parent)
 {
-    setWindowTitle(tr("JTF file main information"));
+    setWindowTitle(tr("Main settings of the JTF file"));
     createWidgets();
     fillWidgetsWithProjectData();
 }

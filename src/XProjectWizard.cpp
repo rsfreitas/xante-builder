@@ -211,8 +211,8 @@ ProjectConfigPage::ProjectConfigPage(QWidget *parent)
     setLayout(layout);
 }
 
-XProjectWizard::XProjectWizard(QWidget *parent)
-    : QWizard(parent)
+XProjectWizard::XProjectWizard(XanteBuilderConfig &config, QWidget *parent)
+    : QWizard(parent), config(config)
 {
     setWizardStyle(QWizard::ModernStyle);
     setWindowTitle(tr("New project"));
@@ -273,11 +273,12 @@ void XProjectWizard::callSourceTemplate()
             author = field("projectAuthor").toString(),
             path = field("projectPathname").toString();
 
-    p.start(QString("source-template -name %1 -language %2 -type xante-plugin "
+    p.start(QString("%5/source-template -name %1 -language %2 -type xante-plugin "
                     "-path %3 -author \"%4\"").arg(projectName)
                                               .arg(language)
                                               .arg(path)
-                                              .arg(author));
+                                              .arg(author)
+                                              .arg(config.sourceTemplatePath()));
 
     p.waitForFinished();
 }

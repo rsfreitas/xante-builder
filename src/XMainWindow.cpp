@@ -72,7 +72,7 @@ void XMainWindow::closeEvent(QCloseEvent *event)
 
 void XMainWindow::newProject()
 {
-    XProjectWizard projectWizard;
+    XProjectWizard projectWizard(*config, this);
 
     if (projectWizard.exec()) {
         project = projectWizard.buildProject();
@@ -161,8 +161,9 @@ void XMainWindow::jtfTest()
 {
     QProcess p;
 
-    p.start(QString("xterm -geometry 100x33+0+0 -e jerminus -j %1 -N -T")
-                    .arg(project->getJtfFilename()));
+    p.start(QString("xterm -geometry 100x33+0+0 -e %2/jerminus -j %1 -N -T")
+                    .arg(project->getJtfFilename())
+                    .arg(config->jerminusPath()));
 
     p.waitForFinished();
 }

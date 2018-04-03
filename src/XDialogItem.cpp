@@ -23,25 +23,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <QLabel>
-#include <QLineEdit>
-#include <QComboBox>
-#include <QCheckBox>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QGroupBox>
-#include <QRadioButton>
-#include <QGridLayout>
-#include <QPushButton>
-#include <QListWidget>
-#include <QMap>
-#include <QPair>
-#include <QVector>
-#include <QMapIterator>
-#include <QInputDialog>
-#include <QAction>
-#include <QHeaderView>
-
 #include "xante_builder.hpp"
 
 static const char *cbAccessModeName[] = {
@@ -70,32 +51,46 @@ static const char *cbItemTypeName[] = {
     XANTE_STR_WIDGET_DYNAMIC_MENU,
     XANTE_STR_WIDGET_DELETE_DYNAMIC_MENU,
     XANTE_STR_WIDGET_ADD_DYNAMIC_MENU,
-/*    XANTE_STR_WIDGET_CUSTOM
-    XANTE_STR_WIDGET_PROGRESS
-    XANTE_STR_WIDGET_SPINNER_SYNC
-    XANTE_STR_WIDGET_DOTS_SYNC
-    XANTE_STR_WIDGET_RANGE
-    XANTE_STR_WIDGET_FILE_SELECT
-    XANTE_STR_WIDGET_DIR_SELECT
-    XANTE_STR_WIDGET_FILE_VIEW
-    XANTE_STR_WIDGET_TAILBOX
-    XANTE_STR_WIDGET_SCROLLTEXT
-    XANTE_STR_WIDGET_UPDATE_OBJECT
-    XANTE_STR_WIDGET_INPUTSCROLL
-    XANTE_STR_WIDGET_MIXEDFORM
-    XANTE_STR_WIDGET_BUILDLIST
-    XANTE_STR_WIDGET_SPREADSHEET
-    XANTE_STR_GADGET_CLOCK*/
+    XANTE_STR_WIDGET_CUSTOM,
+    XANTE_STR_WIDGET_PROGRESS,
+    XANTE_STR_WIDGET_SPINNER_SYNC,
+    XANTE_STR_WIDGET_DOTS_SYNC,
+    XANTE_STR_WIDGET_RANGE,
+    XANTE_STR_WIDGET_FILE_SELECT,
+    XANTE_STR_WIDGET_DIR_SELECT,
+    XANTE_STR_WIDGET_FILE_VIEW,
+    XANTE_STR_WIDGET_TAILBOX,
+    XANTE_STR_WIDGET_SCROLLTEXT,
+    XANTE_STR_WIDGET_UPDATE_OBJECT,
+    XANTE_STR_WIDGET_INPUTSCROLL,
+    XANTE_STR_WIDGET_MIXEDFORM,
+    XANTE_STR_WIDGET_BUILDLIST,
+    XANTE_STR_WIDGET_SPREADSHEET,
+    XANTE_STR_GADGET_CLOCK,
 };
 
 #define ITEM_TYPE       \
     (sizeof(cbItemTypeName) / sizeof(cbItemTypeName[0]))
 
-QHBoxLayout *XDialogItem::createIdentificationWidgets(void)
+/** *** *** *** ***
+ *
+ * Handles the UI creation -- Begin
+ *
+ */
+
+/*
+ *
+ * Main information
+ *
+ */
+
+QGroupBox *XDialogItem::createMainWidgets(void)
 {
     QLabel *label;
     QLineEdit *edit;
+    QComboBox *cb;
     QHBoxLayout *h = new QHBoxLayout;
+    QGroupBox *g = new QGroupBox(tr("Details"));
 
     /* name */
     label = new QLabel(tr("Name:"));
@@ -113,15 +108,6 @@ QHBoxLayout *XDialogItem::createIdentificationWidgets(void)
     lineEdit[XDialogItem::LineEdit::ObjectId] = edit;
     h->addWidget(label);
     h->addWidget(edit);
-
-    return h;
-}
-
-QHBoxLayout *XDialogItem::createTypeWidgets(void)
-{
-    QLabel *label;
-    QComboBox *cb;
-    QHBoxLayout *h = new QHBoxLayout;
 
     /* type */
     label = new QLabel(tr("Item type:"));
@@ -147,51 +133,16 @@ QHBoxLayout *XDialogItem::createTypeWidgets(void)
     h->addWidget(cb);
     comboBox[XDialogItem::ComboBox::Mode] = cb;
 
-    /* menuId */
-    label = new QLabel(tr("Referenced menu:"));
-    cb = new QComboBox;
-
-    h->addWidget(label);
-    h->addWidget(cb);
-    comboBox[XDialogItem::ComboBox::MenuReference] = cb;
-
-    return h;
-}
-
-QGroupBox *XDialogItem::createItemConfigurationWidgets(void)
-{
-    QLabel *label;
-    QLineEdit *edit;
-    QGroupBox *g = new QGroupBox(tr("Settings (config)"));
-    QHBoxLayout *h = new QHBoxLayout;
-
-    /* default value */
-    label = new QLabel(tr("Default item value:"));
-    edit = new QLineEdit;
-    label->setBuddy(edit);
-    h->addWidget(label);
-    h->addWidget(edit);
-    lineEdit[XDialogItem::LineEdit::DefaultValue] = edit;
-
-    label = new QLabel(tr("Block:"));
-    edit = new QLineEdit;
-    label->setBuddy(edit);
-    h->addWidget(label);
-    h->addWidget(edit);
-    lineEdit[XDialogItem::LineEdit::CfgBlock] = edit;
-
-    label = new QLabel(tr("Item:"));
-    edit = new QLineEdit;
-    label->setBuddy(edit);
-    h->addWidget(label);
-    h->addWidget(edit);
-    lineEdit[XDialogItem::LineEdit::CfgItem] = edit;
-
     g->setLayout(h);
-    groupBox[XDialogItem::GroupBox::Config] = g;
 
     return g;
 }
+
+/*
+ *
+ * Content
+ *
+ */
 
 QGroupBox *XDialogItem::createItemOptionsWidgets(void)
 {
@@ -230,6 +181,303 @@ QGroupBox *XDialogItem::createItemOptionsWidgets(void)
     v->addWidget(lo);
     g->setLayout(v);
     groupBox[XDialogItem::GroupBox::OptionsGb] = g;
+
+    return g;
+}
+
+QGroupBox *XDialogItem::createItemConfigurationWidgets(void)
+{
+    QLabel *label;
+    QLineEdit *edit;
+    QVBoxLayout *v = new QVBoxLayout;
+    QGroupBox *g = new QGroupBox(tr("Settings (config)"));
+    QHBoxLayout *h;
+
+    /* default value */
+    h = new QHBoxLayout;
+    label = new QLabel(tr("Default value:"));
+    edit = new QLineEdit;
+    label->setBuddy(edit);
+    h->addWidget(label);
+    h->addWidget(edit);
+    v->addLayout(h);
+    lineEdit[XDialogItem::LineEdit::DefaultValue] = edit;
+
+    h = new QHBoxLayout;
+    label = new QLabel(tr("Block:"));
+    edit = new QLineEdit;
+    label->setBuddy(edit);
+    h->addWidget(label);
+    h->addWidget(edit);
+    v->addLayout(h);
+    lineEdit[XDialogItem::LineEdit::CfgBlock] = edit;
+
+    h = new QHBoxLayout;
+    label = new QLabel(tr("Entry:"));
+    edit = new QLineEdit;
+    label->setBuddy(edit);
+    h->addWidget(label);
+    h->addWidget(edit);
+    v->addLayout(h);
+    lineEdit[XDialogItem::LineEdit::CfgItem] = edit;
+
+    g->setLayout(v);
+    groupBox[XDialogItem::GroupBox::Config] = g;
+
+    return g;
+}
+
+QGroupBox *XDialogItem::createRangesWidgets(void)
+{
+    QLabel *label;
+    QSpinBox *sb;
+    QHBoxLayout *h;
+    QVBoxLayout *v = new QVBoxLayout;
+    QGroupBox *g = new QGroupBox(tr("Input ranges"));
+
+    /* String length */
+    h = new QHBoxLayout;
+    label = new QLabel(tr("String length:"));
+    sb = new QSpinBox;
+    sb->setRange(1, 1024);
+    h->addWidget(label);
+    h->addWidget(sb);
+    spinBox[XDialogItem::SpinBox::InputStringLength] = sb;
+    v->addLayout(h);
+
+    /* Min */
+    h = new QHBoxLayout;
+    label = new QLabel(tr("Min:"));
+    sb = new QSpinBox;
+    sb->setRange(1, 1024); // FIXME: adjust limit
+    h->addWidget(label);
+    h->addWidget(sb);
+    spinBox[XDialogItem::SpinBox::InputMin] = sb;
+    v->addLayout(h);
+
+    /* Max */
+    h = new QHBoxLayout;
+    label = new QLabel(tr("Max:"));
+    sb = new QSpinBox;
+    sb->setRange(1, 1024); // FIXME: adjust limit
+    h->addWidget(label);
+    h->addWidget(sb);
+    spinBox[XDialogItem::SpinBox::InputMax] = sb;
+    v->addLayout(h);
+
+    g->setLayout(v);
+    groupBox[XDialogItem::GroupBox::InputRanges] = g;
+
+    return g;
+}
+
+QHBoxLayout *XDialogItem::createRangesAndSettingsWidgets(void)
+{
+    QHBoxLayout *h = new QHBoxLayout;
+
+    /* Add Settings and Ranges */
+    h->addWidget(createItemConfigurationWidgets());
+    h->addWidget(createRangesWidgets());
+
+    return h;
+}
+
+QVBoxLayout *XDialogItem::createContentWidgets(void)
+{
+    QVBoxLayout *v = new QVBoxLayout;
+    QHBoxLayout *h = new QHBoxLayout;
+
+    /* Referenced Menu*/
+    QLabel *label = new QLabel(tr("Referenced menu:"));
+    QComboBox *cb = new QComboBox;
+    h->addWidget(label);
+    h->addWidget(cb);
+    comboBox[XDialogItem::ComboBox::MenuReference] = cb;
+    v->addLayout(h);
+
+    /* Ranges and Settings */
+    v->addLayout(createRangesAndSettingsWidgets());
+
+    return v;
+}
+
+QGroupBox *XDialogItem::createDataWidgets(void)
+{
+    QHBoxLayout *h = new QHBoxLayout;
+    QGroupBox *g = new QGroupBox(tr("Content"));
+
+    h->addWidget(createItemOptionsWidgets());
+    h->addLayout(createContentWidgets());
+    g->setLayout(h);
+
+    return g;
+}
+
+/*
+ *
+ * Events
+ *
+ */
+
+QGroupBox *XDialogItem::createEventsWidgets(void)
+{
+    QGroupBox *gb = new QGroupBox(tr("Events"));
+    QHBoxLayout *l = new QHBoxLayout;
+
+    tbEvents = new QTableWidget(XANTE_ITEM_DEFAULT_EVENTS, 1);
+    tbEvents->setHorizontalHeaderLabels(QStringList() << tr("Function name"));
+    tbEvents->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    tbEvents->setVerticalHeaderLabels(QStringList() << tr("Selected")
+                                                    << tr("Confirm value")
+                                                    << tr("Value changed")
+                                                    << tr("Exit")
+                                                    << tr("Extra button pressed"));
+
+
+    l->addWidget(tbEvents);
+    gb->setCheckable(true);
+    gb->setChecked(false);
+    gb->setLayout(l);
+    groupBox[XDialogItem::GroupBox::Events] = gb;
+
+    return gb;
+}
+
+/*
+ *
+ * UI Object
+ *
+ */
+
+QGroupBox *XDialogItem::createGeometryWidgets(void)
+{
+    QGroupBox *g = new QGroupBox(tr("Geometry"));
+    QVBoxLayout *v = new QVBoxLayout;
+    QHBoxLayout *h;
+    QSpinBox *sb;
+    QLabel *label;
+
+    h = new QHBoxLayout;
+    label = new QLabel(tr("Width:"));
+    sb = new QSpinBox;
+    sb->setRange(30, 60); // FIXME: adjust limit
+    h->addWidget(label);
+    h->addWidget(sb);
+    v->addLayout(h);
+    spinBox[XDialogItem::SpinBox::Width] = sb;
+
+    h = new QHBoxLayout;
+    label = new QLabel(tr("Height:"));
+    sb = new QSpinBox;
+    sb->setRange(30, 60); // FIXME: adjust limit
+    h->addWidget(label);
+    h->addWidget(sb);
+    v->addLayout(h);
+    spinBox[XDialogItem::SpinBox::Height] = sb;
+
+    g->setCheckable(true);
+    g->setChecked(false);
+    g->setLayout(v);
+    groupBox[XDialogItem::GroupBox::Geometry] = g;
+
+    return g;
+}
+
+QVBoxLayout *XDialogItem::createExtraFeaturesWidgets(void)
+{
+    QHBoxLayout *hw, *h = new QHBoxLayout;
+    QVBoxLayout *v = new QVBoxLayout;
+    QCheckBox *cb = new QCheckBox(tr("Use Extra button"));
+    QLabel *l;
+    QLineEdit *le;
+
+    /* Extra button */
+    v->addWidget(cb);
+    checkBox[XDialogItem::CheckBox::ExtraButton] = cb;
+
+    /* Window Title */
+    hw = new QHBoxLayout;
+    l = new QLabel(tr("Window title:"));
+    le = new QLineEdit;
+    l->setBuddy(le);
+    hw->addWidget(l);
+    hw->addWidget(le);
+    v->addLayout(hw);
+    lineEdit[XDialogItem::LineEdit::Title] = le;
+
+    /* Geometry */
+    v->addWidget(createGeometryWidgets());
+
+    return v;
+}
+
+QHBoxLayout *XDialogItem::createUiTitleWidgets(void)
+{
+    QHBoxLayout *h = new QHBoxLayout;
+    QLabel *l;
+    QLineEdit *le;
+
+    l = new QLabel(tr("Window title:"));
+    le = new QLineEdit;
+    l->setBuddy(le);
+    h->addWidget(l);
+    h->addWidget(le);
+
+    return h;
+}
+
+QGroupBox *XDialogItem::createBtnLabelsWidgets(void)
+{
+    QGroupBox *g = new QGroupBox(tr("Buttons"));
+    QVBoxLayout *v = new QVBoxLayout;
+    QLabel *label;
+    QLineEdit *edit;
+    QHBoxLayout *h;
+
+    /* ok */
+    h = new QHBoxLayout;
+    label = new QLabel(tr("Ok:"));
+    edit = new QLineEdit;
+    label->setBuddy(edit);
+    h->addWidget(label);
+    h->addWidget(edit);
+    lineEdit[XDialogItem::LineEdit::BtnOkLabel] = edit;
+    v->addLayout(h);
+
+    /* cancel */
+    h = new QHBoxLayout;
+    label = new QLabel(tr("Cancel:"));
+    edit = new QLineEdit;
+    label->setBuddy(edit);
+    h->addWidget(label);
+    h->addWidget(edit);
+    lineEdit[XDialogItem::LineEdit::BtnCancelLabel] = edit;
+    v->addLayout(h);
+
+    /* extra */
+    h = new QHBoxLayout;
+    label = new QLabel(tr("Extra:"));
+    edit = new QLineEdit;
+    label->setBuddy(edit);
+    h->addWidget(label);
+    h->addWidget(edit);
+    lineEdit[XDialogItem::LineEdit::BtnExtraLabel] = edit;
+    v->addLayout(h);
+
+    /* help */
+    h = new QHBoxLayout;
+    label = new QLabel(tr("Help:"));
+    edit = new QLineEdit;
+    label->setBuddy(edit);
+    h->addWidget(label);
+    h->addWidget(edit);
+    lineEdit[XDialogItem::LineEdit::BtnHelpLabel] = edit;
+    v->addLayout(h);
+
+    g->setCheckable(true);
+    g->setChecked(false);
+    g->setLayout(v);
+    groupBox[XDialogItem::GroupBox::BtnLabels] = g;
 
     return g;
 }
@@ -287,191 +535,91 @@ QGroupBox *XDialogItem::createItemHelpWidgets(void)
     return g;
 }
 
-QHBoxLayout *XDialogItem::createItemDetailsWidgets(void)
+QGroupBox *XDialogItem::createUiWidgets(void)
 {
+    QVBoxLayout *v = new QVBoxLayout;
+    QGroupBox *g = new QGroupBox(tr("UI"));
     QHBoxLayout *h = new QHBoxLayout;
 
-    h->addWidget(createItemOptionsWidgets());
+    h->addLayout(createExtraFeaturesWidgets());
+    h->addWidget(createBtnLabelsWidgets());
     h->addWidget(createItemHelpWidgets());
-
-    return h;
-}
-
-QGroupBox *XDialogItem::createRangesWidgets(void)
-{
-    QLabel *label;
-    QLineEdit *edit;
-    QHBoxLayout *h;
-    QGroupBox *g = new QGroupBox(tr("Input ranges"));
-    QVBoxLayout *v = new QVBoxLayout;
-
-    /* String length */
-    h = new QHBoxLayout;
-    label = new QLabel(tr("String length:"));
-    edit = new QLineEdit;
-    label->setBuddy(edit);
-    h->addWidget(label);
-    h->addWidget(edit);
-    lineEdit[XDialogItem::LineEdit::InputStringLength] = edit;
     v->addLayout(h);
-
-    /* Min */
-    h = new QHBoxLayout;
-    label = new QLabel(tr("Min:"));
-    edit = new QLineEdit;
-    label->setBuddy(edit);
-    h->addWidget(label);
-    h->addWidget(edit);
-    lineEdit[XDialogItem::LineEdit::InputMin] = edit;
-    v->addLayout(h);
-
-    /* Max */
-    h = new QHBoxLayout;
-    label = new QLabel(tr("Max:"));
-    edit = new QLineEdit;
-    label->setBuddy(edit);
-    h->addWidget(label);
-    h->addWidget(edit);
-    lineEdit[XDialogItem::LineEdit::InputMax] = edit;
-    v->addLayout(h);
-
-    g->setLayout(v);
-    groupBox[XDialogItem::GroupBox::InputRanges] = g;
-
-    return g;
-}
-
-QGroupBox *XDialogItem::createEventsWidgets(void)
-{
-/*  QLabel *label;
-    QLineEdit *edit;
-    QCheckBox *cb;
-    QHBoxLayout *h;
-    QMap<QString, QPair<enum XDialogItem::LineEdit, enum XDialogItem::CheckBox>> eventsLabel;
-    QGroupBox *g = new QGroupBox(tr("Events"));
-    QVBoxLayout *v = new QVBoxLayout;
-
-    eventsLabel.insert("Selected",
-                        qMakePair(XDialogItem::LineEdit::EventSelected,
-                                  XDialogItem::CheckBox::EvSelected));
-
-    eventsLabel.insert("Value confirmed",
-                        qMakePair(XDialogItem::LineEdit::EventValueConfirmed,
-                                  XDialogItem::CheckBox::EvValueConfirmed));
-
-    eventsLabel.insert("Value changed",
-                        qMakePair(XDialogItem::LineEdit::EventValueChanged,
-                                  XDialogItem::CheckBox::EvValueChanged));
-
-    eventsLabel.insert("Exit",
-                        qMakePair(XDialogItem::LineEdit::EventExit,
-                                  XDialogItem::CheckBox::EvExit));
-
-    QMapIterator<QString, QPair<enum XDialogItem::LineEdit, enum XDialogItem::CheckBox>> i(eventsLabel);
-
-    while (i.hasNext()) {
-        i.next();
-        QPair<enum XDialogItem::LineEdit, enum XDialogItem::CheckBox> pair;
-
-        h = new QHBoxLayout;
-        cb = new QCheckBox(i.key());
-        label = new QLabel(tr("Function name:"));
-        edit = new QLineEdit;
-        label->setBuddy(edit);
-        h->addWidget(cb);
-        h->addWidget(label);
-        h->addWidget(edit);
-
-        pair = i.value();
-        lineEdit[pair.first] = edit;
-        checkBox[pair.second] = cb;
-
-        v->addLayout(h);
-    }
 
     g->setCheckable(true);
     g->setChecked(false);
     g->setLayout(v);
-    groupBox[XDialogItem::GroupBox::Events] = g;
+    groupBox[XDialogItem::GroupBox::Ui] = g;
 
-    return g;*/
-    QGroupBox *gb = new QGroupBox(tr("Events"));
-    QHBoxLayout *l = new QHBoxLayout;
-
-    tbEvents = new QTableWidget(XANTE_ITEM_DEFAULT_EVENTS, 1);
-    tbEvents->setHorizontalHeaderLabels(QStringList() << tr("Function name"));
-    tbEvents->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    tbEvents->setVerticalHeaderLabels(QStringList() << tr("Selected")
-                                                    << tr("Confirm value")
-                                                    << tr("Value changed")
-                                                    << tr("Exit")
-                                                    << tr("Extra button pressed"));
-
-
-    l->addWidget(tbEvents);
-    gb->setCheckable(true);
-    gb->setChecked(false);
-    gb->setLayout(l);
-    groupBox[XDialogItem::GroupBox::Events] = gb;
-
-    return gb;
+    return g;
 }
 
-QHBoxLayout *XDialogItem::createRangesAndEventsWidgets(void)
-{
-    QHBoxLayout *h = new QHBoxLayout;
-
-    h->addWidget(createRangesWidgets());
-    h->addWidget(createEventsWidgets());
-
-    return h;
-}
+/** *** *** *** ***
+ *
+ * Handles the UI creation -- End
+ *
+ */
 
 XDialogItem::XDialogItem(QWidget *parent)
     : QWidget(parent)
 {
+    listWidget = QVector<QListWidget *>(XDialogItem::MaxListWidget);
     lineEdit = QVector<QLineEdit *>(XDialogItem::MaxLineEdit);
     groupBox = QVector<QGroupBox *>(XDialogItem::MaxGroupBox);
     comboBox = QVector<QComboBox *>(XDialogItem::MaxComboBox);
-    listWidget = QVector<QListWidget *>(XDialogItem::MaxListWidget);
+    checkBox = QVector<QCheckBox *>(XDialogItem::MaxCheckBox);
+    spinBox = QVector<QSpinBox *>(XDialogItem::MaxSpinBox);
 
     QVBoxLayout *layout = new QVBoxLayout;
-
-    layout->addLayout(createIdentificationWidgets());
-    layout->addLayout(createTypeWidgets());
-    layout->addWidget(createItemConfigurationWidgets());
-    layout->addLayout(createItemDetailsWidgets());
-    layout->addLayout(createRangesAndEventsWidgets());
+    QSplitter *splitter = new QSplitter(this);
+    splitter->setOrientation(Qt::Vertical);
+    splitter->addWidget(createMainWidgets());
+    splitter->addWidget(createDataWidgets());
+    splitter->addWidget(createEventsWidgets());
+    splitter->addWidget(createUiWidgets());
+    layout->addWidget(splitter);
 
     setLayout(layout);
 }
 
-XDialogItem::~XDialogItem()
-{
-}
-
 /*
- * Sets the current project that is been edited, so all other information
- * (or selections inside the main list view) may use it. At the same time,
- * sets the current XanteItem to the @selectedMenuIndex and the
- * @selectedItemIndex inside it.
+ * Clears all data inside the widgets, so a new item may be displayed or to
+ * leave it clear when a project is closed.
  */
-void XDialogItem::setCurrentProject(int selectedMenuIndex,
-    int selectedItemIndex)
+void XDialogItem::clear(void)
 {
-    setSelection(selectedMenuIndex, selectedItemIndex);
-}
+    // LineEdits
+    for (int i = XDialogItem::LineEdit::Name;
+         i < XDialogItem::LineEdit::MaxLineEdit;
+         i++)
+    {
+        lineEdit[i]->clear();
+    }
 
-/*
- * Sets data by using the @selectedMenuIndex to get its corresponding
- * XanteItem.
- */
-void XDialogItem::setSelection(int selectedMenuIndex, int selectedItemIndex)
-{
-    clear();
-    currentMenuIndex = selectedMenuIndex;
-    currentItemIndex = selectedItemIndex;
-    setupWidgets();
+    // ComboBoxes
+    for (int i = XDialogItem::ComboBox::Type;
+         i < XDialogItem::ComboBox::MaxComboBox;
+         i++)
+    {
+        comboBox[i]->setCurrentIndex(0);
+    }
+
+    // ListWidgets
+    for (int i = XDialogItem::ListWidget::OptionsLw;
+         i < XDialogItem::ListWidget::MaxListWidget;
+         i++)
+    {
+        listWidget[i]->clear();
+    }
+
+    // Event's grid
+    tbEvents->clearContents();
+    currentMenuIndex = -1;
+    currentItemIndex = -1;
+
+    /* Also, remove rows which aren't default item events */
+    for (int i = XANTE_ITEM_DEFAULT_EVENTS; i < tbEvents->rowCount(); i++)
+        tbEvents->removeRow(i);
 }
 
 void XDialogItem::setupConfigWidgets(const XanteItem &item)
@@ -575,7 +723,7 @@ void XDialogItem::setupInputRangesWidgets(const XanteItem &item)
 
     enum XanteItem::Type type = item.type();
 
-    if (type == XanteItem::Type::InputString) {
+/*    if (type == XanteItem::Type::InputString) {
         lineEdit[XDialogItem::LineEdit::InputStringLength]->setText(
             QString("%1").arg(item.stringLength())
         );
@@ -593,7 +741,7 @@ void XDialogItem::setupInputRangesWidgets(const XanteItem &item)
                                     ? mm.second.toInt()
                                     : mm.second.toFloat())
         );
-    }
+    }*/
 }
 
 void XDialogItem::setupOptionsWidgets(const XanteItem &item)
@@ -634,6 +782,13 @@ void XDialogItem::setupMenuReferences(const XanteItem &item, XanteJTF &jtf)
     }
 }
 
+/*
+ * In possession of the selected item, its content is used to fill the widgets
+ * on the screen.
+ *
+ * Therefore, in addition to filling the data into the widgets we also enable and
+ * disable some of them.
+ */
 void XDialogItem::setupWidgets(void)
 {
     XanteProject &project = XMainWindow::getProject();
@@ -664,6 +819,30 @@ void XDialogItem::setupWidgets(void)
         currentMenuIndex = 0;
         currentItemIndex = 0;
     }
+}
+
+/*
+ * Sets data by using the @selectedMenuIndex to get its corresponding
+ * XanteItem.
+ */
+void XDialogItem::setSelection(int selectedMenuIndex, int selectedItemIndex)
+{
+    clear();
+    currentMenuIndex = selectedMenuIndex;
+    currentItemIndex = selectedItemIndex;
+    setupWidgets();
+}
+
+/*
+ * Sets the current project that is been edited, so all other information
+ * (or selections inside the main list view) may use it. At the same time,
+ * sets the current XanteItem to the @selectedMenuIndex and the
+ * @selectedItemIndex inside it.
+ */
+void XDialogItem::setCurrentProject(int selectedMenuIndex,
+    int selectedItemIndex)
+{
+    setSelection(selectedMenuIndex, selectedItemIndex);
 }
 
 void XDialogItem::disableAllWidgets(void)
@@ -698,9 +877,9 @@ void XDialogItem::enableInputRanges(int type)
     } else
         inputString = true;
 
-    lineEdit[XDialogItem::LineEdit::InputStringLength]->setEnabled(inputString);
+/*    lineEdit[XDialogItem::LineEdit::InputStringLength]->setEnabled(inputString);
     lineEdit[XDialogItem::LineEdit::InputMin]->setEnabled(inputMin);
-    lineEdit[XDialogItem::LineEdit::InputMax]->setEnabled(inputMax);
+    lineEdit[XDialogItem::LineEdit::InputMax]->setEnabled(inputMax);*/
 }
 
 void XDialogItem::enableOptions(int type)
@@ -733,6 +912,10 @@ void XDialogItem::enableHelp(int type)
     groupBox[XDialogItem::GroupBox::ListHelpOptions]->setEnabled(listOptions);
 }
 
+/*
+ * Enables/Disables widgets according with current item type. We call it @index
+ * but it is really its type.
+ */
 void XDialogItem::selectItemType(int index)
 {
     /* Adjusts current widgets according to the selected item type */
@@ -766,18 +949,102 @@ void XDialogItem::selectItemType(int index)
             enableOptions(type);
             break;
 
+        case XanteItem::Type::Spreadsheet:
+            /*
+             * TODO
+             * - config
+             * - options (Description)
+             */
+            break;
+
+        case XanteItem::Type::Range:
+            /*
+             * TODO
+             * - add config
+             * - options description
+             * - ranges (min / max)
+             */
+            break;
+
+        case XanteItem::Type::Buildlist:
+            /*
+             * TODO
+             * - add config
+             * - default_value
+             * - options list
+             */
+            break;
+
+        case XanteItem::Type::Mixedform:
+            /*
+             * TODO
+             * - options description
+             */
+            break;
+
+        case XanteItem::Type::FileSelect:
+        case XanteItem::Type::DirSelect:
+            /*
+             * TODO
+             * - options description
+             */
+            break;
+
         case XanteItem::Type::Inputscroll:
+            /*
+             * TODO
+             * - add config
+             * - add default_value
+             * - add options description
+             * - ranges (string_length)
+             * - add event row (value-strlen)
+             * - add event row (value-check)
+             */
+            break;
+
+        case XanteItem::Type::Tailbox:
+            /*
+             * TODO
+             * - add default_value
+             */
+            break;
+
+        case XanteItem::Type::Scrolltext:
+            /*
+             * TODO
+             * - add options description
+             * - add default_value
+             */
             break;
 
         case XanteItem::Type::SpinnerSync:
         case XanteItem::Type::DotsSync:
+            /*
+             * TODO
+             * - add event row (sync-routine)
+             * - add event row (item-custom-data)
+             * - options description
+             * - ranges (max)
+             */
             break;
 
         case XanteItem::Type::UpdateObject:
         case XanteItem::Type::Progress:
+            /*
+             * TODO
+             * - add event row (update-routine)
+             * - add event row (item-custom-data)
+             * - options description
+             * - progress only:
+             *      - ranges (max)
+             */
             break;
 
         case XanteItem::Type::Custom:
+            /*
+             * TODO
+             * - add event row (custom-event)
+             */
             break;
 
         default:
@@ -840,38 +1107,6 @@ void XDialogItem::helpGroupToggled(bool on)
 
     /* Are we editing a checklist or a radioChecklist item? */
     enableHelp(comboBox[XDialogItem::ComboBox::Type]->currentIndex());
-}
-
-void XDialogItem::clear(void)
-{
-    for (int i = XDialogItem::LineEdit::Name;
-         i < XDialogItem::LineEdit::MaxLineEdit;
-         i++)
-    {
-        lineEdit[i]->clear();
-    }
-
-    for (int i = XDialogItem::ComboBox::Type;
-         i < XDialogItem::ComboBox::MaxComboBox;
-         i++)
-    {
-        comboBox[i]->setCurrentIndex(0);
-    }
-
-    for (int i = XDialogItem::ListWidget::OptionsLw;
-         i < XDialogItem::ListWidget::MaxListWidget;
-         i++)
-    {
-        listWidget[i]->clear();
-    }
-
-    tbEvents->clearContents();
-    currentMenuIndex = -1;
-    currentItemIndex = -1;
-
-    /* Also, remove rows which aren't default item events */
-    for (int i = XANTE_ITEM_DEFAULT_EVENTS; i < tbEvents->rowCount(); i++)
-        tbEvents->removeRow(i);
 }
 
 void XDialogItem::updateXanteItemEvents(XanteItem &item)
@@ -941,20 +1176,20 @@ void XDialogItem::updateXanteItemInputRanges(XanteItem &item)
     switch (type) {
         case XanteItem::Type::InputString:
         case XanteItem::Type::InputPasswd:
-            data = lineEdit[XDialogItem::LineEdit::InputStringLength]->text();
-            item.stringLength(data.toInt());
+//            data = lineEdit[XDialogItem::LineEdit::InputStringLength]->text();
+//            item.stringLength(data.toInt());
             break;
 
         case XanteItem::Type::InputInt:
         case XanteItem::Type::InputFloat:
-            min = lineEdit[XDialogItem::LineEdit::InputMin]->text();
+/*            min = lineEdit[XDialogItem::LineEdit::InputMin]->text();
             max = lineEdit[XDialogItem::LineEdit::InputMax]->text();
 
             if (type == XanteItem::Type::InputInt)
                 item.minMax(min.toInt(), max.toInt());
             else
                 item.minMax(min.toFloat(), max.toFloat());
-
+*/
             break;
 
         default:
@@ -1025,6 +1260,11 @@ XanteItem XDialogItem::createXanteItemFromWidgets(XanteJTF &jtf,
         item.referencedMenu(m.objectId());
     }
 
+    /* button labels */
+
+    /* extra button */
+
+    /* geometry */
     return item;
 }
 

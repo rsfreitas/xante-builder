@@ -24,8 +24,8 @@
  * USA
  */
 
-#include <QStyle>
-#include <QGroupBox>
+//#include <QStyle>
+//#include <QGroupBox>
 
 #include "xante_builder.hpp"
 

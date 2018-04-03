@@ -22,7 +22,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
+/*
 #include <QLabel>
 #include <QLineEdit>
 #include <QComboBox>
@@ -36,7 +36,8 @@
 #include <QListWidget>
 #include <QInputDialog>
 #include <QHeaderView>
-
+#include <QSpinBox>
+*/
 #include "xante_builder.hpp"
 
 static const char *cbMenuTypeName[] = {
@@ -86,7 +87,11 @@ QHBoxLayout *XDialogMenu::createTypeWidgets(void)
 {
     QLabel *label;
     QComboBox *cb;
-    QHBoxLayout *h = new QHBoxLayout;
+    QGroupBox *g;
+    QHBoxLayout *hg, *h = new QHBoxLayout;
+
+    g = new QGroupBox(tr("Main information"));
+    hg = new QHBoxLayout;
 
     /* type */
     label = new QLabel(tr("Menu type:"));
@@ -96,8 +101,8 @@ QHBoxLayout *XDialogMenu::createTypeWidgets(void)
     for (unsigned int i = 0; i < MENU_TYPE; i++)
         cb->addItem(QString(cbMenuTypeName[i]));
 
-    h->addWidget(label);
-    h->addWidget(cb);
+    hg->addWidget(label);
+    hg->addWidget(cb);
     connect(cb, SIGNAL(activated(int)), this, SLOT(selectMenuType(int)));
     comboBox[XDialogMenu::ComboBox::Type] = cb;
 
@@ -109,9 +114,29 @@ QHBoxLayout *XDialogMenu::createTypeWidgets(void)
     for (unsigned int i = 0; i < ACCESS_MODE; i++)
         cb->addItem(QString(cbAccessModeName[i]));
 
-    h->addWidget(label);
-    h->addWidget(cb);
+    hg->addWidget(label);
+    hg->addWidget(cb);
     comboBox[XDialogMenu::ComboBox::Mode] = cb;
+    g->setLayout(hg);
+    h->addWidget(g);
+
+    g = new QGroupBox(tr("Geometry"));
+    hg = new QHBoxLayout;
+    label = new QLabel(tr("Width:"));
+    sbWidth = new QSpinBox;
+    sbWidth->setRange(30, 60);
+    hg->addWidget(label);
+    hg->addWidget(sbWidth);
+
+    label = new QLabel(tr("Height:"));
+    sbHeight = new QSpinBox;
+    sbHeight->setRange(30, 60);
+    hg->addWidget(label);
+    hg->addWidget(sbHeight);
+    g->setCheckable(true);
+    g->setChecked(false);
+    g->setLayout(hg);
+    h->addWidget(g);
 
     return h;
 }

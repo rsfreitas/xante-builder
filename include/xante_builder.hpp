@@ -33,7 +33,10 @@
 #define APP_NAME                    "xante-builder"
 
 /* External libraries */
-#include "xante/libxante.h"
+#include <QtWidgets>
+#include <QtCore>
+#include <QtGui>
+#include <xante/libxante.h>
 
 /* Internal classes */
 #include "XanteUtils.hpp"

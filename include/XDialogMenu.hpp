@@ -39,6 +39,7 @@ class QCheckBox;
 class QRadioButton;
 class QHBoxLayout;
 class QListWidget;
+class QSpinBox;
 class XanteProject;
 
 class XDialogMenu : public QWidget
@@ -102,6 +103,7 @@ class XDialogMenu : public QWidget
         QVector<QComboBox *> comboBox;
         QVector<QGroupBox *> groupBox;
         QVector<QRadioButton *> radioButton;
+        QSpinBox *sbWidth, *sbHeight;
         QTableWidget *tbEvents;
         QListWidget *dynamicOptions;
 

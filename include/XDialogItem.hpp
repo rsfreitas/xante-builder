@@ -37,6 +37,8 @@ class QCheckBox;
 class QRadioButton;
 class QHBoxLayout;
 class QListWidget;
+class QVBoxLayout;
+class QSpinBox;
 
 class XanteProject;
 class XanteItem;
@@ -49,9 +51,9 @@ class XDialogItem : public QWidget
 
     public:
         XDialogItem(QWidget *parent = 0);
-        ~XDialogItem();
+        ~XDialogItem() {}
         void setCurrentProject(int selectedMenuIndex,
-                                 int selectedItemIndex);
+                               int selectedItemIndex);
 
         void setSelection(int selectedMenuIndex, int selectedItemIndex);
         void clear(void);
@@ -79,12 +81,14 @@ class XDialogItem : public QWidget
             CfgBlock,
             CfgItem,
             Options,
-            InputStringLength,
-            InputMin,
-            InputMax,
             HelpBrief,
             HelpDescriptive,
             DefaultValue,
+            BtnOkLabel,
+            BtnCancelLabel,
+            BtnExtraLabel,
+            BtnHelpLabel,
+            Title,
 
             MaxLineEdit
         };
@@ -105,6 +109,9 @@ class XDialogItem : public QWidget
             ListHelpOptions,
             Config,
             InputRanges,
+            Geometry,
+            BtnLabels,
+            Ui,
 
             MaxGroupBox
         };
@@ -116,24 +123,47 @@ class XDialogItem : public QWidget
             MaxListWidget
         };
 
+        enum SpinBox {
+            InputMin,
+            InputMax,
+            InputStringLength,
+            Width,
+            Height,
+
+            MaxSpinBox
+        };
+
+        enum CheckBox {
+            ExtraButton,
+
+            MaxCheckBox
+        };
+
         int currentMenuIndex = -1, currentItemIndex = -1;
 
         /* UI */
+        QVector<QListWidget *> listWidget;
         QVector<QLineEdit *> lineEdit;
         QVector<QGroupBox *> groupBox;
         QVector<QComboBox *> comboBox;
-        QVector<QListWidget *> listWidget;
+        QVector<QCheckBox *> checkBox;
+        QVector<QSpinBox *> spinBox;
         QTableWidget *tbEvents;
 
-        QHBoxLayout *createIdentificationWidgets(void);
-        QHBoxLayout *createTypeWidgets(void);
-        QHBoxLayout *createItemDetailsWidgets(void);
-        QHBoxLayout *createRangesAndEventsWidgets(void);
+        QGroupBox *createMainWidgets(void);
+        QHBoxLayout *createRangesAndSettingsWidgets(void);
+        QVBoxLayout *createContentWidgets(void);
+        QVBoxLayout *createExtraFeaturesWidgets(void);
+        QHBoxLayout *createUiTitleWidgets(void);
+        QGroupBox *createDataWidgets(void);
+        QGroupBox *createUiWidgets(void);
         QGroupBox *createItemConfigurationWidgets(void);
         QGroupBox *createItemOptionsWidgets(void);
         QGroupBox *createItemHelpWidgets(void);
-        QGroupBox *createRangesWidgets(void);
         QGroupBox *createEventsWidgets(void);
+        QGroupBox *createBtnLabelsWidgets(void);
+        QGroupBox *createRangesWidgets(void);
+        QGroupBox *createGeometryWidgets(void);
 
         void setupWidgets(void);
         void setupDynamicInfoWidgets(const XanteItem &item);

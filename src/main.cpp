@@ -23,8 +23,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <QApplication>
-#include <QCommandLineParser>
+//#include <QApplication>
+//#include <QCommandLineParser>
 
 #include "xante_builder.hpp"
 

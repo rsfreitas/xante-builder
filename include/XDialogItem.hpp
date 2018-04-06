@@ -60,12 +60,7 @@ class XDialogItem : public QWidget
         void saveCurrentState(void);
 
     private slots:
-        void selectItemType(int index);
-        void addOption(void);
-        void delOption(void);
-        void addOptionHelp(void);
-        void delOptionHelp(void);
-        void helpGroupToggled(bool on);
+        void prepareWidgetsForCurrentItem(int type);
 
     protected:
         void hideEvent(QHideEvent *event) override;
@@ -75,118 +70,13 @@ class XDialogItem : public QWidget
         void projectHasChanges();
 
     private:
-        enum LineEdit {
-            Name,
-            ObjectId,
-            CfgBlock,
-            CfgItem,
-            Options,
-            HelpBrief,
-            HelpDescriptive,
-            DefaultValue,
-            BtnOkLabel,
-            BtnCancelLabel,
-            BtnExtraLabel,
-            BtnHelpLabel,
-            Title,
-
-            MaxLineEdit
-        };
-
-        enum ComboBox {
-            Type,
-            Mode,
-            MenuReference,
-
-            MaxComboBox
-        };
-
-        enum GroupBox {
-            Events,
-            Help,
-            OptionsGb,
-            ListOptions,
-            ListHelpOptions,
-            Config,
-            InputRanges,
-            Geometry,
-            BtnLabels,
-            Ui,
-
-            MaxGroupBox
-        };
-
-        enum ListWidget {
-            OptionsLw,
-            HelpOptions,
-
-            MaxListWidget
-        };
-
-        enum SpinBox {
-            InputMin,
-            InputMax,
-            InputStringLength,
-            Width,
-            Height,
-
-            MaxSpinBox
-        };
-
-        enum CheckBox {
-            ExtraButton,
-
-            MaxCheckBox
-        };
-
         int currentMenuIndex = -1, currentItemIndex = -1;
 
         /* UI */
-        QVector<QListWidget *> listWidget;
-        QVector<QLineEdit *> lineEdit;
-        QVector<QGroupBox *> groupBox;
-        QVector<QComboBox *> comboBox;
-        QVector<QCheckBox *> checkBox;
-        QVector<QSpinBox *> spinBox;
-        QTableWidget *tbEvents;
-
-        QGroupBox *createMainWidgets(void);
-        QHBoxLayout *createRangesAndSettingsWidgets(void);
-        QVBoxLayout *createContentWidgets(void);
-        QVBoxLayout *createExtraFeaturesWidgets(void);
-        QHBoxLayout *createUiTitleWidgets(void);
-        QGroupBox *createDataWidgets(void);
-        QGroupBox *createUiWidgets(void);
-        QGroupBox *createItemConfigurationWidgets(void);
-        QGroupBox *createItemOptionsWidgets(void);
-        QGroupBox *createItemHelpWidgets(void);
-        QGroupBox *createEventsWidgets(void);
-        QGroupBox *createBtnLabelsWidgets(void);
-        QGroupBox *createRangesWidgets(void);
-        QGroupBox *createGeometryWidgets(void);
-
-        void setupWidgets(void);
-        void setupDynamicInfoWidgets(const XanteItem &item);
-        void setupEventsWidgets(const XanteItem &item);
-        void setupHelpWidgets(const XanteItem &item);
-        void setupConfigWidgets(const XanteItem &item);
-        void setupInputRangesWidgets(const XanteItem &item);
-        void setupOptionsWidgets(const XanteItem &item);
-        void setupMenuReferences(const XanteItem &item, XanteJTF &jtf);
-
-        void disableAllWidgets(void);
-        void enableInputRanges(int type);
-        void enableOptions(int type);
-        void enableHelp(int type);
+        QTabWidget *tabItem;
+        QMap<int, QWidget *> tabs;
 
         bool updateXanteItem(void);
-        void updateXanteItemEvents(XanteItem &item);
-        void updateXanteItemHelp(XanteItem &item);
-        void updateXanteItemContent(XanteItem &item);
-        void updateXanteItemOptions(XanteItem &item);
-        void updateXanteItemInputRanges(XanteItem &item);
-        void updateXanteItemConfig(XanteItem &item);
-
         XanteItem createXanteItemFromWidgets(XanteJTF &jtf, const XanteMenu &menu);
 };
 

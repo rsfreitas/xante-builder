@@ -1,9 +1,9 @@
 
 /*
- * Description: The main function.
+ * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Thu Jun  8 18:14:14 2017
+ * Created at: Tue Apr  3 14:04:03 -03 2018
  * Project: xante-builder
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -23,14 +23,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "xante_builder.hpp"
+#ifndef _TABBASE_HPP
+#define _TABBASE_HPP          1
 
-int main(int argc, char **argv)
+class XanteItem;
+
+class TabBase
 {
-    QApplication app(argc, argv);
-    XMainWindow window;
-    window.show();
+    public:
+        /**
+         * Clears all internal widgets.
+         */
+        virtual void clearCurrentData(void) = 0;
 
-    return app.exec();
-}
+        /**
+         * Enables/Disables internal widgets according an item type.
+         */
+        virtual void prepareWidgets(int type) = 0;
+
+        /**
+         * Fills all internal widgets with @item data.
+         */
+        virtual void setSelectedItem(const XanteItem &item) = 0;
+
+        /**
+         * Fills @item with current widgets data.
+         */
+        virtual void updateSelectedItem(XanteItem &item) = 0;
+};
+
+#endif
 

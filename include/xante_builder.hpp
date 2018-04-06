@@ -51,6 +51,14 @@
 #include "XDialogJTFInfo.hpp"
 #include "XDialogItemList.hpp"
 #include "XDialogSystemSettings.hpp"
+#include "settings.hpp"
+#include "tabBase.hpp"
+#include "tabContent.hpp"
+#include "tabDetails.hpp"
+#include "tabEvents.hpp"
+#include "tabMixedform.hpp"
+#include "tabSpreadsheet.hpp"
+#include "tabUi.hpp"
 
 #endif
 

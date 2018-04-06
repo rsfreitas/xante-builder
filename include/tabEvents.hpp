@@ -1,9 +1,9 @@
 
 /*
- * Description: The main function.
+ * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Thu Jun  8 18:14:14 2017
+ * Created at: Tue Apr  3 14:04:03 -03 2018
  * Project: xante-builder
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -23,14 +23,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "xante_builder.hpp"
+#ifndef _TABEVENTS_HPP
+#define _TABEVENTS_HPP          1
 
-int main(int argc, char **argv)
+#include <QtWidgets>
+#include "tabBase.hpp"
+
+class XanteItem;
+
+class TabEvents : public QWidget, public TabBase
 {
-    QApplication app(argc, argv);
-    XMainWindow window;
-    window.show();
+    Q_OBJECT
 
-    return app.exec();
-}
+    public:
+        TabEvents(QWidget *parent = 0);
+        ~TabEvents() {}
+
+        void setSelectedItem(const XanteItem &item);
+        void updateSelectedItem(XanteItem &item);
+        void clearCurrentData(void);
+        void prepareWidgets(int type);
+
+    private:
+        QTableWidget *tbEvents;
+        QStringList rowLabels;
+
+        /* Holds current XanteItem's events */
+        QList<int> events;
+};
+
+#endif
 

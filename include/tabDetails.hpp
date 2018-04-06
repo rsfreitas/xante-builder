@@ -1,9 +1,9 @@
 
 /*
- * Description: The main function.
+ * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Thu Jun  8 18:14:14 2017
+ * Created at: Tue Apr  3 14:04:03 -03 2018
  * Project: xante-builder
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -23,14 +23,39 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "xante_builder.hpp"
+#ifndef _TABDETAILS_HPP
+#define _TABDETAILS_HPP          1
 
-int main(int argc, char **argv)
+#include <QtWidgets>
+#include "tabBase.hpp"
+
+class XanteItem;
+
+class TabDetails : public QWidget, public TabBase
 {
-    QApplication app(argc, argv);
-    XMainWindow window;
-    window.show();
+    Q_OBJECT
 
-    return app.exec();
-}
+    public:
+        TabDetails(QWidget *parent = 0);
+        ~TabDetails() {}
+
+        void setSelectedItem(const XanteItem &item);
+        void updateSelectedItem(XanteItem &item);
+        void clearCurrentData(void);
+        void prepareWidgets(int type);
+
+    private slots:
+        void selectItemType(int index);
+
+    signals:
+        void itemTypeChanged(int type);
+
+    private:
+        QLineEdit *leName, *leObjectId;
+        QComboBox *cbType, *cbMode;
+
+        QVBoxLayout *createMainWidgets(void);
+};
+
+#endif
 

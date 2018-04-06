@@ -24,9 +24,6 @@
  * USA
  */
 
-//#include <QStyle>
-//#include <QGroupBox>
-
 #include "xante_builder.hpp"
 
 XDialogItemList::XDialogItemList(XanteMenu &menu, QWidget *parent)

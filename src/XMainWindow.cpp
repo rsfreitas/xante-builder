@@ -22,15 +22,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-/*
-#include <QMainWindow>
-#include <QMessageBox>
-#include <QStatusBar>
-#include <QMenuBar>
-#include <QMenu>
-#include <QApplication>
-#include <QFileDialog>
-*/
+
 #include "xante_builder.hpp"
 
 XanteProject *XMainWindow::project = nullptr;

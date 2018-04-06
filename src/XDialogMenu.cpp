@@ -22,22 +22,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-/*
-#include <QLabel>
-#include <QLineEdit>
-#include <QComboBox>
-#include <QCheckBox>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QGroupBox>
-#include <QRadioButton>
-#include <QGridLayout>
-#include <QPushButton>
-#include <QListWidget>
-#include <QInputDialog>
-#include <QHeaderView>
-#include <QSpinBox>
-*/
+
 #include "xante_builder.hpp"
 
 static const char *cbMenuTypeName[] = {

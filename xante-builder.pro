@@ -12,7 +12,7 @@ LIBS += /usr/local/lib/libxante.a
 CONFIG += debug
 
 # Input
-HEADERS += $$CURRENT_ROOT_PATH/include/XMainWindow.hpp          \
+HEADERS = $$CURRENT_ROOT_PATH/include/XMainWindow.hpp          \
         $$CURRENT_ROOT_PATH/include/XProjectWizard.hpp          \
         $$CURRENT_ROOT_PATH/include/XMainDialog.hpp             \
         $$CURRENT_ROOT_PATH/include/XTreeView.hpp               \
@@ -21,7 +21,14 @@ HEADERS += $$CURRENT_ROOT_PATH/include/XMainWindow.hpp          \
         $$CURRENT_ROOT_PATH/include/XDialogItem.hpp             \
         $$CURRENT_ROOT_PATH/include/XDialogJTFInfo.hpp          \
         $$CURRENT_ROOT_PATH/include/XDialogItemList.hpp         \
-        $$CURRENT_ROOT_PATH/include/XDialogSystemSettings.hpp
+        $$CURRENT_ROOT_PATH/include/XDialogSystemSettings.hpp   \
+        $$CURRENT_ROOT_PATH/include/settings.hpp                \
+        $$CURRENT_ROOT_PATH/include/tabContent.hpp              \
+        $$CURRENT_ROOT_PATH/include/tabDetails.hpp              \
+        $$CURRENT_ROOT_PATH/include/tabEvents.hpp               \
+        $$CURRENT_ROOT_PATH/include/tabMixedform.hpp            \
+        $$CURRENT_ROOT_PATH/include/tabSpreadsheet.hpp          \
+        $$CURRENT_ROOT_PATH/include/tabUi.hpp
 
 SOURCES += $$CURRENT_ROOT_PATH/src/main.cpp                 \
         $$CURRENT_ROOT_PATH/src/XanteProject.cpp            \
@@ -36,5 +43,11 @@ SOURCES += $$CURRENT_ROOT_PATH/src/main.cpp                 \
         $$CURRENT_ROOT_PATH/src/XDialogItemList.cpp         \
         $$CURRENT_ROOT_PATH/src/XanteUtils.cpp              \
         $$CURRENT_ROOT_PATH/src/XDialogSystemSettings.cpp   \
-        $$CURRENT_ROOT_PATH/src/settings.cpp
+        $$CURRENT_ROOT_PATH/src/settings.cpp                \
+        $$CURRENT_ROOT_PATH/src/tabContent.cpp              \
+        $$CURRENT_ROOT_PATH/src/tabDetails.cpp              \
+        $$CURRENT_ROOT_PATH/src/tabEvents.cpp               \
+        $$CURRENT_ROOT_PATH/src/tabMixedform.cpp            \
+        $$CURRENT_ROOT_PATH/src/tabSpreadsheet.cpp          \
+        $$CURRENT_ROOT_PATH/src/tabUi.cpp
 

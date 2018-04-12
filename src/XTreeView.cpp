@@ -23,12 +23,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <QMenu>
-#include <QAction>
-#include <QTreeView>
-#include <QApplication>
-#include <QMessageBox>
-
 #include "xante_builder.hpp"
 
 XTreeView::XTreeView(QWidget *parent)
@@ -82,8 +76,8 @@ void XTreeView::controlDialogActions(bool enable)
 
 void XTreeView::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    QModelIndex index = indexAt(event->pos());
-    displaySelectedItem(index);
+    QModelIndex selectedIndex = indexAt(event->pos());
+    displaySelectedItem(selectedIndex);
 }
 
 void XTreeView::mousePressEvent(QMouseEvent *event)
@@ -236,8 +230,8 @@ void XTreeView::removeItem()
 
     if (QMessageBox::question(this, tr("Removing"),
                               QString(tr("Are you sure you want to remove the %1?"))
-                                    .arg((selectedLine == XTreeView::SelectedLine::MenuLine)
-                                        ? "menu" : "item")) == QMessageBox::No)
+                                      .arg((selectedLine == XTreeView::SelectedLine::MenuLine)
+                                                ? "menu" : "item")) == QMessageBox::No)
     {
         return;
     }

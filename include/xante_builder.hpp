@@ -33,7 +33,10 @@
 #define APP_NAME                    "xante-builder"
 
 /* External libraries */
-#include "libxante.h"
+#include <QtWidgets>
+#include <QtCore>
+#include <QtGui>
+#include <xante/libxante.h>
 
 /* Internal classes */
 #include "XanteUtils.hpp"
@@ -47,6 +50,15 @@
 #include "XDialogMenu.hpp"
 #include "XDialogJTFInfo.hpp"
 #include "XDialogItemList.hpp"
+#include "XDialogSystemSettings.hpp"
+#include "settings.hpp"
+#include "tabBase.hpp"
+#include "tabContent.hpp"
+#include "tabDetails.hpp"
+#include "tabEvents.hpp"
+#include "tabMixedform.hpp"
+#include "tabSpreadsheet.hpp"
+#include "tabUi.hpp"
 
 #endif
 

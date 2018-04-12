@@ -32,6 +32,7 @@ class QLabel;
 class QLineEdit;
 class QComboBox;
 class XanteProject;
+class XanteBuilderConfig;
 
 class IntroPage : public QWizardPage
 {
@@ -70,7 +71,8 @@ class ProjectInfoPage : public QWizardPage
 
     private:
         /* UI */
-        QLineEdit *leName, *leDescription, *lePathname;
+        QLineEdit *leName, *leDescription, *lePathname, *leAuthor;
+        QComboBox *cbLanguage;
 };
 
 class ProjectConfigPage : public QWizardPage
@@ -93,7 +95,7 @@ class XProjectWizard : public QWizard
     Q_OBJECT
 
     public:
-        XProjectWizard(QWidget *parent = 0);
+        XProjectWizard(XanteBuilderConfig &config, QWidget *parent = 0);
         ~XProjectWizard();
         void accept();
         XanteProject *buildProject(void);
@@ -101,6 +103,9 @@ class XProjectWizard : public QWizard
     private:
         bool releaseProject = true;
         XanteProject *project = nullptr;
+        XanteBuilderConfig &config;
+
+        void callSourceTemplate();
 };
 
 #endif

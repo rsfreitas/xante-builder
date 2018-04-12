@@ -23,15 +23,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <QWizard>
-#include <QLabel>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QFileDialog>
-#include <QComboBox>
-
 #include "xante_builder.hpp"
 
 IntroPage::IntroPage(QWidget *parent)
@@ -70,7 +61,7 @@ void ConclusionPage::initializePage()
 ProjectInfoPage::ProjectInfoPage(QWidget *parent)
     : QWizardPage(parent)
 {
-    setTitle(tr("Project Informations"));
+    setTitle(tr("Project Information"));
 
     QLabel *lname = new QLabel(tr("Project name:"));
     leName = new QLineEdit;
@@ -101,15 +92,38 @@ ProjectInfoPage::ProjectInfoPage(QWidget *parent)
     hpathname->addWidget(lePathname);
     hpathname->addWidget(bt);
 
+    QLabel *lAuthor = new QLabel(tr("Author:"));
+    leAuthor = new QLineEdit;
+    lAuthor->setBuddy(leAuthor);
+
+    QHBoxLayout *hAuthor = new QHBoxLayout;
+    hAuthor->addWidget(lAuthor);
+    hAuthor->addWidget(leAuthor);
+
+    QLabel *l = new QLabel(tr("Language:"));
+    cbLanguage= new QComboBox;
+    l->setBuddy(cbLanguage);
+    cbLanguage->addItem(tr("C"));
+    cbLanguage->addItem(tr("Go"));
+    cbLanguage->addItem(tr("Rust"));
+
+    QHBoxLayout *hLanguage = new QHBoxLayout;
+    hLanguage->addWidget(l);
+    hLanguage->addWidget(cbLanguage);
+
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addLayout(hname);
     layout->addLayout(hdescription);
     layout->addLayout(hpathname);
+    layout->addLayout(hAuthor);
+    layout->addLayout(hLanguage);
     setLayout(layout);
 
     registerField("projectName", leName);
     registerField("projectDescription", leDescription);
     registerField("projectPathname", lePathname);
+    registerField("projectAuthor", leAuthor);
+    registerField("projectLanguage", cbLanguage, "currentText", "currentTextChanged");
 }
 
 void ProjectInfoPage::chooseDir(void)
@@ -188,8 +202,8 @@ ProjectConfigPage::ProjectConfigPage(QWidget *parent)
     setLayout(layout);
 }
 
-XProjectWizard::XProjectWizard(QWidget *parent)
-    : QWizard(parent)
+XProjectWizard::XProjectWizard(XanteBuilderConfig &config, QWidget *parent)
+    : QWizard(parent), config(config)
 {
     setWizardStyle(QWizard::ModernStyle);
     setWindowTitle(tr("New project"));
@@ -207,10 +221,6 @@ XProjectWizard::~XProjectWizard()
 
 void XProjectWizard::accept()
 {
-    /*
-     * TODO: Call source-tpl to create the templates
-     */
-
     QDialog::accept();
 }
 
@@ -220,26 +230,47 @@ XanteProject *XProjectWizard::buildProject(void)
     project = new XanteProject(projectName,
                                field("projectPathname").toString(),
                                XanteJTF::Builder()
-                                .setApplicationName(projectName)
-                                .setDescription(field("projectDescription").toString())
-                                .setCompany(field("projectCompany").toString())
-                                .setPlugin(field("projectPlugin").toString())
-                                .setCfgPathname(field("projectCfg").toString())
-                                .setLogPathname(field("projectLog").toString())
-                                .setVersion(field("projectVersion").toString())
-                                .setRevision(field("projectRevision").toInt())
-                                .setBuild(field("projectBuild").toInt())
-                                .setBeta(field("projectBeta").toBool())
-                                .build());
+                                    .setApplicationName(projectName)
+                                    .setDescription(field("projectDescription").toString())
+                                    .setCompany(field("projectCompany").toString())
+                                    .setPlugin(field("projectPlugin").toString())
+                                    .setCfgPathname(field("projectCfg").toString())
+                                    .setLogPathname(field("projectLog").toString())
+                                    .setVersion(field("projectVersion").toString())
+                                    .setRevision(field("projectRevision").toInt())
+                                    .setBuild(field("projectBuild").toInt())
+                                    .setBeta(field("projectBeta").toBool())
+                                    .build());
 
+    callSourceTemplate();
     project->create();
 
     /*
-     * Don't let release the project object when this object goes out of
-     * scope.
+     * Don't let release the project object when this object goes out of scope.
      */
     releaseProject = false;
 
     return project;
+}
+
+/*
+ * Calls the source-template application.
+ */
+void XProjectWizard::callSourceTemplate()
+{
+    QProcess p;
+    QString language = field("projectLanguage").toString().toLower(),
+            projectName = field("projectName").toString(),
+            author = field("projectAuthor").toString(),
+            path = field("projectPathname").toString();
+
+    p.start(QString("%5/source-template -name %1 -language %2 -type xante-plugin "
+                    "-path %3 -author \"%4\"").arg(projectName)
+                                              .arg(language)
+                                              .arg(path)
+                                              .arg(author)
+                                              .arg(config.sourceTemplatePath()));
+
+    p.waitForFinished();
 }
 

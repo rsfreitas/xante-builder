@@ -28,20 +28,22 @@
 
 #include <QMainWindow>
 
-#include <libxante.h>
+#include <xante/libxante.h>
 
 class QAction;
 class XanteConfig;
+class XanteConfigObject;
 class XanteProject;
 class XMainDialog;
+class XanteBuilderConfig;
 
 class XMainWindow : public QMainWindow
 {
     Q_OBJECT
 
     public:
-        XMainWindow(XanteConfig &config);
-        ~XMainWindow() {}
+        XMainWindow();
+        ~XMainWindow();
 
         static bool activeProject(void) { return (project != nullptr); }
         static XanteProject &getProject(void) { return *project; }
@@ -59,15 +61,16 @@ class XMainWindow : public QMainWindow
         void aboutUs();
         void openRecentFile();
         void projectChanged();
+        void systemSettings();
 
     private:
         static XanteProject *project;
-        XanteConfig &config;
+        XanteBuilderConfig *config;
         bool editingProject = false, hasChanges = false;
 
         /* UI */
         QAction *acOpen, *acClose, *acSave, *acJtfMainInfo, *acTestJtf,
-                *acNewProject, *acRecentFiles[MaxRecentFiles];
+                *acNewProject, *acRecentFiles[MaxRecentFiles], *acSettings;
 
         XMainDialog *dialog;
 

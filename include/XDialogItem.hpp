@@ -28,6 +28,7 @@
 
 #include <QWidget>
 #include <QVector>
+#include <QTableWidget>
 
 class QLineEdit;
 class QComboBox;
@@ -36,6 +37,8 @@ class QCheckBox;
 class QRadioButton;
 class QHBoxLayout;
 class QListWidget;
+class QVBoxLayout;
+class QSpinBox;
 
 class XanteProject;
 class XanteItem;
@@ -48,127 +51,30 @@ class XDialogItem : public QWidget
 
     public:
         XDialogItem(QWidget *parent = 0);
-        ~XDialogItem();
+        ~XDialogItem() {}
         void setCurrentProject(int selectedMenuIndex,
-                                 int selectedItemIndex);
+                               int selectedItemIndex);
 
         void setSelection(int selectedMenuIndex, int selectedItemIndex);
         void clear(void);
-        void saveCurrentState(void);
+        bool saveCurrentState(void);
 
     private slots:
-        void selectItemType(int index);
-        void addOption(void);
-        void delOption(void);
-        void addOptionHelp(void);
-        void delOptionHelp(void);
-        void helpGroupToggled(bool on);
-
-    protected:
-        void hideEvent(QHideEvent *event) override;
+        void prepareWidgetsForCurrentItem(int type);
+        void dataChanged(void);
 
     signals:
         void treeViewNeedsUpdate();
         void projectHasChanges();
 
     private:
-        enum LineEdit {
-            Name,
-            ObjectId,
-            EventSelected,
-            EventExit,
-            EventValueConfirmed,
-            EventValueChanged,
-            CfgBlock,
-            CfgItem,
-            Options,
-            InputStringLength,
-            InputMin,
-            InputMax,
-            HelpBrief,
-            HelpDescriptive,
-            DefaultValue,
-
-            MaxLineEdit
-        };
-
-        enum ComboBox {
-            Type,
-            Mode,
-            MenuReference,
-
-            MaxComboBox
-        };
-
-        enum CheckBox {
-            EvSelected,
-            EvExit,
-            EvValueConfirmed,
-            EvValueChanged,
-
-            MaxCheckBox
-        };
-
-        enum GroupBox {
-            Events,
-            Help,
-            OptionsGb,
-            ListOptions,
-            ListHelpOptions,
-            Config,
-            InputRanges,
-
-            MaxGroupBox
-        };
-
-        enum ListWidget {
-            OptionsLw,
-            HelpOptions,
-
-            MaxListWidget
-        };
-
         int currentMenuIndex = -1, currentItemIndex = -1;
 
         /* UI */
-        QVector<QLineEdit *> lineEdit;
-        QVector<QCheckBox *> checkBox;
-        QVector<QGroupBox *> groupBox;
-        QVector<QComboBox *> comboBox;
-        QVector<QListWidget *> listWidget;
-
-        QHBoxLayout *createIdentificationWidgets(void);
-        QHBoxLayout *createTypeWidgets(void);
-        QHBoxLayout *createItemDetailsWidgets(void);
-        QHBoxLayout *createRangesAndEventsWidgets(void);
-        QGroupBox *createItemConfigurationWidgets(void);
-        QGroupBox *createItemOptionsWidgets(void);
-        QGroupBox *createItemHelpWidgets(void);
-        QGroupBox *createRangesWidgets(void);
-        QGroupBox *createEventsWidgets(void);
-
-        void setupWidgets(void);
-        void setupDynamicInfoWidgets(const XanteItem &item);
-        void setupEventsWidgets(const XanteItem &item);
-        void setupHelpWidgets(const XanteItem &item);
-        void setupConfigWidgets(const XanteItem &item);
-        void setupInputRangesWidgets(const XanteItem &item);
-        void setupOptionsWidgets(const XanteItem &item);
-        void setupMenuReferences(const XanteItem &item, XanteJTF &jtf);
-
-        void disableAllWidgets(void);
-        void enableInputRanges(int type);
-        void enableOptions(int type);
-        void enableHelp(int type);
+        QTabWidget *tabItem;
+        QMap<int, QWidget *> tabs;
 
         bool updateXanteItem(void);
-        void updateXanteItemEvents(XanteItem &item);
-        void updateXanteItemHelp(XanteItem &item);
-        void updateXanteItemContent(XanteItem &item);
-        void updateXanteItemOptions(XanteItem &item);
-        void updateXanteItemInputRanges(XanteItem &item);
-        void updateXanteItemConfig(XanteItem &item);
-
         XanteItem createXanteItemFromWidgets(XanteJTF &jtf, const XanteMenu &menu);
 };
 

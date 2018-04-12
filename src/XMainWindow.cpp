@@ -23,21 +23,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <QMainWindow>
-#include <QMessageBox>
-#include <QStatusBar>
-#include <QMenuBar>
-#include <QMenu>
-#include <QApplication>
-#include <QFileDialog>
-
 #include "xante_builder.hpp"
 
 XanteProject *XMainWindow::project = nullptr;
 
-XMainWindow::XMainWindow(XanteConfig &config)
-    : config(config)
+XMainWindow::XMainWindow()
 {
+    config = new XanteBuilderConfig(APP_NAME);
     dialog = new XMainDialog(this);
     connect(dialog, SIGNAL(projectHasChanges()), this, SLOT(projectChanged()));
     createMenu();
@@ -45,8 +37,13 @@ XMainWindow::XMainWindow(XanteConfig &config)
 
     setCentralWidget(dialog);
     setWindowTitle(APP_NAME);
-    resize(config.windowSize());
-    move(config.windowPosition());
+    resize(config->windowSize());
+    move(config->windowPosition());
+}
+
+XMainWindow::~XMainWindow()
+{
+    delete config;
 }
 
 void XMainWindow::closeEvent(QCloseEvent *event)
@@ -60,14 +57,14 @@ void XMainWindow::closeEvent(QCloseEvent *event)
         }
     }
 
-    config.windowSize(size());
-    config.windowPosition(pos());
+    config->windowSize(size());
+    config->windowPosition(pos());
     event->accept();
 }
 
 void XMainWindow::newProject()
 {
-    XProjectWizard projectWizard;
+    XProjectWizard projectWizard(*config, this);
 
     if (projectWizard.exec()) {
         project = projectWizard.buildProject();
@@ -154,6 +151,13 @@ void XMainWindow::editJtfInfo()
 
 void XMainWindow::jtfTest()
 {
+    QProcess p;
+
+    p.start(QString("xterm -geometry 100x33+0+0 -e %2/jerminus -j %1 -N -T")
+                    .arg(project->getJtfFilename())
+                    .arg(config->jerminusPath()));
+
+    p.waitForFinished();
 }
 
 void XMainWindow::aboutUs()
@@ -203,8 +207,22 @@ void XMainWindow::createMenu(void)
     acClose->setShortcuts(QKeySequence::Close);
     mMain->addSeparator();
 
+    acJtfMainInfo = mMain->addAction(tr("S&ettings"), this,
+                                        &XMainWindow::editJtfInfo);
+
+    acJtfMainInfo->setStatusTip(tr("Edits the JTF main information."));
+    acJtfMainInfo->setShortcuts(QKeySequence::Italic);
+    acTestJtf = mMain->addAction(tr("&Test"), this,
+                                       &XMainWindow::jtfTest);
+
+    acTestJtf->setShortcuts(QKeySequence::AddTab);
+    acTestJtf->setStatusTip(tr("Puts the current JTF configuration into a "
+                               "test."));
+
+    mMain->addSeparator();
+
     for (int i = 0; i < MaxRecentFiles; i++) {
-        QString file = config.recentFile(i);
+        QString file = config->recentFile(i);
         acRecentFiles[i] = mMain->addAction(file.isEmpty() ? tr("") : file,
                                                this,
                                                &XMainWindow::openRecentFile);
@@ -225,19 +243,11 @@ void XMainWindow::createMenu(void)
     acExit->setStatusTip(tr("Quits the application."));
     acExit->setShortcuts(QKeySequence::Quit);
 
-    QMenu *mActions = menuBar()->addMenu(tr("&JTF"));
-    acJtfMainInfo = mActions->addAction(tr("&Informations"), this,
-                                            &XMainWindow::editJtfInfo);
+    QMenu *mSystem = menuBar()->addMenu(tr("&System"));
+    acSettings = mSystem->addAction(tr("&Settings"), this,
+                                    &XMainWindow::systemSettings);
 
-    acJtfMainInfo->setStatusTip(tr("Edits the JTF main informations."));
-    acJtfMainInfo->setShortcuts(QKeySequence::Italic);
-    mActions->addSeparator();
-    acTestJtf = mActions->addAction(tr("&Test"), this,
-                                       &XMainWindow::jtfTest);
-
-    acTestJtf->setShortcuts(QKeySequence::AddTab);
-    acTestJtf->setStatusTip(tr("Puts the current JTF configuration into a "
-                               "test."));
+    acSettings->setStatusTip(tr("Adjusts the aplpication settings."));
 
     QMenu *mHelp = menuBar()->addMenu(tr("&Help"));
     QAction *acAbout = mHelp->addAction(tr("&About this application"), this,
@@ -275,13 +285,13 @@ void XMainWindow::setWindowWidgetsEnabled(bool enable)
 
 void XMainWindow::setCurrentFile(const QString &filename)
 {
-    if (config.recentFile(filename) == false)
+    if (config->recentFile(filename) == false)
         return;
 
-    int nRecentFiles = qMin(config.totalRecentFiles(), (int)MaxRecentFiles);
+    int nRecentFiles = qMin(config->totalRecentFiles(), (int)MaxRecentFiles);
 
     for (int i = 0; i < nRecentFiles; i++) {
-        QString file = config.recentFile(i);
+        QString file = config->recentFile(i);
         QString text = tr("&%1 %2").arg(i + 1)
                                    .arg(QFileInfo(file).fileName());
 
@@ -300,5 +310,11 @@ void XMainWindow::projectChanged()
     hasChanges = true;
     setWindowTitle(QString("%1 [%2] *").arg(APP_NAME)
                                        .arg(project->getProjectName()));
+}
+
+void XMainWindow::systemSettings()
+{
+    XDialogSystemSettings dlg(*config, this);
+    dlg.exec();
 }
 

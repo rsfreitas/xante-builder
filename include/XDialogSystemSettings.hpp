@@ -3,7 +3,7 @@
  * Description:
  *
  * Author: Rodrigo Freitas
- * Created at: Tue Jun 13 16:27:19 2017
+ * Created at: Mon Apr  2 10:45:05 -03 2018
  * Project: xante-builder
  *
  * Copyright (C) 2017 Rodrigo Freitas
@@ -23,57 +23,38 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _XDIALOGJTFINFO_HPP
-#define _XDIALOGJTFINFO_HPP          1
+#ifndef _XDIALOGSYSTEMSETTINGS_HPP
+#define _XDIALOGSYSTEMSETTINGS_HPP              1
 
 #include <QDialog>
 #include <QWidget>
-#include <QList>
 
-class QComboBox;
-class QLineEdit;
 class QGroupBox;
 class QHBoxLayout;
-class XanteProject;
+class QLineEdit;
+class XanteBuilderConfig;
 
-class XDialogJTFInfo : public QDialog
+class XDialogSystemSettings : public QDialog
 {
     Q_OBJECT
 
     public:
-        XDialogJTFInfo(QWidget *parent = 0);
-        ~XDialogJTFInfo() {}
+        XDialogSystemSettings(XanteBuilderConfig &config, QWidget *parent = 0);
+        ~XDialogSystemSettings() {}
 
     private slots:
         void confirmOk(void);
         void confirmCancel(void);
+        void chooseSourceTemplatePath(void);
+        void chooseJerminusPath(void);
 
     private:
-        enum editWidget {
-            ApplicationName,
-            Description,
-            Company,
-            Plugin,
-            CfgPathname,
-            LogPathname,
-            Version,
-            Revision,
-            Build
-        };
-
-        /* UI */
-        QComboBox *cbMainMenu, *cbBeta, *cbEscKey, *cbSuspendKey, *cbStopKey;
-        QList<QLineEdit *> edit;
+        QLineEdit *leSourceTemplatePath, *leJerminusPath;
+        XanteBuilderConfig &config;
 
         void createWidgets(void);
-        void reject(void);
-        void fillWidgetsWithProjectData(void);
-        void prepareMainMenuChooser(void);
-        QHBoxLayout *createMainMenuChooser(void);
-        QPair<QComboBox *, QHBoxLayout *> createChooser(QString name);
         QHBoxLayout *createButtons(void);
-        QGroupBox *createInformationWidgets(void);
-        QGroupBox *createBlockedKeysWidgets(void);
+        QGroupBox *createUtilitiesWidgets(void);
 };
 
 #endif

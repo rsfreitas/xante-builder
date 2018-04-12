@@ -23,22 +23,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <QWidget>
-#include <QDialog>
-#include <QLabel>
-#include <QComboBox>
-#include <QPushButton>
-#include <QGroupBox>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QLineEdit>
-
 #include "xante_builder.hpp"
 
 XDialogJTFInfo::XDialogJTFInfo(QWidget *parent)
     : QDialog(parent)
 {
-    setWindowTitle(tr("JTF file main informations"));
+    setWindowTitle(tr("Main settings of the JTF file"));
     createWidgets();
     fillWidgetsWithProjectData();
 }
@@ -72,19 +62,19 @@ QHBoxLayout *XDialogJTFInfo::createButtons(void)
     return h;
 }
 
-QHBoxLayout *XDialogJTFInfo::createBetaChooser(void)
+QPair<QComboBox *, QHBoxLayout *> XDialogJTFInfo::createChooser(QString name)
 {
     QHBoxLayout *h = new QHBoxLayout;
 
-    QLabel *l = new QLabel(tr("Beta:"));
-    cbBeta = new QComboBox;
-    l->setBuddy(cbBeta);
-    cbBeta->addItem(tr("Yes"));
-    cbBeta->addItem(tr("No"));
+    QLabel *l = new QLabel(name);
+    QComboBox *cb = new QComboBox;
+    l->setBuddy(cb);
+    cb->addItem(tr("Yes"));
+    cb->addItem(tr("No"));
     h->addWidget(l);
-    h->addWidget(cbBeta);
+    h->addWidget(cb);
 
-    return h;
+    return qMakePair(cb, h);
 }
 
 QGroupBox *XDialogJTFInfo::createInformationWidgets(void)
@@ -113,7 +103,7 @@ QGroupBox *XDialogJTFInfo::createInformationWidgets(void)
     };
 
     QVBoxLayout *v = new QVBoxLayout;
-    QGroupBox *gb = new QGroupBox(tr("JTF Informations"));
+    QGroupBox *gb = new QGroupBox(tr("JTF Information"));
     int i, t;
 
     t = sizeof(pageItems) / sizeof(pageItems[0]);
@@ -137,7 +127,32 @@ QGroupBox *XDialogJTFInfo::createInformationWidgets(void)
         edit.append(le);
     }
 
-    v->addLayout(createBetaChooser());
+    QPair<QComboBox *, QHBoxLayout *> pair = createChooser(tr("Beta:"));
+    cbBeta = pair.first;
+    v->addLayout(pair.second);
+    gb->setLayout(v);
+
+    return gb;
+}
+
+QGroupBox *XDialogJTFInfo::createBlockedKeysWidgets(void)
+{
+    QPair<QComboBox *, QHBoxLayout *> p;
+    QVBoxLayout *v = new QVBoxLayout;
+    QGroupBox *gb = new QGroupBox(tr("Blocked keys"));
+
+    p = createChooser(tr("ESC:"));
+    cbEscKey = p.first;
+    v->addLayout(p.second);
+
+    p = createChooser(tr("Suspend (ctrl + v):"));
+    cbSuspendKey = p.first;
+    v->addLayout(p.second);
+
+    p = createChooser(tr("Stop (ctrl + c):"));
+    cbStopKey = p.first;
+    v->addLayout(p.second);
+
     gb->setLayout(v);
 
     return gb;
@@ -148,6 +163,7 @@ void XDialogJTFInfo::createWidgets(void)
     QVBoxLayout *v = new QVBoxLayout;
 
     v->addWidget(createInformationWidgets());
+    v->addWidget(createBlockedKeysWidgets());
     v->addLayout(createMainMenuChooser());
     v->addLayout(createButtons());
 
@@ -188,6 +204,9 @@ void XDialogJTFInfo::confirmOk(void)
     jtf.build(data.toInt());
 
     jtf.beta(cbBeta->currentIndex() == 0 ? true : false);
+    jtf.escKey(cbEscKey->currentIndex() == 0 ? true : false);
+    jtf.suspendKey(cbSuspendKey->currentIndex() == 0 ? true : false);
+    jtf.stopKey(cbStopKey->currentIndex() == 0 ? true : false);
 
     XanteMenu menu = jtf.menuAt(cbMainMenu->currentIndex());
     jtf.mainMenu(menu.objectId());
@@ -226,6 +245,11 @@ void XDialogJTFInfo::fillWidgetsWithProjectData(void)
 
     /* Main menu chooser */
     prepareMainMenuChooser();
+
+    /* Blocked keys */
+    cbEscKey->setCurrentIndex(jtf.escKey() == true ? 0 : 1);
+    cbSuspendKey->setCurrentIndex(jtf.suspendKey() == true ? 0 : 1);
+    cbStopKey->setCurrentIndex(jtf.stopKey() == true ? 0 : 1);
 }
 
 void XDialogJTFInfo::prepareMainMenuChooser(void)

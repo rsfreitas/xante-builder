@@ -48,6 +48,9 @@ QGroupBox *TabUi::createGeometryWidgets(void)
     h = new QHBoxLayout;
     label = new QLabel(tr("Width:"));
     sbWidth = new QSpinBox;
+    connect(sbWidth, SIGNAL(valueChanged(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     sbWidth->setRange(30, 60); // FIXME: adjust limit
     h->addWidget(label);
     h->addWidget(sbWidth);
@@ -56,6 +59,9 @@ QGroupBox *TabUi::createGeometryWidgets(void)
     h = new QHBoxLayout;
     label = new QLabel(tr("Height:"));
     sbHeight = new QSpinBox;
+    connect(sbHeight, SIGNAL(valueChanged(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     sbHeight->setRange(30, 60); // FIXME: adjust limit
     h->addWidget(label);
     h->addWidget(sbHeight);
@@ -82,6 +88,9 @@ QVBoxLayout *TabUi::createExtraFeaturesWidgets(void)
     /* Window Title */
     l = new QLabel(tr("Window title:"));
     leTitle = new QLineEdit;
+    connect(leTitle, SIGNAL(textEdited(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     l->setBuddy(leTitle);
     h->addWidget(l);
     h->addWidget(leTitle);
@@ -103,6 +112,9 @@ QGroupBox *TabUi::createBtnLabelsWidgets(void)
     h = new QHBoxLayout;
     label = new QLabel(tr("Ok:"));
     leBtnOk = new QLineEdit;
+    connect(leBtnOk, SIGNAL(textEdited(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     label->setBuddy(leBtnOk);
     h->addWidget(label);
     h->addWidget(leBtnOk);
@@ -112,6 +124,9 @@ QGroupBox *TabUi::createBtnLabelsWidgets(void)
     h = new QHBoxLayout;
     label = new QLabel(tr("Cancel:"));
     leBtnCancel = new QLineEdit;
+    connect(leBtnCancel, SIGNAL(textEdited(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     label->setBuddy(leBtnCancel);
     h->addWidget(label);
     h->addWidget(leBtnCancel);
@@ -121,6 +136,9 @@ QGroupBox *TabUi::createBtnLabelsWidgets(void)
     h = new QHBoxLayout;
     label = new QLabel(tr("Extra:"));
     leBtnExtra = new QLineEdit;
+    connect(leBtnExtra, SIGNAL(textEdited(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     label->setBuddy(leBtnExtra);
     h->addWidget(label);
     h->addWidget(leBtnExtra);
@@ -130,6 +148,9 @@ QGroupBox *TabUi::createBtnLabelsWidgets(void)
     h = new QHBoxLayout;
     label = new QLabel(tr("Help:"));
     leBtnHelp = new QLineEdit;
+    connect(leBtnHelp, SIGNAL(textEdited(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     label->setBuddy(leBtnHelp);
     h->addWidget(label);
     h->addWidget(leBtnHelp);
@@ -155,12 +176,18 @@ QGroupBox *TabUi::createItemHelpWidgets(void)
 
     label = new QLabel(tr("Brief:"));
     leBrief = new QLineEdit;
+    connect(leBrief, SIGNAL(textEdited(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     label->setBuddy(leBrief);
     hbrief->addWidget(label);
     hbrief->addWidget(leBrief);
 
     label = new QLabel(tr("Description:"));
     leDescription = new QLineEdit;
+    connect(leDescription, SIGNAL(textEdited(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     label->setBuddy(leDescription);
     hdescription->addWidget(label);
     hdescription->addWidget(leDescription);
@@ -344,6 +371,7 @@ void TabUi::addOption(void)
         return;
 
     lwOptions->addItem(option);
+    notifyChange();
 }
 
 void TabUi::delOption(void)
@@ -354,5 +382,17 @@ void TabUi::delOption(void)
         return;
 
     lwOptions->takeItem(row);
+    notifyChange();
+}
+
+void TabUi::notifyChange(void)
+{
+    emit dataChanged();
+}
+
+void TabUi::contentChanged(const QString &value)
+{
+    Q_UNUSED(value);
+    notifyChange();
 }
 

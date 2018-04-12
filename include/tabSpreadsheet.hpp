@@ -43,6 +43,9 @@ class TabSpreadsheet : public QWidget, public TabBase
         void updateSelectedItem(XanteItem &item);
         void clearCurrentData(void);
         void prepareWidgets(int type);
+
+    signals:
+        void dataChanged(void);
 };
 
 #endif

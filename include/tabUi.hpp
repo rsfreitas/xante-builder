@@ -48,6 +48,10 @@ class TabUi : public QWidget, public TabBase
     private slots:
         void addOption(void);
         void delOption(void);
+        void contentChanged(const QString &value);
+
+    signals:
+        void dataChanged(void);
 
     private:
         QPushButton *btAdd, *btDel;
@@ -62,6 +66,7 @@ class TabUi : public QWidget, public TabBase
         QGroupBox *createBtnLabelsWidgets(void);
         QGroupBox *createItemHelpWidgets(void);
         QGroupBox *createGeometryWidgets(void);
+        void notifyChange(void);
 };
 
 #endif

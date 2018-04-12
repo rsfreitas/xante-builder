@@ -85,13 +85,26 @@ void XMainDialog::setTreeContent(XTreeModel *model, bool enableMenu)
 {
     tree->setModel(model);
     tree->controlDialogActions(enableMenu);
-    tree->expandAll();
 }
 
 void XMainDialog::dialogItemSelected()
 {
-    dialogMenu->hide();
-    dialogItem->hide();
+    /* Were we selecting an item? */
+    if (dialogItem->isVisible()) {
+        if (dialogItem->saveCurrentState() == false)
+            return;
+
+        dialogItem->hide();
+    }
+
+    /* Or we were editting a menu? */
+    if (dialogMenu->isVisible()) {
+        if (dialogMenu->saveCurrentState() == false)
+            return;
+
+        dialogMenu->hide();
+    }
+
     dialogItem->show();
     dialogItem->setSelection(tree->currentSelectedMenu,
                              tree->currentSelectedItem);
@@ -99,8 +112,22 @@ void XMainDialog::dialogItemSelected()
 
 void XMainDialog::dialogMenuSelected()
 {
-    dialogItem->hide();
-    dialogMenu->hide();
+    /* Were we selecting an item? */
+    if (dialogItem->isVisible()) {
+        if (dialogItem->saveCurrentState() == false)
+            return;
+
+        dialogItem->hide();
+    }
+
+    /* Or we were editting a menu? */
+    if (dialogMenu->isVisible()) {
+        if (dialogMenu->saveCurrentState() == false)
+            return;
+
+        dialogMenu->hide();
+    }
+
     dialogMenu->show();
     dialogMenu->setSelection(tree->currentSelectedMenu);
 }
@@ -115,7 +142,6 @@ void XMainDialog::updateTreeView()
 {
     XTreeModel *model = new XTreeModel(true, this);
     tree->setModel(model);
-    tree->expandAll();
 }
 
 void XMainDialog::projectChanged()

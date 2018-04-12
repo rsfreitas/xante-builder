@@ -44,6 +44,9 @@ class TabEvents : public QWidget, public TabBase
         void clearCurrentData(void);
         void prepareWidgets(int type);
 
+    signals:
+        void dataChanged(void);
+
     private:
         QTableWidget *tbEvents;
         QStringList rowLabels;

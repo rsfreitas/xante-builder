@@ -90,6 +90,9 @@ QVBoxLayout *TabDetails::createMainWidgets(void)
     /* name */
     label = new QLabel(tr("Name:"));
     leName = new QLineEdit;
+    connect(leName, SIGNAL(textEdited(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     label->setBuddy(leName);
     h->addWidget(label);
     h->addWidget(leName);
@@ -108,6 +111,9 @@ QVBoxLayout *TabDetails::createMainWidgets(void)
     /* type */
     label = new QLabel(tr("Item type:"));
     cbType = new QComboBox;
+    connect(cbType, SIGNAL(activated(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     label->setBuddy(cbType);
 
     for (unsigned int i = 1; i < ITEM_TYPE; i++)
@@ -120,6 +126,8 @@ QVBoxLayout *TabDetails::createMainWidgets(void)
     /* mode */
     label = new QLabel(tr("Access mode:"));
     cbMode = new QComboBox;
+    connect(cbMode, SIGNAL(activated(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
 
     for (unsigned int i = 0; i < ACCESS_MODE; i++)
         cbMode ->addItem(QString(cbAccessModeName[i]));
@@ -142,7 +150,6 @@ void TabDetails::setSelectedItem(const XanteItem &item)
 
     /* type */
     cbType->setCurrentIndex((int)item.type());
-    printf("%s: alterando para %d\n", __FUNCTION__, (int)item.type());
 
     /* mode */
     cbMode->setCurrentIndex((int)item.mode());
@@ -154,8 +161,11 @@ void TabDetails::updateSelectedItem(XanteItem &item)
 
     /* name */
     data = leName->text();
+
+    if (data.isEmpty())
+        throw std::runtime_error(tr("<li>Name</li>").toLocal8Bit().data());
+
     item.name(data);
-    qDebug() << __FUNCTION__ << item.name();
 
     /* type */
     enum XanteItem::Type type = (enum XanteItem::Type)cbType->currentIndex();
@@ -186,5 +196,16 @@ void TabDetails::clearCurrentData(void)
 void TabDetails::selectItemType(int index)
 {
     emit itemTypeChanged(index);
+}
+
+void TabDetails::notifyChange(void)
+{
+    emit dataChanged();
+}
+
+void TabDetails::contentChanged(const QString &value)
+{
+    Q_UNUSED(value);
+    notifyChange();
 }
 

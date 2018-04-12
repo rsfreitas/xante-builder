@@ -30,6 +30,9 @@ class XanteItem;
 
 class TabBase
 {
+    signals:
+        virtual void dataChanged(void) = 0;
+
     public:
         /**
          * Clears all internal widgets.

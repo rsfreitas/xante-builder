@@ -47,16 +47,23 @@ QGroupBox *TabContent::createItemOptionsWidgets(void)
     gOptionsList = new QGroupBox(tr("List:"));
     label = new QLabel(tr("Description:"));
     leDescription = new QLineEdit;
+    connect(leDescription, SIGNAL(textEdited(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     label->setBuddy(leDescription);
     hdescription->addWidget(label);
     hdescription->addWidget(leDescription);
 
-    QPushButton *btAdd = new QPushButton(tr("Add"));
-    QPushButton *btDel = new QPushButton(tr("Remove"));
+    btAdd = new QPushButton(tr("Add"));
+    btDel = new QPushButton(tr("Remove"));
+    btDefaultValue = new QPushButton(tr("Set default value"));
+    btDefaultValue->setVisible(false);
     vbuttons->addWidget(btAdd, 0, Qt::AlignBottom);
-    vbuttons->addWidget(btDel, 0, Qt::AlignTop);
+    vbuttons->addWidget(btDel, 1, Qt::AlignTop);
+    vbuttons->addWidget(btDefaultValue, 0, Qt::AlignBottom);
     connect(btAdd, SIGNAL(clicked()), this, SLOT(addOption()));
     connect(btDel, SIGNAL(clicked()), this, SLOT(delOption()));
+    connect(btDefaultValue, SIGNAL(clicked()), this, SLOT(setDefaultValue()));
 
     lwOptions = new QListWidget;
     hbuttons->addWidget(lwOptions);
@@ -81,6 +88,9 @@ QGroupBox *TabContent::createItemConfigurationWidgets(void)
     h = new QHBoxLayout;
     label = new QLabel(tr("Block:"));
     leBlock = new QLineEdit;
+    connect(leBlock, SIGNAL(textEdited(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     label->setBuddy(leBlock);
     h->addWidget(label);
     h->addWidget(leBlock);
@@ -89,6 +99,9 @@ QGroupBox *TabContent::createItemConfigurationWidgets(void)
     h = new QHBoxLayout;
     label = new QLabel(tr("Entry:"));
     leEntry = new QLineEdit;
+    connect(leEntry, SIGNAL(textEdited(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     label->setBuddy(leEntry);
     h->addWidget(label);
     h->addWidget(leEntry);
@@ -111,6 +124,9 @@ QGroupBox *TabContent::createRangesWidgets(void)
     h = new QHBoxLayout;
     label = new QLabel(tr("String length:"));
     sbStringLength = new QSpinBox;
+    connect(sbStringLength, SIGNAL(valueChanged(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     sbStringLength->setRange(1, 1024);
     h->addWidget(label);
     h->addWidget(sbStringLength);
@@ -120,8 +136,14 @@ QGroupBox *TabContent::createRangesWidgets(void)
     h = new QHBoxLayout;
     label = new QLabel(tr("Min:"));
     sbMin = new QSpinBox;
+    connect(sbMin, SIGNAL(valueChanged(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     sbMin->setRange(1, 1024); // FIXME: adjust limit
     dsbMin = new QDoubleSpinBox;
+    connect(dsbMin, SIGNAL(valueChanged(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     dsbMin->setRange(1, 1024); // FIXME: adjust limit
     dsbMin->setVisible(false);
     h->addWidget(label);
@@ -133,8 +155,14 @@ QGroupBox *TabContent::createRangesWidgets(void)
     h = new QHBoxLayout;
     label = new QLabel(tr("Max:"));
     sbMax = new QSpinBox;
+    connect(sbMax, SIGNAL(valueChanged(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     sbMax->setRange(1, 1024); // FIXME: adjust limit
     dsbMax = new QDoubleSpinBox;
+    connect(dsbMax, SIGNAL(valueChanged(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     dsbMax->setRange(1, 1024); // FIXME: adjust limit
     dsbMax->setVisible(false);
     h->addWidget(label);
@@ -176,9 +204,18 @@ QVBoxLayout *TabContent::createContentWidgets(void)
     h = new QHBoxLayout;
     label = new QLabel(tr("Default value:"));
     leDefaultValue = new QLineEdit;
+    connect(leDefaultValue, SIGNAL(textEdited(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     label->setBuddy(leDefaultValue);
+    cbDefaultValue = new QComboBox;
+    cbDefaultValue->setVisible(false);
+    dtDefaultValue = new QDateTimeEdit(QDateTime::currentDateTime());
+    dtDefaultValue->setVisible(false);
     h->addWidget(label);
     h->addWidget(leDefaultValue);
+    h->addWidget(cbDefaultValue);
+    h->addWidget(dtDefaultValue);
     v->addLayout(h);
 
     /* Ranges and Settings */
@@ -199,8 +236,14 @@ void TabContent::setSelectedItem(const XanteItem &item)
         if ((type == XanteItem::Type::Checklist) ||
             (type == XanteItem::Type::RadioChecklist))
         {
-            for (int i = 0; i < item.totalOptions(); i++)
-                lwOptions->addItem(item.option(i));
+            for (int i = 0; i < item.totalOptions(); i++) {
+                QString data = item.option(i);
+                lwOptions->addItem(data);
+                cbDefaultValue->addItem(data);
+            }
+
+            if (type == XanteItem::Type::RadioChecklist)
+                cbDefaultValue->setCurrentIndex(item.defaultValue().toInt());
         } else
             leDescription->setText(item.option());
     }
@@ -245,14 +288,32 @@ void TabContent::updateSelectedItem(XanteItem &item)
 {
     enum XanteItem::Type type = item.type();
     int min = 0, max = 0;
+    QString error;
 
     if (XanteItem::needsSettings(type)) {
         item.configBlock(leBlock->text());
         item.configEntry(leEntry->text());
+
+        if (item.configBlock().isEmpty())
+            error += QString("<li>Config Block</li>");
+
+        if (item.configEntry().isEmpty())
+            error += QString("<li>Config Entry</li>");
     }
 
-    if (XanteItem::needsDefaultValue(type))
-        item.defaultValue(leDefaultValue->text());
+    if (XanteItem::needsDefaultValue(type)) {
+        if (type == XanteItem::Type::RadioChecklist)
+            item.defaultValue(QString("%1").arg(cbDefaultValue->currentIndex()));
+        else if (type == XanteItem::Type::Calendar)
+            item.defaultValue(dtDefaultValue->date().toString("yyyy-MM-dd"));
+        else if (type == XanteItem::Type::Timebox)
+            item.defaultValue(dtDefaultValue->time().toString("HH:mm:ss"));
+        else
+            item.defaultValue(leDefaultValue->text());
+
+        if (item.defaultValue().isEmpty())
+            error += QString("<li>Default value</li>");
+    }
 
     if (XanteItem::needsDescription(type))
         item.option(leDescription->text());
@@ -268,20 +329,31 @@ void TabContent::updateSelectedItem(XanteItem &item)
         item.referencedMenu(m.objectId());
     }
 
-    if (XanteItem::needsStringLengthRange(type))
-        item.stringLength(sbStringLength->value());
+    if (XanteItem::needsRange(type)) {
+        if (XanteItem::needsStringLengthRange(type))
+            item.stringLength(sbStringLength->value());
 
-    if (type == XanteItem::Type::InputFloat)
-        item.minMax(dsbMin->value(), dsbMax->value());
-    else {
-        if (XanteItem::needsMinRange(type))
-            min = sbMin->value();
+        if (type == XanteItem::Type::InputFloat)
+            item.minMax(dsbMin->value(), dsbMax->value());
+        else {
+            if ((XanteItem::needsMinRange(type)) ||
+                (XanteItem::needsMaxRange(type)))
+            {
+                if (XanteItem::needsMinRange(type))
+                    min = sbMin->value();
 
-        if (XanteItem::needsMaxRange(type))
-            max = sbMax->value();
+                if (XanteItem::needsMaxRange(type))
+                    max = sbMax->value();
 
-        item.minMax(min, max);
+                item.minMax(min, max);
+            }
+        }
     }
+
+    if (!error.isEmpty())
+        throw std::runtime_error(error.toLatin1().data());
+
+    return;
 }
 
 void TabContent::clearCurrentData(void)
@@ -301,6 +373,43 @@ void TabContent::clearCurrentData(void)
     gOptionsList->setEnabled(false);
     leDescription->setEnabled(false);
     leDefaultValue->setEnabled(false);
+
+    cbDefaultValue->clear();
+}
+
+void TabContent::prepareDefaultValue(int type)
+{
+    enum XanteItem::Type t = (enum XanteItem::Type)type;
+
+    leDefaultValue->setVisible(false);
+    cbDefaultValue->setVisible(false);
+    btDefaultValue->setVisible(false);
+    dtDefaultValue->setVisible(false);
+    dtDefaultValue->setCalendarPopup(false);
+
+    switch (t) {
+        case XanteItem::Type::RadioChecklist:
+            cbDefaultValue->setVisible(true);
+            break;
+
+        case XanteItem::Type::Calendar:
+            dtDefaultValue->setVisible(true);
+            dtDefaultValue->setCalendarPopup(true);
+            dtDefaultValue->setDisplayFormat(QString("yyyy-MM-dd"));
+            break;
+
+        case XanteItem::Type::Timebox:
+            dtDefaultValue->setVisible(true);
+            dtDefaultValue->setDisplayFormat(QString("HH:mm:ss"));
+            break;
+
+        default:
+            if (t == XanteItem::Type::Checklist)
+                btDefaultValue->setVisible(true);
+
+            leDefaultValue->setVisible(true);
+            break;
+    }
 }
 
 void TabContent::prepareWidgets(int type)
@@ -308,11 +417,32 @@ void TabContent::prepareWidgets(int type)
     enum XanteItem::Type t = (enum XanteItem::Type)type;
     bool showFloatField = false;
 
+    /*
+     * Set which type of Widget we're going to use to adjust the item's
+     * default value.
+     */
+    prepareDefaultValue(t);
+
+    /*
+     * Adjusts how the rows will be selected inside the list of options for
+     * a checklist widget.
+     */
+    if (type == XanteItem::Type::RadioChecklist)
+        lwOptions->setSelectionMode(QAbstractItemView::SingleSelection);
+    else
+        lwOptions->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
     cbReferencedMenu->setEnabled(XanteItem::needsMenuReference(t));
     leDescription->setEnabled(XanteItem::needsDescription(t));
-    leDefaultValue->setEnabled(XanteItem::needsDefaultValue(t));
+    leDefaultValue->setEnabled(XanteItem::needsDefaultValue(t) &&
+                               (type != XanteItem::Type::Checklist));
+
+    lwOptions->setEnabled(XanteItem::needsOptions(t));
     gOptionsList->setEnabled(XanteItem::needsOptions(t));
     gSettings->setEnabled(XanteItem::needsSettings(t));
+    btAdd->setEnabled(XanteItem::needsOptions(t));
+    btDel->setEnabled(XanteItem::needsOptions(t));
+    btDefaultValue->setEnabled(XanteItem::needsOptions(t));
 
     if (t == XanteItem::Type::InputFloat)
         showFloatField = true;
@@ -340,6 +470,7 @@ void TabContent::addOption(void)
         return;
 
     lwOptions->addItem(option);
+    notifyChange();
 }
 
 void TabContent::delOption(void)
@@ -350,5 +481,29 @@ void TabContent::delOption(void)
         return;
 
     lwOptions->takeItem(row);
+    notifyChange();
+}
+
+void TabContent::setDefaultValue(void)
+{
+    int value = 0;
+
+    for (int i = 0; i < lwOptions->count(); i++)
+        if (lwOptions->item(i)->isSelected())
+            value += (int)pow(2, i);
+
+    leDefaultValue->setText(QString("%1").arg(value));
+    notifyChange();
+}
+
+void TabContent::notifyChange(void)
+{
+    emit dataChanged();
+}
+
+void TabContent::contentChanged(const QString &value)
+{
+    Q_UNUSED(value);
+    notifyChange();
 }
 

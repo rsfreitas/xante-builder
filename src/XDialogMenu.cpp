@@ -578,6 +578,7 @@ XanteMenu XDialogMenu::createXanteMenuFromWidgets(XanteJTF &jtf)
 
 bool XDialogMenu::updateXanteMenu(void)
 {
+    bool new_menu_name = false;
     XanteProject &project = XMainWindow::getProject();
     XanteJTF &jtf = project.getJtf();
     XanteMenu &menu = jtf.menuAt(currentMenuIndex),
@@ -589,36 +590,30 @@ bool XDialogMenu::updateXanteMenu(void)
 
         /* The TreeView must be updated when the names are different. */
         if (menu.name() != newMenu.name())
-            emit treeViewNeedsUpdate();
+            new_menu_name = true;
 
-        /* TODO: Do we have all the required fields filled? */
-        if (0) {
+        /* Do we have all the required fields filled? */
+        if (newMenu.name().isEmpty()) {
+            QMessageBox::warning(this, tr("Update error"),
+                                 QString("The menu <b>name</b> is missing"));
+
             return false;
         }
 
+        menu = newMenu;
+
+        if (new_menu_name)
+            emit treeViewNeedsUpdate();
+
         /* The MainWindow must know that we have a change to be saved. */
         emit projectHasChanges();
-        menu = newMenu;
     }
 
     return true;
 }
 
-void XDialogMenu::hideEvent(QHideEvent *event)
+bool XDialogMenu::saveCurrentState(void)
 {
-    /* Save all modifications */
-    if ((event->spontaneous() == false) && XMainWindow::activeProject()) {
-        if (updateXanteMenu() == false) {
-            event->ignore();
-            return;
-        }
-    }
-
-    event->accept();
-}
-
-void XDialogMenu::saveCurrentState(void)
-{
-    updateXanteMenu();
+    return updateXanteMenu();
 }
 

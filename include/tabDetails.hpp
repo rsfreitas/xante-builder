@@ -46,15 +46,18 @@ class TabDetails : public QWidget, public TabBase
 
     private slots:
         void selectItemType(int index);
+        void contentChanged(const QString &value);
 
     signals:
         void itemTypeChanged(int type);
+        void dataChanged(void);
 
     private:
         QLineEdit *leName, *leObjectId;
         QComboBox *cbType, *cbMode;
 
         QVBoxLayout *createMainWidgets(void);
+        void notifyChange(void);
 };
 
 #endif

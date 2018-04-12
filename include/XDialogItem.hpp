@@ -57,13 +57,11 @@ class XDialogItem : public QWidget
 
         void setSelection(int selectedMenuIndex, int selectedItemIndex);
         void clear(void);
-        void saveCurrentState(void);
+        bool saveCurrentState(void);
 
     private slots:
         void prepareWidgetsForCurrentItem(int type);
-
-    protected:
-        void hideEvent(QHideEvent *event) override;
+        void dataChanged(void);
 
     signals:
         void treeViewNeedsUpdate();

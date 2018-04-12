@@ -32,10 +32,12 @@ TabMixedform::TabMixedform(QWidget *parent)
 
 void TabMixedform::setSelectedItem(const XanteItem &item)
 {
+    Q_UNUSED(item);
 }
 
 void TabMixedform::updateSelectedItem(XanteItem &item)
 {
+    Q_UNUSED(item);
 }
 
 void TabMixedform::clearCurrentData(void)

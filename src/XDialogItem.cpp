@@ -38,21 +38,33 @@ XDialogItem::XDialogItem(QWidget *parent)
     connect(t, SIGNAL(itemTypeChanged(int)), this,
             SLOT(prepareWidgetsForCurrentItem(int)));
 
+    connect(t, SIGNAL(dataChanged()), this,
+            SLOT(dataChanged()));
+
     index = tabItem->addTab(t, tr("Details"));
     tabs.insert(index, t);
 
     /* Content */
     t = new TabContent(this);
+    connect(t, SIGNAL(dataChanged()), this,
+            SLOT(dataChanged()));
+
     index = tabItem->addTab(t, tr("Content"));
     tabs.insert(index, t);
 
     /* Ui */
     t = new TabUi(this);
+    connect(t, SIGNAL(dataChanged()), this,
+            SLOT(dataChanged()));
+
     index = tabItem->addTab(t, tr("Interface"));
     tabs.insert(index, t);
 
     /* Events */
     t = new TabEvents(this);
+    connect(t, SIGNAL(dataChanged()), this,
+            SLOT(dataChanged()));
+
     index = tabItem->addTab(t, tr("Events"));
     tabs.insert(index, t);
 
@@ -97,6 +109,7 @@ void XDialogItem::setSelection(int selectedMenuIndex, int selectedItemIndex)
 
         while (it.hasNext()) {
             it.next();
+            dynamic_cast<TabBase *>(it.value())->prepareWidgets(item.type());
             dynamic_cast<TabBase *>(it.value())->setSelectedItem(item);
         }
     } catch (std::exception &e) {
@@ -119,7 +132,8 @@ void XDialogItem::setCurrentProject(int selectedMenuIndex,
 }
 
 /*
- * Creates a XanteItem object from the widgets current content.
+ * Creates a XanteItem object from the widgets current content. If a tab
+ * encounters an error it must throw an exception, and here we propagate it.
  */
 XanteItem XDialogItem::createXanteItemFromWidgets(XanteJTF &jtf,
     const XanteMenu &menu)
@@ -134,8 +148,12 @@ XanteItem XDialogItem::createXanteItemFromWidgets(XanteJTF &jtf,
 
     while (it.hasNext()) {
         it.next();
-        printf("%s: %d\n", __FUNCTION__, (int)it.key());
-        dynamic_cast<TabBase *>(it.value())->updateSelectedItem(item);
+
+        try {
+            dynamic_cast<TabBase *>(it.value())->updateSelectedItem(item);
+        } catch (std::exception &e) {
+            throw std::runtime_error(e.what());
+        }
     }
 
     return item;
@@ -155,6 +173,7 @@ bool XDialogItem::updateXanteItem(void)
 {
     XanteProject &project = XMainWindow::getProject();
     XanteJTF &jtf = project.getJtf();
+    bool new_item_name = false;
 
     try {
         XanteMenu &menu = jtf.menuAt(currentMenuIndex);
@@ -165,42 +184,32 @@ bool XDialogItem::updateXanteItem(void)
             qDebug() << item.debug();
             qDebug() << newItem.debug();
 
-            /* The TreeView must be updated when the names are different. */
             if (item.name() != newItem.name())
-                emit treeViewNeedsUpdate();
+                new_item_name = true;
 
-            /* TODO: Do we have all the required fields filled? */
-            if (0) {
-                return false;
-            }
+            item = newItem;
+
+            /* The TreeView must be updated when the names are different. */
+            if (new_item_name)
+                emit treeViewNeedsUpdate();
 
             /* The MainWindow must know that we have a change to be saved. */
             emit projectHasChanges();
-            item = newItem;
         }
     } catch (std::exception &e) {
+        /* Do we have all the required fields filled? */
+        QMessageBox::warning(this, tr("Update error"),
+                             QString("The following fields are missing or have wrong value: <ul> %1 </ul>")
+                                     .arg(e.what()));
         return false;
     }
 
     return true;
 }
 
-void XDialogItem::hideEvent(QHideEvent *event)
+bool XDialogItem::saveCurrentState(void)
 {
-    /* Savel all modifications */
-    if ((event->spontaneous() == false) && XMainWindow::activeProject()) {
-        if (updateXanteItem() == false) {
-            event->ignore();
-            return;
-        }
-    }
-
-    event->accept();
-}
-
-void XDialogItem::saveCurrentState(void)
-{
-    updateXanteItem();
+    return updateXanteItem();
 }
 
 void XDialogItem::prepareWidgetsForCurrentItem(int type)
@@ -211,5 +220,10 @@ void XDialogItem::prepareWidgetsForCurrentItem(int type)
         it.next();
         dynamic_cast<TabBase *>(it.value())->prepareWidgets(type);
     }
+}
+
+void XDialogItem::dataChanged(void)
+{
+    emit projectHasChanges();
 }
 

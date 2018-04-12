@@ -32,10 +32,12 @@ TabSpreadsheet::TabSpreadsheet(QWidget *parent)
 
 void TabSpreadsheet::setSelectedItem(const XanteItem &item)
 {
+    Q_UNUSED(item);
 }
 
 void TabSpreadsheet::updateSelectedItem(XanteItem &item)
 {
+    Q_UNUSED(item);
 }
 
 void TabSpreadsheet::clearCurrentData(void)

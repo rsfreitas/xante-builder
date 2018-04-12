@@ -34,10 +34,7 @@
 XTreeItem::XTreeItem(const QList<QVariant> &data, int itemType,
     XTreeItem *parent) : m_itemData(data), m_parentItem(parent)
 {
-/*    if (itemType != XanteItem::Type::Unknown) {
-        QPixmap pixmap = QPixmap(QString(""));
-        m_icon = pixmap.scaled(18, 18);
-    }*/
+    Q_UNUSED(itemType);
 }
 
 XTreeItem::~XTreeItem()
@@ -83,11 +80,6 @@ int XTreeItem::row() const
     return 0;
 }
 
-QPixmap XTreeItem::icon() const
-{
-    return m_icon;
-}
-
 /*
  *
  * XTreeModel
@@ -119,36 +111,39 @@ int XTreeModel::columnCount(const QModelIndex &parent) const
         return rootItem->columnCount();
 }
 
+QString XTreeModel::itemTypeDescription(const QModelIndex &index) const
+{
+    QModelIndex parentIndex = index.parent();
+    QString tooltip;
+
+    if (parentIndex.isValid()) {
+        XanteProject &project = XMainWindow::getProject();
+        XanteJTF jtf = project.getJtf();
+        XanteMenu menu = jtf.menuAt(parentIndex.row());
+        XanteItem item = menu.itemAt(index.row());
+
+        tooltip += item.typeDescription();
+    } else if (index.isValid()) {
+        tooltip += QString("Menu object");
+    }
+
+    return tooltip;
+}
+
 QVariant XTreeModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
 
-    if (role != Qt::DisplayRole)
+    if (role != Qt::DisplayRole) {
+        if (role == Qt::ToolTipRole)
+            return itemTypeDescription(index);
+
         return QVariant();
+    }
 
     XTreeItem *item = static_cast<XTreeItem *>(index.internalPointer());
     return item->data(index.column());
-
-    //XTreeItem *item = static_cast<XTreeItem *>(index.internalPointer());
-
-//        printf("1 %s\n", __FUNCTION__);
-//    if (role == Qt::DecorationRole) {
-/*        {
-            QList<QByteArray> l = QImageReader::supportedImageFormats();
-            printf("%s: %d\n", __FUNCTION__, l.size());
-        }
-        QPixmap pixmap;
-        bool x = pixmap.load("/home/rodrigo/git/github/personal/xante-builder/resource/item.jpg");
-        printf("2 %s: %d - %d, %d\n", __FUNCTION__, pixmap.isNull(), x,
-                QFileInfo::exists("/home/rodrigo/git/github/personal/xante-builder/resource/item.jpg"));
-        return QVariant::fromValue(pixmap);
-//        return pixmap;*/
-/*        return QVariant::fromValue(item->icon());
-    } else if (role != Qt::DisplayRole)
-        return QVariant();
-
-    return item->data(index.column());*/
 }
 
 QModelIndex XTreeModel::index(int row, int column, const QModelIndex &parent) const

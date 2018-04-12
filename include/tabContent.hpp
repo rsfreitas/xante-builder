@@ -47,20 +47,30 @@ class TabContent : public QWidget, public TabBase
     private slots:
         void addOption(void);
         void delOption(void);
+        void setDefaultValue(void);
+        void contentChanged(const QString &value);
+
+    signals:
+        void dataChanged(void);
 
     private:
         QLineEdit *leDescription, *leDefaultValue, *leBlock, *leEntry;
         QSpinBox *sbMin, *sbMax, *sbStringLength;
         QDoubleSpinBox *dsbMin, *dsbMax;
+        QPushButton *btAdd, *btDel, *btDefaultValue;
         QListWidget *lwOptions;
-        QComboBox *cbReferencedMenu;
+        QComboBox *cbReferencedMenu, *cbDefaultValue;
         QGroupBox *gSettings, *gOptionsList;
+        QDateTimeEdit *dtDefaultValue;
 
         QGroupBox *createItemOptionsWidgets(void);
         QGroupBox *createItemConfigurationWidgets(void);
         QGroupBox *createRangesWidgets(void);
         QHBoxLayout *createRangesAndSettingsWidgets(void);
         QVBoxLayout *createContentWidgets(void);
+
+        void notifyChange(void);
+        void prepareDefaultValue(int type);
 };
 
 #endif

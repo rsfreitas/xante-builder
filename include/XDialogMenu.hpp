@@ -52,16 +52,13 @@ class XDialogMenu : public QWidget
         void setCurrentProject(int selectedMenuIndex);
         void setSelection(int selectedMenuIndex);
         void clear(void);
-        void saveCurrentState(void);
+        bool saveCurrentState(void);
 
     public slots:
         void dynamicRadioToggled(bool checked);
         void selectMenuType(int index);
         void addDynamicFixedOption(void);
         void delDynamicFixedOption(void);
-
-    protected:
-        void hideEvent(QHideEvent *event) override;
 
     signals:
         void treeViewNeedsUpdate();

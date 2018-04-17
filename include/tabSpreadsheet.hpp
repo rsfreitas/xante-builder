@@ -27,9 +27,8 @@
 #define _TABSPREADSHEET_HPP          1
 
 #include <QWidget>
+#include <xante/libxante.h>
 #include "tabBase.hpp"
-
-class XanteItem;
 
 class TabSpreadsheet : public QWidget, public TabBase
 {
@@ -42,7 +41,7 @@ class TabSpreadsheet : public QWidget, public TabBase
         void setSelectedItem(const XanteItem &item);
         void updateSelectedItem(XanteItem &item);
         void clearCurrentData(void);
-        void prepareWidgets(int type);
+        void prepareWidgets(enum XanteItem::Type type);
 
     signals:
         void dataChanged(void);

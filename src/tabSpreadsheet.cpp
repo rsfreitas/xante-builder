@@ -44,7 +44,7 @@ void TabSpreadsheet::clearCurrentData(void)
 {
 }
 
-void TabSpreadsheet::prepareWidgets(int type)
+void TabSpreadsheet::prepareWidgets(enum XanteItem::Type type)
 {
     Q_UNUSED(type);
 }

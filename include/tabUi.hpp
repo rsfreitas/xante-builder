@@ -27,10 +27,8 @@
 #define _TABUI_HPP          1
 
 #include <QtWidgets>
-
+#include <xante/libxante.h>
 #include "tabBase.hpp"
-
-class XanteItem;
 
 class TabUi : public QWidget, public TabBase
 {
@@ -43,7 +41,7 @@ class TabUi : public QWidget, public TabBase
         void setSelectedItem(const XanteItem &item);
         void updateSelectedItem(XanteItem &item);
         void clearCurrentData(void);
-        void prepareWidgets(int type);
+        void prepareWidgets(enum XanteItem::Type type);
 
     private slots:
         void addOption(void);

@@ -44,7 +44,7 @@ void TabMixedform::clearCurrentData(void)
 {
 }
 
-void TabMixedform::prepareWidgets(int type)
+void TabMixedform::prepareWidgets(enum XanteItem::Type type)
 {
     Q_UNUSED(type);
 }

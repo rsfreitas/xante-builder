@@ -27,9 +27,8 @@
 #define _TABCONTENT_HPP          1
 
 #include <QtWidgets>
+#include <xante/libxante.h>
 #include "tabBase.hpp"
-
-class XanteItem;
 
 class TabContent : public QWidget, public TabBase
 {
@@ -42,7 +41,7 @@ class TabContent : public QWidget, public TabBase
         void setSelectedItem(const XanteItem &item);
         void updateSelectedItem(XanteItem &item);
         void clearCurrentData(void);
-        void prepareWidgets(int type);
+        void prepareWidgets(enum XanteItem::Type type);
 
     private slots:
         void addOption(void);
@@ -63,6 +62,9 @@ class TabContent : public QWidget, public TabBase
         QGroupBox *gSettings, *gOptionsList;
         QDateTimeEdit *dtDefaultValue;
 
+        /* Says if we can notify any change */
+        bool mayNotify = false;
+
         QGroupBox *createItemOptionsWidgets(void);
         QGroupBox *createItemConfigurationWidgets(void);
         QGroupBox *createRangesWidgets(void);
@@ -70,7 +72,7 @@ class TabContent : public QWidget, public TabBase
         QVBoxLayout *createContentWidgets(void);
 
         void notifyChange(void);
-        void prepareDefaultValue(int type);
+        void prepareDefaultValue(enum XanteItem::Type type);
 };
 
 #endif

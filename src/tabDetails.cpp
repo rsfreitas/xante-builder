@@ -176,7 +176,7 @@ void TabDetails::updateSelectedItem(XanteItem &item)
     item.mode(mode);
 }
 
-void TabDetails::prepareWidgets(int type)
+void TabDetails::prepareWidgets(enum XanteItem::Type type)
 {
     Q_UNUSED(type);
 }

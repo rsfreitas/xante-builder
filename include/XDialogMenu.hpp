@@ -30,7 +30,7 @@
 #include <QVector>
 #include <QTableWidget>
 
-#include "xante/libxante.h"
+#include <xante/libxante.h>
 
 class QLineEdit;
 class QComboBox;
@@ -59,6 +59,10 @@ class XDialogMenu : public QWidget
         void selectMenuType(int index);
         void addDynamicFixedOption(void);
         void delDynamicFixedOption(void);
+        void contentChanged(const QString &value);
+        void tableContentChanged(QTableWidgetItem *item);
+        void selectionChanged(void);
+        void groupSelected(bool checked);
 
     signals:
         void treeViewNeedsUpdate();
@@ -93,6 +97,8 @@ class XDialogMenu : public QWidget
             MaxGroupBox
         };
 
+        bool mayNotify = false;
+        XanteMenu oldMenu;
         int currentMenuIndex = -1;
 
         /* UI */
@@ -123,6 +129,7 @@ class XDialogMenu : public QWidget
         void updateXanteMenuDynamic(XanteMenu &menu);
 
         XanteMenu createXanteMenuFromWidgets(XanteJTF &jtf);
+        void notifyChange(void);
 };
 
 #endif

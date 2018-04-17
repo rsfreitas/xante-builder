@@ -141,7 +141,7 @@ void XMainDialog::controlProjectWidgets(bool enable)
 void XMainDialog::updateTreeView()
 {
     XTreeModel *model = new XTreeModel(true, this);
-    tree->setModel(model);
+    tree->redraw(model);
 }
 
 void XMainDialog::projectChanged()

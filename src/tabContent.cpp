@@ -282,6 +282,9 @@ void TabContent::setSelectedItem(const XanteItem &item)
             }
         }
     }
+
+    /* We can notify changes now */
+    mayNotify = true;
 }
 
 void TabContent::updateSelectedItem(XanteItem &item)
@@ -358,6 +361,9 @@ void TabContent::updateSelectedItem(XanteItem &item)
 
 void TabContent::clearCurrentData(void)
 {
+    /* And now we don't */
+    mayNotify = false;
+
     lwOptions->clear();
     leDescription->clear();
     leDefaultValue->clear();
@@ -377,17 +383,15 @@ void TabContent::clearCurrentData(void)
     cbDefaultValue->clear();
 }
 
-void TabContent::prepareDefaultValue(int type)
+void TabContent::prepareDefaultValue(enum XanteItem::Type type)
 {
-    enum XanteItem::Type t = (enum XanteItem::Type)type;
-
     leDefaultValue->setVisible(false);
     cbDefaultValue->setVisible(false);
     btDefaultValue->setVisible(false);
     dtDefaultValue->setVisible(false);
     dtDefaultValue->setCalendarPopup(false);
 
-    switch (t) {
+    switch (type) {
         case XanteItem::Type::RadioChecklist:
             cbDefaultValue->setVisible(true);
             break;
@@ -404,7 +408,7 @@ void TabContent::prepareDefaultValue(int type)
             break;
 
         default:
-            if (t == XanteItem::Type::Checklist)
+            if (type == XanteItem::Type::Checklist)
                 btDefaultValue->setVisible(true);
 
             leDefaultValue->setVisible(true);
@@ -412,16 +416,15 @@ void TabContent::prepareDefaultValue(int type)
     }
 }
 
-void TabContent::prepareWidgets(int type)
+void TabContent::prepareWidgets(enum XanteItem::Type type)
 {
-    enum XanteItem::Type t = (enum XanteItem::Type)type;
     bool showFloatField = false;
 
     /*
      * Set which type of Widget we're going to use to adjust the item's
      * default value.
      */
-    prepareDefaultValue(t);
+    prepareDefaultValue(type);
 
     /*
      * Adjusts how the rows will be selected inside the list of options for
@@ -432,19 +435,19 @@ void TabContent::prepareWidgets(int type)
     else
         lwOptions->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-    cbReferencedMenu->setEnabled(XanteItem::needsMenuReference(t));
-    leDescription->setEnabled(XanteItem::needsDescription(t));
-    leDefaultValue->setEnabled(XanteItem::needsDefaultValue(t) &&
+    cbReferencedMenu->setEnabled(XanteItem::needsMenuReference(type));
+    leDescription->setEnabled(XanteItem::needsDescription(type));
+    leDefaultValue->setEnabled(XanteItem::needsDefaultValue(type) &&
                                (type != XanteItem::Type::Checklist));
 
-    lwOptions->setEnabled(XanteItem::needsOptions(t));
-    gOptionsList->setEnabled(XanteItem::needsOptions(t));
-    gSettings->setEnabled(XanteItem::needsSettings(t));
-    btAdd->setEnabled(XanteItem::needsOptions(t));
-    btDel->setEnabled(XanteItem::needsOptions(t));
-    btDefaultValue->setEnabled(XanteItem::needsOptions(t));
+    lwOptions->setEnabled(XanteItem::needsOptions(type));
+    gOptionsList->setEnabled(XanteItem::needsOptions(type));
+    gSettings->setEnabled(XanteItem::needsSettings(type));
+    btAdd->setEnabled(XanteItem::needsOptions(type));
+    btDel->setEnabled(XanteItem::needsOptions(type));
+    btDefaultValue->setEnabled(XanteItem::needsOptions(type));
 
-    if (t == XanteItem::Type::InputFloat)
+    if (type == XanteItem::Type::InputFloat)
         showFloatField = true;
 
     dsbMin->setVisible(showFloatField);
@@ -452,11 +455,11 @@ void TabContent::prepareWidgets(int type)
     sbMin->setVisible(!showFloatField);
     sbMax->setVisible(!showFloatField);
 
-    dsbMin->setEnabled(XanteItem::needsMinRange(t));
-    dsbMax->setEnabled(XanteItem::needsMaxRange(t));
-    sbMin->setEnabled(XanteItem::needsMinRange(t));
-    sbMax->setEnabled(XanteItem::needsMaxRange(t));
-    sbStringLength->setEnabled(XanteItem::needsStringLengthRange(t));
+    dsbMin->setEnabled(XanteItem::needsMinRange(type));
+    dsbMax->setEnabled(XanteItem::needsMaxRange(type));
+    sbMin->setEnabled(XanteItem::needsMinRange(type));
+    sbMax->setEnabled(XanteItem::needsMaxRange(type));
+    sbStringLength->setEnabled(XanteItem::needsStringLengthRange(type));
 }
 
 void TabContent::addOption(void)
@@ -504,6 +507,8 @@ void TabContent::notifyChange(void)
 void TabContent::contentChanged(const QString &value)
 {
     Q_UNUSED(value);
-    notifyChange();
+
+    if (mayNotify)
+        notifyChange();
 }
 

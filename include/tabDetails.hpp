@@ -27,9 +27,8 @@
 #define _TABDETAILS_HPP          1
 
 #include <QtWidgets>
+#include <xante/libxante.h>
 #include "tabBase.hpp"
-
-class XanteItem;
 
 class TabDetails : public QWidget, public TabBase
 {
@@ -42,7 +41,7 @@ class TabDetails : public QWidget, public TabBase
         void setSelectedItem(const XanteItem &item);
         void updateSelectedItem(XanteItem &item);
         void clearCurrentData(void);
-        void prepareWidgets(int type);
+        void prepareWidgets(enum XanteItem::Type type);
 
     private slots:
         void selectItemType(int index);

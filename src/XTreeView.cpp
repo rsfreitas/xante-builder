@@ -105,6 +105,18 @@ void XTreeView::mousePressEvent(QMouseEvent *event)
     }
 }
 
+void XTreeView::keyPressEvent(QKeyEvent *event)
+{
+    switch (event->key()) {
+        case Qt::Key_Return:
+        case Qt::Key_Space:
+            displaySelectedItem(currentIndex());
+            break;
+    }
+
+    QTreeView::keyPressEvent(event);
+}
+
 void XTreeView::displaySelectedItem(QModelIndex index)
 {
     QModelIndex parentIndex = index.parent();
@@ -270,5 +282,40 @@ void XTreeView::emitSignalToUpdate(void)
 {
     emit treeViewNeedsUpdate();
     emit projectHasChanges();
+}
+
+void XTreeView::redraw(QAbstractItemModel *model)
+{
+    QStringList st = saveState();
+
+    setModel(model);
+    restoreState(st);
+}
+
+QStringList XTreeView::saveState(void)
+{
+    XTreeModel *m = dynamic_cast<XTreeModel *>(model());
+    QStringList state;
+
+    foreach (QModelIndex index, m->getPersistentIndexList()) {
+        if (isExpanded(index))
+            state << index.data(Qt::DisplayRole).toString();
+    }
+
+    return state;
+}
+
+void XTreeView::restoreState(QStringList state)
+{
+    QAbstractItemModel *m = model();
+
+    foreach (QString item, state) {
+        QModelIndexList Items = m->match(m->index(0, 0),
+                                         Qt::DisplayRole,
+                                         QVariant::fromValue(item));
+
+        if (!Items.isEmpty())
+            setExpanded(Items.first(), true);
+    }
 }
 

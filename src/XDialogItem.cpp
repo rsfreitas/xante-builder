@@ -180,10 +180,10 @@ bool XDialogItem::updateXanteItem(void)
         XanteItem &item = menu.itemAt(currentItemIndex),
                   newItem = createXanteItemFromWidgets(jtf, menu);
 
-        if (item != newItem) {
-            qDebug() << item.debug();
-            qDebug() << newItem.debug();
+        qDebug() << item.debug();
+        qDebug() << newItem.debug();
 
+        if (item != newItem) {
             if (item.name() != newItem.name())
                 new_item_name = true;
 
@@ -218,7 +218,7 @@ void XDialogItem::prepareWidgetsForCurrentItem(int type)
 
     while (it.hasNext()) {
         it.next();
-        dynamic_cast<TabBase *>(it.value())->prepareWidgets(type);
+        dynamic_cast<TabBase *>(it.value())->prepareWidgets((enum XanteItem::Type)type);
     }
 }
 

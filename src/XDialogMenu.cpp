@@ -51,6 +51,9 @@ QHBoxLayout *XDialogMenu::createIdentificationWidgets(void)
     /* name */
     label = new QLabel(tr("Name:"));
     edit = new QLineEdit;
+    connect(edit, SIGNAL(textEdited(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     label->setBuddy(edit);
     lineEdit[XDialogMenu::LineEdit::Name] = edit;
     h->addWidget(label);
@@ -82,6 +85,8 @@ QHBoxLayout *XDialogMenu::createTypeWidgets(void)
     label = new QLabel(tr("Menu type:"));
     cb = new QComboBox;
     label->setBuddy(cb);
+    connect(cb, SIGNAL(activated(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
 
     for (unsigned int i = 0; i < MENU_TYPE; i++)
         cb->addItem(QString(cbMenuTypeName[i]));
@@ -95,6 +100,8 @@ QHBoxLayout *XDialogMenu::createTypeWidgets(void)
     label = new QLabel(tr("Access mode:"));
     cb = new QComboBox;
     label->setBuddy(cb);
+    connect(cb, SIGNAL(activated(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
 
     for (unsigned int i = 0; i < ACCESS_MODE; i++)
         cb->addItem(QString(cbAccessModeName[i]));
@@ -106,16 +113,23 @@ QHBoxLayout *XDialogMenu::createTypeWidgets(void)
     h->addWidget(g);
 
     g = new QGroupBox(tr("Geometry"));
+    connect(g, SIGNAL(clicked(bool)), this, SLOT(groupSelected(bool)));
     hg = new QHBoxLayout;
     label = new QLabel(tr("Width:"));
     sbWidth = new QSpinBox;
     sbWidth->setRange(30, 60);
+    connect(sbWidth, SIGNAL(valueChanged(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     hg->addWidget(label);
     hg->addWidget(sbWidth);
 
     label = new QLabel(tr("Height:"));
     sbHeight = new QSpinBox;
     sbHeight->setRange(30, 60);
+    connect(sbHeight, SIGNAL(valueChanged(const QString &)), this,
+            SLOT(contentChanged(const QString &)));
+
     hg->addWidget(label);
     hg->addWidget(sbHeight);
     g->setCheckable(true);
@@ -135,6 +149,13 @@ QGroupBox *XDialogMenu::createEventsWidgets(void)
     tbEvents->setHorizontalHeaderLabels(QStringList() << tr("Function name"));
     tbEvents->setVerticalHeaderLabels(QStringList() << tr("Exit event"));
     tbEvents->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    connect(tbEvents, SIGNAL(itemChanged(QTableWidgetItem *)), this,
+            SLOT(tableContentChanged(QTableWidgetItem *)));
+
+    connect(tbEvents, SIGNAL(itemSelectionChanged()), this,
+            SLOT(selectionChanged()));
+
+    connect(gb, SIGNAL(clicked(bool)), this, SLOT(groupSelected(bool)));
 
     l->addWidget(tbEvents);
     gb->setCheckable(true);
@@ -404,6 +425,8 @@ void XDialogMenu::selectMenuType(int index)
 
 void XDialogMenu::setupWidgets(XanteMenu menu)
 {
+    mayNotify = false;
+    oldMenu = menu;
     disableAllWidgets();
 
     /* Enable/Disable dynamics groupbox */
@@ -584,10 +607,10 @@ bool XDialogMenu::updateXanteMenu(void)
     XanteMenu &menu = jtf.menuAt(currentMenuIndex),
               newMenu = createXanteMenuFromWidgets(jtf);
 
-    if (menu != newMenu) {
-        qDebug() << menu.debug(false);
-        qDebug() << newMenu.debug(false);
+    qDebug() << menu.debug(false);
+    qDebug() << newMenu.debug(false);
 
+    if (menu != newMenu) {
         /* The TreeView must be updated when the names are different. */
         if (menu.name() != newMenu.name())
             new_menu_name = true;
@@ -606,7 +629,7 @@ bool XDialogMenu::updateXanteMenu(void)
             emit treeViewNeedsUpdate();
 
         /* The MainWindow must know that we have a change to be saved. */
-        emit projectHasChanges();
+        notifyChange();
     }
 
     return true;
@@ -615,5 +638,39 @@ bool XDialogMenu::updateXanteMenu(void)
 bool XDialogMenu::saveCurrentState(void)
 {
     return updateXanteMenu();
+}
+
+void XDialogMenu::notifyChange(void)
+{
+    emit projectHasChanges();
+}
+
+void XDialogMenu::contentChanged(const QString &value)
+{
+    Q_UNUSED(value);
+    notifyChange();
+}
+
+void XDialogMenu::tableContentChanged(QTableWidgetItem *item)
+{
+    Q_UNUSED(item);
+
+    if (mayNotify) {
+        QString event = oldMenu.event((enum XanteMenu::Event)item->row());
+
+        if (event != item->text())
+            notifyChange();
+    }
+}
+
+void XDialogMenu::selectionChanged(void)
+{
+    mayNotify = true;
+}
+
+void XDialogMenu::groupSelected(bool checked)
+{
+    Q_UNUSED(checked);
+    notifyChange();
 }
 

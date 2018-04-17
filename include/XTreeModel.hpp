@@ -70,6 +70,7 @@ class XTreeModel : public QAbstractItemModel
                             int rotel = Qt::DisplayRole) const;
 
         void setupModelData(XTreeItem *parent);
+        QModelIndexList getPersistentIndexList(void);
 
     private:
         XTreeItem *rootItem;

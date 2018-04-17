@@ -290,7 +290,6 @@ XDialogMenu::XDialogMenu(QWidget *parent)
     : QWidget(parent)
 {
     lineEdit = QVector<QLineEdit *>(XDialogMenu::MaxLineEdit);
-//    checkBox = QVector<QCheckBox *>(XDialogMenu::MaxCheckBox);
     comboBox = QVector<QComboBox *>(XDialogMenu::MaxComboBox);
     groupBox = QVector<QGroupBox *>(XDialogMenu::MaxGroupBox);
     radioButton = QVector<QRadioButton *>(XanteMenu::MaxDynamicMenuType);

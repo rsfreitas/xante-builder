@@ -30,12 +30,14 @@
 #include <xante/libxante.h>
 #include "tabBase.hpp"
 
+class XanteBuilderConfig;
+
 class TabUi : public QWidget, public TabBase
 {
     Q_OBJECT
 
     public:
-        TabUi(QWidget *parent = 0);
+        TabUi(const XanteBuilderConfig &config, QWidget *parent = 0);
         ~TabUi() {}
 
         void setSelectedItem(const XanteItem &item);
@@ -59,6 +61,8 @@ class TabUi : public QWidget, public TabBase
         QListWidget *lwOptions;
         QLineEdit *leTitle, *leBtnOk, *leBtnCancel, *leBtnExtra, *leBtnHelp,
                   *leDescription, *leBrief;
+
+        const XanteBuilderConfig &config;
 
         QVBoxLayout *createExtraFeaturesWidgets(void);
         QGroupBox *createBtnLabelsWidgets(void);

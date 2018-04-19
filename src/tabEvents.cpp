@@ -25,8 +25,8 @@
 
 #include "xante_builder.hpp"
 
-TabEvents::TabEvents(QWidget *parent)
-    : QWidget(parent)
+TabEvents::TabEvents(const XanteBuilderConfig &config, QWidget *parent)
+    : QWidget(parent), config(config)
 {
     rowLabels << QString("Selected")
               << QString("Confirm value")

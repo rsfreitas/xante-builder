@@ -34,6 +34,7 @@ XDialogSystemSettings::XDialogSystemSettings(XanteBuilderConfig &config, QWidget
     /* Fill widgets with config */
     leSourceTemplatePath->setText(config.sourceTemplatePath());
     leJerminusPath->setText(config.jerminusPath());
+    cbMandatoryFieldColor->setCurrentText(config.mandatoryFieldColor());
 }
 
 void XDialogSystemSettings::chooseSourceTemplatePath(void)
@@ -88,6 +89,14 @@ QGroupBox *XDialogSystemSettings::createUtilitiesWidgets(void)
     h->addWidget(bt);
     v->addLayout(h);
 
+    h = new QHBoxLayout;
+    l = new QLabel(tr("Mandatory field color:"));
+    cbMandatoryFieldColor = new ColorListEditor(this);
+    l->setBuddy(cbMandatoryFieldColor);
+    h->addWidget(l);
+    h->addWidget(cbMandatoryFieldColor);
+    v->addLayout(h);
+
     g->setLayout(v);
 
     return g;
@@ -99,8 +108,12 @@ void XDialogSystemSettings::confirmOk(void)
 
     tmp = leSourceTemplatePath->text();
     config.sourceTemplatePath(tmp);
+
     tmp = leJerminusPath->text();
     config.jerminusPath(tmp);
+
+    tmp = cbMandatoryFieldColor->currentText();
+    config.mandatoryFieldColor(tmp);
 
     done(0);
 }

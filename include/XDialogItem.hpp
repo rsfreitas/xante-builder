@@ -44,13 +44,14 @@ class XanteProject;
 class XanteItem;
 class XanteMenu;
 class XanteJTF;
+class XanteBuilderConfig;
 
 class XDialogItem : public QWidget
 {
     Q_OBJECT
 
     public:
-        XDialogItem(QWidget *parent = 0);
+        XDialogItem(const XanteBuilderConfig &config, QWidget *parent = 0);
         ~XDialogItem() {}
         void setCurrentProject(int selectedMenuIndex,
                                int selectedItemIndex);
@@ -62,13 +63,16 @@ class XDialogItem : public QWidget
     private slots:
         void prepareWidgetsForCurrentItem(int type);
         void dataChanged(void);
+        void handleNewSettings(void);
 
     signals:
         void treeViewNeedsUpdate();
         void projectHasChanges();
+        void newSettings(void);
 
     private:
         int currentMenuIndex = -1, currentItemIndex = -1;
+        const XanteBuilderConfig &config;
 
         /* UI */
         QTabWidget *tabItem;

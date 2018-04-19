@@ -72,13 +72,15 @@ static const char *cbItemTypeName[] = {
 #define ITEM_TYPE       \
     (sizeof(cbItemTypeName) / sizeof(cbItemTypeName[0]))
 
-TabDetails::TabDetails(QWidget *parent)
-    : QWidget(parent)
+TabDetails::TabDetails(const XanteBuilderConfig &config, QWidget *parent)
+    : QWidget(parent), config(config)
 {
+    /* We're going to use this to change mandatory fields color */
+    labels = QVector<QLabel *>(TabDetails::Label::MaxLabel);
+    connect(parent, SIGNAL(newSettings()), this, SLOT(handleNewSettings()));
     setLayout(createMainWidgets());
 }
 
-// use a QGridLayout here
 QVBoxLayout *TabDetails::createMainWidgets(void)
 {
     QHBoxLayout *h;
@@ -89,6 +91,7 @@ QVBoxLayout *TabDetails::createMainWidgets(void)
 
     /* name */
     label = new QLabel(tr("Name:"));
+    labels[TabDetails::Label::Name] = label;
     leName = new QLineEdit;
     connect(leName, SIGNAL(textEdited(const QString &)), this,
             SLOT(contentChanged(const QString &)));
@@ -110,6 +113,7 @@ QVBoxLayout *TabDetails::createMainWidgets(void)
 
     /* type */
     label = new QLabel(tr("Item type:"));
+    labels[TabDetails::Label::Type] = label;
     cbType = new QComboBox;
     connect(cbType, SIGNAL(activated(const QString &)), this,
             SLOT(contentChanged(const QString &)));
@@ -125,6 +129,7 @@ QVBoxLayout *TabDetails::createMainWidgets(void)
 
     /* mode */
     label = new QLabel(tr("Access mode:"));
+    labels[TabDetails::Label::Mode] = label;
     cbMode = new QComboBox;
     connect(cbMode, SIGNAL(activated(const QString &)), this,
             SLOT(contentChanged(const QString &)));
@@ -179,6 +184,7 @@ void TabDetails::updateSelectedItem(XanteItem &item)
 void TabDetails::prepareWidgets(enum XanteItem::Type type)
 {
     Q_UNUSED(type);
+    handleNewSettings();
 }
 
 void TabDetails::clearCurrentData(void)
@@ -207,5 +213,18 @@ void TabDetails::contentChanged(const QString &value)
 {
     Q_UNUSED(value);
     notifyChange();
+}
+
+/*
+ * Since we received this notification we must update the color of the mandatory
+ * fields so the user may notice them.
+ */
+void TabDetails::handleNewSettings(void)
+{
+    QVector<QLabel *>::iterator i;
+
+    for (i = labels.begin(); i != labels.end(); ++i)
+        (*i)->setStyleSheet(QString("QLabel { color : %1 }")
+                                     .arg(config.mandatoryFieldColor()));
 }
 

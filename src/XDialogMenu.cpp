@@ -50,6 +50,7 @@ QHBoxLayout *XDialogMenu::createIdentificationWidgets(void)
 
     /* name */
     label = new QLabel(tr("Name:"));
+    labels.append(label);
     edit = new QLineEdit;
     connect(edit, SIGNAL(textEdited(const QString &)), this,
             SLOT(contentChanged(const QString &)));
@@ -83,6 +84,7 @@ QHBoxLayout *XDialogMenu::createTypeWidgets(void)
 
     /* type */
     label = new QLabel(tr("Menu type:"));
+    labels.append(label);
     cb = new QComboBox;
     label->setBuddy(cb);
     connect(cb, SIGNAL(activated(const QString &)), this,
@@ -98,6 +100,7 @@ QHBoxLayout *XDialogMenu::createTypeWidgets(void)
 
     /* mode */
     label = new QLabel(tr("Access mode:"));
+    labels.append(label);
     cb = new QComboBox;
     label->setBuddy(cb);
     connect(cb, SIGNAL(activated(const QString &)), this,
@@ -286,9 +289,11 @@ QGroupBox *XDialogMenu::createDynamicDetailsWidgets(void)
     return gbDynamic;
 }
 
-XDialogMenu::XDialogMenu(QWidget *parent)
-    : QWidget(parent)
+XDialogMenu::XDialogMenu(const XanteBuilderConfig &config, QWidget *parent)
+    : QWidget(parent), config(config)
 {
+    connect(parent, SIGNAL(newSettings()), this, SLOT(handleNewSettings()));
+
     lineEdit = QVector<QLineEdit *>(XDialogMenu::MaxLineEdit);
     comboBox = QVector<QComboBox *>(XDialogMenu::MaxComboBox);
     groupBox = QVector<QGroupBox *>(XDialogMenu::MaxGroupBox);
@@ -472,6 +477,9 @@ void XDialogMenu::clear(void)
 
     tbEvents->clearContents();
     currentMenuIndex = -1;
+
+    for (QList<QLabel *>::iterator i = labels.begin(); i != labels.end(); ++i)
+        (*i)->setStyleSheet(QString(""));
 }
 
 /*
@@ -483,6 +491,7 @@ void XDialogMenu::setSelection(int selectedMenuIndex)
     clear();
     currentMenuIndex = selectedMenuIndex;
     setupWidgets();
+    handleNewSettings();
 }
 
 void XDialogMenu::addDynamicFixedOption(void)
@@ -671,5 +680,12 @@ void XDialogMenu::groupSelected(bool checked)
 {
     Q_UNUSED(checked);
     notifyChange();
+}
+
+void XDialogMenu::handleNewSettings(void)
+{
+    for (QList<QLabel *>::iterator i = labels.begin(); i != labels.end(); ++i)
+        (*i)->setStyleSheet(QString("QLabel { color : %1 }")
+                                     .arg(config.mandatoryFieldColor()));
 }
 

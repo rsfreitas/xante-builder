@@ -30,12 +30,14 @@
 #include <xante/libxante.h>
 #include "tabBase.hpp"
 
+class XanteBuilderConfig;
+
 class TabMixedform : public QWidget, public TabBase
 {
     Q_OBJECT
 
     public:
-        TabMixedform(QWidget *parent = 0);
+        TabMixedform(const XanteBuilderConfig &config, QWidget *parent = 0);
         ~TabMixedform() {}
 
         void setSelectedItem(const XanteItem &item);
@@ -45,6 +47,9 @@ class TabMixedform : public QWidget, public TabBase
 
     signals:
         void dataChanged(void);
+
+    private:
+        const XanteBuilderConfig &config;
 };
 
 #endif

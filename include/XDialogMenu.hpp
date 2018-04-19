@@ -26,28 +26,18 @@
 #ifndef _XDIALOGMENU_HPP
 #define _XDIALOGMENU_HPP          1
 
-#include <QWidget>
-#include <QVector>
-#include <QTableWidget>
-
+#include <QtWidgets>
 #include <xante/libxante.h>
 
-class QLineEdit;
-class QComboBox;
-class QGroupBox;
-class QCheckBox;
-class QRadioButton;
-class QHBoxLayout;
-class QListWidget;
-class QSpinBox;
 class XanteProject;
+class XanteBuilderConfig;
 
 class XDialogMenu : public QWidget
 {
     Q_OBJECT
 
     public:
-        XDialogMenu(QWidget *parent = 0);
+        XDialogMenu(const XanteBuilderConfig &config, QWidget *parent = 0);
         ~XDialogMenu();
         void setCurrentProject(int selectedMenuIndex);
         void setSelection(int selectedMenuIndex);
@@ -63,6 +53,7 @@ class XDialogMenu : public QWidget
         void tableContentChanged(QTableWidgetItem *item);
         void selectionChanged(void);
         void groupSelected(bool checked);
+        void handleNewSettings(void);
 
     signals:
         void treeViewNeedsUpdate();
@@ -100,6 +91,8 @@ class XDialogMenu : public QWidget
         bool mayNotify = false;
         XanteMenu oldMenu;
         int currentMenuIndex = -1;
+        const XanteBuilderConfig &config;
+        QList<QLabel *> labels;
 
         /* UI */
         QVector<QLineEdit *> lineEdit;

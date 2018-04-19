@@ -25,16 +25,18 @@
 
 #include "xante_builder.hpp"
 
-XDialogItem::XDialogItem(QWidget *parent)
-    : QWidget(parent)
+XDialogItem::XDialogItem(const XanteBuilderConfig &config, QWidget *parent)
+    : QWidget(parent), config(config)
 {
     QVBoxLayout *layout = new QVBoxLayout;
     QWidget *t;
     int index;
     tabItem = new QTabWidget;
 
+    connect(parent, SIGNAL(newSettings()), this, SLOT(handleNewSettings()));
+
     /* Details */
-    t = new TabDetails(this);
+    t = new TabDetails(config, this);
     connect(t, SIGNAL(itemTypeChanged(int)), this,
             SLOT(prepareWidgetsForCurrentItem(int)));
 
@@ -45,7 +47,7 @@ XDialogItem::XDialogItem(QWidget *parent)
     tabs.insert(index, t);
 
     /* Content */
-    t = new TabContent(this);
+    t = new TabContent(config, this);
     connect(t, SIGNAL(dataChanged()), this,
             SLOT(dataChanged()));
 
@@ -53,7 +55,7 @@ XDialogItem::XDialogItem(QWidget *parent)
     tabs.insert(index, t);
 
     /* Ui */
-    t = new TabUi(this);
+    t = new TabUi(config, this);
     connect(t, SIGNAL(dataChanged()), this,
             SLOT(dataChanged()));
 
@@ -61,7 +63,7 @@ XDialogItem::XDialogItem(QWidget *parent)
     tabs.insert(index, t);
 
     /* Events */
-    t = new TabEvents(this);
+    t = new TabEvents(config, this);
     connect(t, SIGNAL(dataChanged()), this,
             SLOT(dataChanged()));
 
@@ -225,5 +227,10 @@ void XDialogItem::prepareWidgetsForCurrentItem(int type)
 void XDialogItem::dataChanged(void)
 {
     emit projectHasChanges();
+}
+
+void XDialogItem::handleNewSettings(void)
+{
+    emit newSettings();
 }
 

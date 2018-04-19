@@ -30,12 +30,14 @@
 #include <xante/libxante.h>
 #include "tabBase.hpp"
 
+class XanteBuilderConfig;
+
 class TabSpreadsheet : public QWidget, public TabBase
 {
     Q_OBJECT
 
     public:
-        TabSpreadsheet(QWidget *parent = 0);
+        TabSpreadsheet(const XanteBuilderConfig &config, QWidget *parent = 0);
         ~TabSpreadsheet() {}
 
         void setSelectedItem(const XanteItem &item);
@@ -45,6 +47,9 @@ class TabSpreadsheet : public QWidget, public TabBase
 
     signals:
         void dataChanged(void);
+
+    private:
+        const XanteBuilderConfig &config;
 };
 
 #endif

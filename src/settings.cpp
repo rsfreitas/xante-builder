@@ -41,6 +41,7 @@ void XanteBuilderConfig::loadSettings(QSettings &settings)
     settings.beginGroup("System");
     m_sourceTemplatePath = settings.value("SourceTemplate").toString();
     m_jerminusPath = settings.value("Jerminus").toString();
+    m_mandatoryFieldColor = settings.value("MandatoryFieldColor").toString();
     settings.endGroup();
 }
 
@@ -49,6 +50,7 @@ void XanteBuilderConfig::writeSettings(QSettings &settings)
     settings.beginGroup("System");
     settings.setValue("SourceTemplate", m_sourceTemplatePath);
     settings.setValue("Jerminus", m_jerminusPath);
+    settings.setValue("MandatoryFieldColor", m_mandatoryFieldColor);
     settings.endGroup();
 }
 
@@ -56,5 +58,6 @@ void XanteBuilderConfig::startWithDefaultValues(void)
 {
     m_sourceTemplatePath = QString("/usr/local/bin");
     m_jerminusPath = QString("/usr/local/bin");
+    m_mandatoryFieldColor = QString("cyan");
 }
 

@@ -30,12 +30,14 @@
 #include <xante/libxante.h>
 #include "tabBase.hpp"
 
+class XanteBuilderConfig;
+
 class TabContent : public QWidget, public TabBase
 {
     Q_OBJECT
 
     public:
-        TabContent(QWidget *parent = 0);
+        TabContent(const XanteBuilderConfig &config, QWidget *parent = 0);
         ~TabContent() {}
 
         void setSelectedItem(const XanteItem &item);
@@ -48,11 +50,31 @@ class TabContent : public QWidget, public TabBase
         void delOption(void);
         void setDefaultValue(void);
         void contentChanged(const QString &value);
+        void handleNewSettings(void);
 
     signals:
         void dataChanged(void);
 
     private:
+        enum Label {
+            Description,
+            DefaultValue,
+            Block,
+            Entry,
+            StringLength,
+            Min,
+            Max,
+            ReferencedMenu,
+
+            MaxLabel
+        };
+
+        enum GroupBox {
+            OptionsList,
+
+            MaxGroupBox
+        };
+
         QLineEdit *leDescription, *leDefaultValue, *leBlock, *leEntry;
         QSpinBox *sbMin, *sbMax, *sbStringLength;
         QDoubleSpinBox *dsbMin, *dsbMax;
@@ -61,6 +83,15 @@ class TabContent : public QWidget, public TabBase
         QComboBox *cbReferencedMenu, *cbDefaultValue;
         QGroupBox *gSettings, *gOptionsList;
         QDateTimeEdit *dtDefaultValue;
+        const XanteBuilderConfig &config;
+
+        //** Here we hold all available widgets for us to update their color.
+        QVector<QLabel *> labels;
+        QVector<QGroupBox *> groups;
+
+        //** Here will have only the ones which will really need to be updated.
+        QList<QLabel *> selectedLabels;
+        QList<QGroupBox *> selectedGroup;
 
         /* Says if we can notify any change */
         bool mayNotify = false;
@@ -73,6 +104,7 @@ class TabContent : public QWidget, public TabBase
 
         void notifyChange(void);
         void prepareDefaultValue(enum XanteItem::Type type);
+        void prepareMandatoryFields(enum XanteItem::Type type);
 };
 
 #endif

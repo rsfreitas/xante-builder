@@ -25,8 +25,8 @@
 
 #include "xante_builder.hpp"
 
-TabUi::TabUi(QWidget *parent)
-    : QWidget(parent)
+TabUi::TabUi(const XanteBuilderConfig &config, QWidget *parent)
+    : QWidget(parent), config(config)
 {
     QHBoxLayout *h = new QHBoxLayout;
 

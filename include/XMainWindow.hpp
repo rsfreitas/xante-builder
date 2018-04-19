@@ -63,6 +63,9 @@ class XMainWindow : public QMainWindow
         void projectChanged();
         void systemSettings();
 
+    signals:
+        void newSettings(void);
+
     private:
         static XanteProject *project;
         XanteBuilderConfig *config;

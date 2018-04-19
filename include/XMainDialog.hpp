@@ -33,13 +33,14 @@ class XTreeView;
 class XTreeModel;
 class XDialogItem;
 class XDialogMenu;
+class XanteBuilderConfig;
 
 class XMainDialog : public QWidget
 {
     Q_OBJECT
 
     public:
-        XMainDialog(QWidget *parent = 0);
+        XMainDialog(const XanteBuilderConfig &config, QWidget *parent = 0);
         ~XMainDialog() {}
 
         void activeProject(bool active);
@@ -52,14 +53,17 @@ class XMainDialog : public QWidget
         void dialogMenuSelected();
         void updateTreeView();
         void projectChanged();
+        void handleNewSettings(void);
 
     signals:
         void projectHasChanges();
+        void newSettings(void);
 
     private:
         XDialogItem *dialogItem;
         XDialogMenu *dialogMenu;
         XTreeView *tree;
+        const XanteBuilderConfig &config;
 };
 
 #endif

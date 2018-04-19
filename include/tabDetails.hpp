@@ -30,12 +30,14 @@
 #include <xante/libxante.h>
 #include "tabBase.hpp"
 
+class XanteBuilderConfig;
+
 class TabDetails : public QWidget, public TabBase
 {
     Q_OBJECT
 
     public:
-        TabDetails(QWidget *parent = 0);
+        TabDetails(const XanteBuilderConfig &config, QWidget *parent = 0);
         ~TabDetails() {}
 
         void setSelectedItem(const XanteItem &item);
@@ -46,14 +48,25 @@ class TabDetails : public QWidget, public TabBase
     private slots:
         void selectItemType(int index);
         void contentChanged(const QString &value);
+        void handleNewSettings(void);
 
     signals:
         void itemTypeChanged(int type);
         void dataChanged(void);
 
     private:
+        enum Label {
+            Name,
+            Type,
+            Mode,
+
+            MaxLabel
+        };
+
+        QVector<QLabel *> labels;
         QLineEdit *leName, *leObjectId;
         QComboBox *cbType, *cbMode;
+        const XanteBuilderConfig &config;
 
         QVBoxLayout *createMainWidgets(void);
         void notifyChange(void);

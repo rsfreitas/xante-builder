@@ -30,12 +30,14 @@
 #include <xante/libxante.h>
 #include "tabBase.hpp"
 
+class XanteBuilderConfig;
+
 class TabEvents : public QWidget, public TabBase
 {
     Q_OBJECT
 
     public:
-        TabEvents(QWidget *parent = 0);
+        TabEvents(const XanteBuilderConfig &config, QWidget *parent = 0);
         ~TabEvents() {}
 
         void setSelectedItem(const XanteItem &item);
@@ -53,6 +55,7 @@ class TabEvents : public QWidget, public TabBase
     private:
         QTableWidget *tbEvents;
         QStringList rowLabels;
+        const XanteBuilderConfig &config;
 
         /* Holds current XanteItem's events */
         QList<int> events;

@@ -25,8 +25,8 @@
 
 #include "xante_builder.hpp"
 
-TabSpreadsheet::TabSpreadsheet(QWidget *parent)
-    : QWidget(parent)
+TabSpreadsheet::TabSpreadsheet(const XanteBuilderConfig &config, QWidget *parent)
+    : QWidget(parent), config(config)
 {
 }
 

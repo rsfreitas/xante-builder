@@ -25,10 +25,15 @@
 
 #include "xante_builder.hpp"
 
-TabContent::TabContent(QWidget *parent)
-    : QWidget(parent)
+TabContent::TabContent(const XanteBuilderConfig &config, QWidget *parent)
+    : QWidget(parent), config(config)
 {
     QHBoxLayout *h = new QHBoxLayout;
+
+    /* We're going to use this to change mandatory fields color */
+    groups = QVector<QGroupBox *>(TabContent::GroupBox::MaxGroupBox);
+    labels = QVector<QLabel *>(TabContent::Label::MaxLabel);
+    connect(parent, SIGNAL(newSettings()), this, SLOT(handleNewSettings()));
 
     h->addWidget(createItemOptionsWidgets());
     h->addLayout(createContentWidgets());
@@ -45,7 +50,9 @@ QGroupBox *TabContent::createItemOptionsWidgets(void)
                 *hbuttons = new QHBoxLayout;
 
     gOptionsList = new QGroupBox(tr("List:"));
+    groups[TabContent::GroupBox::OptionsList] = gOptionsList;
     label = new QLabel(tr("Description:"));
+    labels[TabContent::Label::Description] = label;
     leDescription = new QLineEdit;
     connect(leDescription, SIGNAL(textEdited(const QString &)), this,
             SLOT(contentChanged(const QString &)));
@@ -87,6 +94,7 @@ QGroupBox *TabContent::createItemConfigurationWidgets(void)
 
     h = new QHBoxLayout;
     label = new QLabel(tr("Block:"));
+    labels[TabContent::Label::Block] = label;
     leBlock = new QLineEdit;
     connect(leBlock, SIGNAL(textEdited(const QString &)), this,
             SLOT(contentChanged(const QString &)));
@@ -98,6 +106,7 @@ QGroupBox *TabContent::createItemConfigurationWidgets(void)
 
     h = new QHBoxLayout;
     label = new QLabel(tr("Entry:"));
+    labels[TabContent::Label::Entry] = label;
     leEntry = new QLineEdit;
     connect(leEntry, SIGNAL(textEdited(const QString &)), this,
             SLOT(contentChanged(const QString &)));
@@ -123,6 +132,7 @@ QGroupBox *TabContent::createRangesWidgets(void)
     /* String length */
     h = new QHBoxLayout;
     label = new QLabel(tr("String length:"));
+    labels[TabContent::Label::StringLength] = label;
     sbStringLength = new QSpinBox;
     connect(sbStringLength, SIGNAL(valueChanged(const QString &)), this,
             SLOT(contentChanged(const QString &)));
@@ -135,6 +145,7 @@ QGroupBox *TabContent::createRangesWidgets(void)
     /* Min */
     h = new QHBoxLayout;
     label = new QLabel(tr("Min:"));
+    labels[TabContent::Label::Min] = label;
     sbMin = new QSpinBox;
     connect(sbMin, SIGNAL(valueChanged(const QString &)), this,
             SLOT(contentChanged(const QString &)));
@@ -154,6 +165,7 @@ QGroupBox *TabContent::createRangesWidgets(void)
     /* Max */
     h = new QHBoxLayout;
     label = new QLabel(tr("Max:"));
+    labels[TabContent::Label::Max] = label;
     sbMax = new QSpinBox;
     connect(sbMax, SIGNAL(valueChanged(const QString &)), this,
             SLOT(contentChanged(const QString &)));
@@ -195,6 +207,7 @@ QVBoxLayout *TabContent::createContentWidgets(void)
 
     /* Referenced Menu*/
     QLabel *label = new QLabel(tr("Referenced menu:"));
+    labels[TabContent::Label::ReferencedMenu] = label;
     cbReferencedMenu = new QComboBox;
     h->addWidget(label);
     h->addWidget(cbReferencedMenu);
@@ -203,6 +216,7 @@ QVBoxLayout *TabContent::createContentWidgets(void)
     /* Default Value */
     h = new QHBoxLayout;
     label = new QLabel(tr("Default value:"));
+    labels[TabContent::Label::DefaultValue] = label;
     leDefaultValue = new QLineEdit;
     connect(leDefaultValue, SIGNAL(textEdited(const QString &)), this,
             SLOT(contentChanged(const QString &)));
@@ -381,6 +395,14 @@ void TabContent::clearCurrentData(void)
     leDefaultValue->setEnabled(false);
 
     cbDefaultValue->clear();
+    selectedLabels.clear();
+    selectedGroup.clear();
+
+    for (QVector<QLabel *>::iterator i = labels.begin(); i != labels.end(); ++i)
+        (*i)->setStyleSheet(QString(""));
+
+    for (QVector<QGroupBox *>::iterator i = groups.begin(); i != groups.end(); ++i)
+        (*i)->setStyleSheet(QString(""));
 }
 
 void TabContent::prepareDefaultValue(enum XanteItem::Type type)
@@ -416,6 +438,35 @@ void TabContent::prepareDefaultValue(enum XanteItem::Type type)
     }
 }
 
+void TabContent::prepareMandatoryFields(enum XanteItem::Type type)
+{
+    if (XanteItem::needsMenuReference(type))
+        selectedLabels.append(labels[TabContent::Label::ReferencedMenu]);
+
+    if (XanteItem::needsDescription(type))
+        selectedLabels.append(labels[TabContent::Label::Description]);
+
+    if (XanteItem::needsSettings(type)) {
+        selectedLabels.append(labels[TabContent::Label::Block]);
+        selectedLabels.append(labels[TabContent::Label::Entry]);
+    }
+
+    if (XanteItem::needsDefaultValue(type))
+        selectedLabels.append(labels[TabContent::Label::DefaultValue]);
+
+    if (XanteItem::needsStringLengthRange(type))
+        selectedLabels.append(labels[TabContent::Label::StringLength]);
+
+    if (XanteItem::needsMinRange(type))
+        selectedLabels.append(labels[TabContent::Label::Min]);
+
+    if (XanteItem::needsMaxRange(type))
+        selectedLabels.append(labels[TabContent::Label::Max]);
+
+    if (XanteItem::needsOptions(type))
+        selectedGroup.append(groups[TabContent::GroupBox::OptionsList]);
+}
+
 void TabContent::prepareWidgets(enum XanteItem::Type type)
 {
     bool showFloatField = false;
@@ -425,6 +476,12 @@ void TabContent::prepareWidgets(enum XanteItem::Type type)
      * default value.
      */
     prepareDefaultValue(type);
+
+    /*
+     * Adjust the QLabels which are going to be in different color as the
+     * mandatory fields.
+     */
+    prepareMandatoryFields(type);
 
     /*
      * Adjusts how the rows will be selected inside the list of options for
@@ -460,6 +517,8 @@ void TabContent::prepareWidgets(enum XanteItem::Type type)
     sbMin->setEnabled(XanteItem::needsMinRange(type));
     sbMax->setEnabled(XanteItem::needsMaxRange(type));
     sbStringLength->setEnabled(XanteItem::needsStringLengthRange(type));
+
+    handleNewSettings();
 }
 
 void TabContent::addOption(void)
@@ -510,5 +569,25 @@ void TabContent::contentChanged(const QString &value)
 
     if (mayNotify)
         notifyChange();
+}
+
+
+/*
+ * Since we received this notification we must update the color of the mandatory
+ * fields so the user may notice them.
+ */
+void TabContent::handleNewSettings(void)
+{
+    QList<QLabel *>::iterator i;
+    QList<QGroupBox *>::iterator ii;
+
+    for (i = selectedLabels.begin(); i != selectedLabels.end(); ++i)
+        (*i)->setStyleSheet(QString("QLabel { color : %1 }")
+                                     .arg(config.mandatoryFieldColor()));
+
+    for (ii = selectedGroup.begin(); ii != selectedGroup.end(); ++ii)
+        (*ii)->setStyleSheet(QString("QGroupBox { color : %1 }")
+                                     .arg(config.mandatoryFieldColor()));
+
 }
 

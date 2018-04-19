@@ -25,8 +25,8 @@
 
 #include "xante_builder.hpp"
 
-TabMixedform::TabMixedform(QWidget *parent)
-    : QWidget(parent)
+TabMixedform::TabMixedform(const XanteBuilderConfig &config, QWidget *parent)
+    : QWidget(parent), config(config)
 {
 }
 

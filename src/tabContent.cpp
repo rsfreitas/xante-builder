@@ -588,6 +588,5 @@ void TabContent::handleNewSettings(void)
     for (ii = selectedGroup.begin(); ii != selectedGroup.end(); ++ii)
         (*ii)->setStyleSheet(QString("QGroupBox { color : %1 }")
                                      .arg(config.mandatoryFieldColor()));
-
 }
 

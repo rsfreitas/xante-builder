@@ -26,7 +26,7 @@
 #ifndef _TABMIXEDFORM_HPP
 #define _TABMIXEDFORM_HPP          1
 
-#include <QWidget>
+#include <QtWidgets>
 #include <xante/libxante.h>
 #include "tabBase.hpp"
 

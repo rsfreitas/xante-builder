@@ -26,7 +26,7 @@
 #ifndef _TABSPREADSHEET_HPP
 #define _TABSPREADSHEET_HPP          1
 
-#include <QWidget>
+#include <QtWidgets>
 #include <xante/libxante.h>
 #include "tabBase.hpp"
 
@@ -45,11 +45,29 @@ class TabSpreadsheet : public QWidget, public TabBase
         void clearCurrentData(void);
         void prepareWidgets(enum XanteItem::Type type);
 
+    private slots:
+        void handleNewSettings(void);
+        void columnsChanged(int i);
+        void rowsChanged(int i);
+
     signals:
         void dataChanged(void);
 
     private:
         const XanteBuilderConfig &config;
+        QLineEdit *leTitle;
+        QSpinBox *sbColumn, *sbRow;
+        QTableWidget *tbColumn, *tbRow;
+        QList<QLabel *> labels;
+        QList<QGroupBox *> groups;
+
+        QHBoxLayout *createTitleWidgets(void);
+        QGroupBox *createColumnWidgets(void);
+        QGroupBox *createRowWidgets(void);
+
+        void assembleColumnTable(int columns);
+        void assembleRowTable(int rows, int columns);
+        SpreadsheetData buildData(void);
 };
 
 #endif

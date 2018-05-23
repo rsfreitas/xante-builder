@@ -36,7 +36,7 @@ class XTreeView : public QTreeView
 
     public:
         int currentSelectedMenu = 0;
-        int currentSelectedItem = 0;
+        int currentSelectedItem = -1;
 
         XTreeView(QWidget *parent = 0);
         ~XTreeView();

@@ -26,26 +26,48 @@
 #ifndef _TABSPREADSHEET_HPP
 #define _TABSPREADSHEET_HPP          1
 
-#include <QWidget>
+#include <QtWidgets>
+#include <xante/libxante.h>
 #include "tabBase.hpp"
 
-class XanteItem;
+class XanteBuilderConfig;
 
 class TabSpreadsheet : public QWidget, public TabBase
 {
     Q_OBJECT
 
     public:
-        TabSpreadsheet(QWidget *parent = 0);
+        TabSpreadsheet(const XanteBuilderConfig &config, QWidget *parent = 0);
         ~TabSpreadsheet() {}
 
         void setSelectedItem(const XanteItem &item);
         void updateSelectedItem(XanteItem &item);
         void clearCurrentData(void);
-        void prepareWidgets(int type);
+        void prepareWidgets(enum XanteItem::Type type);
+
+    private slots:
+        void handleNewSettings(void);
+        void columnsChanged(int i);
+        void rowsChanged(int i);
 
     signals:
         void dataChanged(void);
+
+    private:
+        const XanteBuilderConfig &config;
+        QLineEdit *leTitle;
+        QSpinBox *sbColumn, *sbRow;
+        QTableWidget *tbColumn, *tbRow;
+        QList<QLabel *> labels;
+        QList<QGroupBox *> groups;
+
+        QHBoxLayout *createTitleWidgets(void);
+        QGroupBox *createColumnWidgets(void);
+        QGroupBox *createRowWidgets(void);
+
+        void assembleColumnTable(int columns);
+        void assembleRowTable(int rows, int columns);
+        SpreadsheetData buildData(void);
 };
 
 #endif

@@ -41,6 +41,9 @@ class XanteBuilderConfig : public XanteConfigObject
         void jerminusPath(QString &path) { m_jerminusPath = path; }
         const QString jerminusPath(void) const { return m_jerminusPath; }
 
+        void mandatoryFieldColor(QString &color) { m_mandatoryFieldColor = color; }
+        const QString mandatoryFieldColor(void) const { return m_mandatoryFieldColor; }
+
         /* Default libxante's settings */
         void windowSize(QSize s) { config->windowSize(s); }
         QSize windowSize(void) const { return config->windowSize(); }
@@ -54,7 +57,7 @@ class XanteBuilderConfig : public XanteConfigObject
 
     private:
         XanteConfig *config;
-        QString m_sourceTemplatePath, m_jerminusPath;
+        QString m_sourceTemplatePath, m_jerminusPath, m_mandatoryFieldColor;
 
         void startWithDefaultValues(void);
 };

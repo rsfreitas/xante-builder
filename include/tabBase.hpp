@@ -26,7 +26,7 @@
 #ifndef _TABBASE_HPP
 #define _TABBASE_HPP          1
 
-class XanteItem;
+#include <xante/libxante.h>
 
 class TabBase
 {
@@ -42,7 +42,7 @@ class TabBase
         /**
          * Enables/Disables internal widgets according an item type.
          */
-        virtual void prepareWidgets(int type) = 0;
+        virtual void prepareWidgets(enum XanteItem::Type type) = 0;
 
         /**
          * Fills all internal widgets with @item data.

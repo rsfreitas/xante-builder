@@ -26,13 +26,42 @@
 #ifndef _XDIALOGSYSTEMSETTINGS_HPP
 #define _XDIALOGSYSTEMSETTINGS_HPP              1
 
+#include <QtWidgets>
 #include <QDialog>
-#include <QWidget>
 
-class QGroupBox;
-class QHBoxLayout;
-class QLineEdit;
 class XanteBuilderConfig;
+
+class ColorListEditor : public QComboBox
+{
+    Q_OBJECT
+    Q_PROPERTY(QColor color READ color WRITE setColor USER true)
+
+    public:
+        ColorListEditor(QWidget *parent) : QComboBox(parent) {
+            populateList();
+        }
+
+        QColor color() const {
+            return qvariant_cast<QColor>(itemData(currentIndex(),
+                                                  Qt::DecorationRole));
+        }
+
+        void setColor(QColor color) {
+            setCurrentIndex(findData(color, int(Qt::DecorationRole)));
+        }
+
+    private:
+        void populateList() {
+            QStringList colorNames = QColor::colorNames();
+
+            for (int i = 0; i < colorNames.size(); i++) {
+                QColor color(colorNames[i]);
+
+                insertItem(i, colorNames[i]);
+                setItemData(i, color, Qt::DecorationRole);
+            }
+        }
+};
 
 class XDialogSystemSettings : public QDialog
 {
@@ -50,6 +79,7 @@ class XDialogSystemSettings : public QDialog
 
     private:
         QLineEdit *leSourceTemplatePath, *leJerminusPath;
+        QComboBox *cbMandatoryFieldColor;
         XanteBuilderConfig &config;
 
         void createWidgets(void);

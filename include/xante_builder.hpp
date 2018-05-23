@@ -39,7 +39,6 @@
 #include <xante/libxante.h>
 
 /* Internal classes */
-#include "XanteUtils.hpp"
 #include "XanteProject.hpp"
 #include "XProjectWizard.hpp"
 #include "XMainWindow.hpp"

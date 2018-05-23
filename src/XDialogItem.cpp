@@ -25,16 +25,18 @@
 
 #include "xante_builder.hpp"
 
-XDialogItem::XDialogItem(QWidget *parent)
-    : QWidget(parent)
+XDialogItem::XDialogItem(const XanteBuilderConfig &config, QWidget *parent)
+    : QWidget(parent), config(config)
 {
     QVBoxLayout *layout = new QVBoxLayout;
     QWidget *t;
     int index;
     tabItem = new QTabWidget;
 
+    connect(parent, SIGNAL(newSettings()), this, SLOT(handleNewSettings()));
+
     /* Details */
-    t = new TabDetails(this);
+    t = new TabDetails(config, this);
     connect(t, SIGNAL(itemTypeChanged(int)), this,
             SLOT(prepareWidgetsForCurrentItem(int)));
 
@@ -45,7 +47,7 @@ XDialogItem::XDialogItem(QWidget *parent)
     tabs.insert(index, t);
 
     /* Content */
-    t = new TabContent(this);
+    t = new TabContent(config, this);
     connect(t, SIGNAL(dataChanged()), this,
             SLOT(dataChanged()));
 
@@ -53,7 +55,7 @@ XDialogItem::XDialogItem(QWidget *parent)
     tabs.insert(index, t);
 
     /* Ui */
-    t = new TabUi(this);
+    t = new TabUi(config, this);
     connect(t, SIGNAL(dataChanged()), this,
             SLOT(dataChanged()));
 
@@ -61,12 +63,17 @@ XDialogItem::XDialogItem(QWidget *parent)
     tabs.insert(index, t);
 
     /* Events */
-    t = new TabEvents(this);
+    t = new TabEvents(config, this);
     connect(t, SIGNAL(dataChanged()), this,
             SLOT(dataChanged()));
 
     index = tabItem->addTab(t, tr("Events"));
     tabs.insert(index, t);
+
+    /* Spreadsheet */
+    spreadsheet = new TabSpreadsheet(config, this);
+    connect(spreadsheet, SIGNAL(dataChanged()), this,
+            SLOT(dataChanged()));
 
     layout->addWidget(tabItem);
     setLayout(layout);
@@ -95,7 +102,6 @@ void XDialogItem::clear(void)
  */
 void XDialogItem::setSelection(int selectedMenuIndex, int selectedItemIndex)
 {
-    QMapIterator<int, QWidget *> it(tabs);
     XanteProject &project = XMainWindow::getProject();
     XanteJTF &jtf = project.getJtf();
 
@@ -106,6 +112,17 @@ void XDialogItem::setSelection(int selectedMenuIndex, int selectedItemIndex)
     try {
         XanteMenu menu = jtf.menuAt(currentMenuIndex);
         XanteItem &item = menu.itemAt(currentItemIndex);
+
+        /*
+         * Enables/Disables optional Tab from the TabWdiget. So far we have to do this
+         * for:
+         *
+         * - Spreadsheet
+         * - Mixedform
+         */
+        updateSpreadsheetTab(item.type());
+
+        QMapIterator<int, QWidget *> it(tabs);
 
         while (it.hasNext()) {
             it.next();
@@ -149,6 +166,7 @@ XanteItem XDialogItem::createXanteItemFromWidgets(XanteJTF &jtf,
     while (it.hasNext()) {
         it.next();
 
+        printf("%s: %d\n", __FUNCTION__, it.key());
         try {
             dynamic_cast<TabBase *>(it.value())->updateSelectedItem(item);
         } catch (std::exception &e) {
@@ -180,10 +198,10 @@ bool XDialogItem::updateXanteItem(void)
         XanteItem &item = menu.itemAt(currentItemIndex),
                   newItem = createXanteItemFromWidgets(jtf, menu);
 
-        if (item != newItem) {
-            qDebug() << item.debug();
-            qDebug() << newItem.debug();
+        qDebug() << item.debug();
+        qDebug() << newItem.debug();
 
+        if (item != newItem) {
             if (item.name() != newItem.name())
                 new_item_name = true;
 
@@ -218,12 +236,53 @@ void XDialogItem::prepareWidgetsForCurrentItem(int type)
 
     while (it.hasNext()) {
         it.next();
-        dynamic_cast<TabBase *>(it.value())->prepareWidgets(type);
+        dynamic_cast<TabBase *>(it.value())->prepareWidgets((enum XanteItem::Type)type);
     }
+
+    /*
+     * Enables/Disables optional Tab from the TabWdiget. So far we have to do this
+     * for:
+     *
+     * - Spreadsheet
+     * - Mixedform
+     */
+    updateSpreadsheetTab((enum XanteItem::Type)type);
+
+/*    if ((enum XanteItem::Type)type == XanteItem::Type::Mixedform) {
+        mixedformTabKey = tabItem->addTab(mixedform, tr("Mixedform"));
+        tabs.insert(mixedformTabKey, spreadsheet);
+    } else {
+        if (mixedformTabKey != -1) {
+            tabs.remove(mixedformTabKey);
+            tabItem->removeTab(mixedformTabKey);
+            mixedformTabKey = -1;
+        }
+    }*/
 }
 
 void XDialogItem::dataChanged(void)
 {
     emit projectHasChanges();
+}
+
+void XDialogItem::handleNewSettings(void)
+{
+    emit newSettings();
+}
+
+void XDialogItem::updateSpreadsheetTab(enum XanteItem::Type type)
+{
+    if (type != XanteItem::Type::Spreadsheet) {
+        if (spreadsheetTabKey != -1) {
+            tabs.remove(spreadsheetTabKey);
+            tabItem->removeTab(spreadsheetTabKey);
+            spreadsheetTabKey = -1;
+        }
+
+        return;
+    }
+
+    spreadsheetTabKey = tabItem->addTab(spreadsheet, tr("Spreadsheet"));
+    tabs.insert(spreadsheetTabKey, spreadsheet);
 }
 

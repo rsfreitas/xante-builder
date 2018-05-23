@@ -25,8 +25,8 @@
 
 #include "xante_builder.hpp"
 
-TabMixedform::TabMixedform(QWidget *parent)
-    : QWidget(parent)
+TabMixedform::TabMixedform(const XanteBuilderConfig &config, QWidget *parent)
+    : QWidget(parent), config(config)
 {
 }
 
@@ -44,7 +44,7 @@ void TabMixedform::clearCurrentData(void)
 {
 }
 
-void TabMixedform::prepareWidgets(int type)
+void TabMixedform::prepareWidgets(enum XanteItem::Type type)
 {
     Q_UNUSED(type);
 }

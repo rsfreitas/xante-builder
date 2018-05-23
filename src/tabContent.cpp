@@ -25,10 +25,15 @@
 
 #include "xante_builder.hpp"
 
-TabContent::TabContent(QWidget *parent)
-    : QWidget(parent)
+TabContent::TabContent(const XanteBuilderConfig &config, QWidget *parent)
+    : QWidget(parent), config(config)
 {
     QHBoxLayout *h = new QHBoxLayout;
+
+    /* We're going to use this to change mandatory fields color */
+    groups = QVector<QGroupBox *>(TabContent::GroupBox::MaxGroupBox);
+    labels = QVector<QLabel *>(TabContent::Label::MaxLabel);
+    connect(parent, SIGNAL(newSettings()), this, SLOT(handleNewSettings()));
 
     h->addWidget(createItemOptionsWidgets());
     h->addLayout(createContentWidgets());
@@ -45,7 +50,9 @@ QGroupBox *TabContent::createItemOptionsWidgets(void)
                 *hbuttons = new QHBoxLayout;
 
     gOptionsList = new QGroupBox(tr("List:"));
+    groups[TabContent::GroupBox::OptionsList] = gOptionsList;
     label = new QLabel(tr("Description:"));
+    labels[TabContent::Label::Description] = label;
     leDescription = new QLineEdit;
     connect(leDescription, SIGNAL(textEdited(const QString &)), this,
             SLOT(contentChanged(const QString &)));
@@ -87,6 +94,7 @@ QGroupBox *TabContent::createItemConfigurationWidgets(void)
 
     h = new QHBoxLayout;
     label = new QLabel(tr("Block:"));
+    labels[TabContent::Label::Block] = label;
     leBlock = new QLineEdit;
     connect(leBlock, SIGNAL(textEdited(const QString &)), this,
             SLOT(contentChanged(const QString &)));
@@ -98,6 +106,7 @@ QGroupBox *TabContent::createItemConfigurationWidgets(void)
 
     h = new QHBoxLayout;
     label = new QLabel(tr("Entry:"));
+    labels[TabContent::Label::Entry] = label;
     leEntry = new QLineEdit;
     connect(leEntry, SIGNAL(textEdited(const QString &)), this,
             SLOT(contentChanged(const QString &)));
@@ -123,6 +132,7 @@ QGroupBox *TabContent::createRangesWidgets(void)
     /* String length */
     h = new QHBoxLayout;
     label = new QLabel(tr("String length:"));
+    labels[TabContent::Label::StringLength] = label;
     sbStringLength = new QSpinBox;
     connect(sbStringLength, SIGNAL(valueChanged(const QString &)), this,
             SLOT(contentChanged(const QString &)));
@@ -135,6 +145,7 @@ QGroupBox *TabContent::createRangesWidgets(void)
     /* Min */
     h = new QHBoxLayout;
     label = new QLabel(tr("Min:"));
+    labels[TabContent::Label::Min] = label;
     sbMin = new QSpinBox;
     connect(sbMin, SIGNAL(valueChanged(const QString &)), this,
             SLOT(contentChanged(const QString &)));
@@ -154,6 +165,7 @@ QGroupBox *TabContent::createRangesWidgets(void)
     /* Max */
     h = new QHBoxLayout;
     label = new QLabel(tr("Max:"));
+    labels[TabContent::Label::Max] = label;
     sbMax = new QSpinBox;
     connect(sbMax, SIGNAL(valueChanged(const QString &)), this,
             SLOT(contentChanged(const QString &)));
@@ -195,6 +207,7 @@ QVBoxLayout *TabContent::createContentWidgets(void)
 
     /* Referenced Menu*/
     QLabel *label = new QLabel(tr("Referenced menu:"));
+    labels[TabContent::Label::ReferencedMenu] = label;
     cbReferencedMenu = new QComboBox;
     h->addWidget(label);
     h->addWidget(cbReferencedMenu);
@@ -203,6 +216,7 @@ QVBoxLayout *TabContent::createContentWidgets(void)
     /* Default Value */
     h = new QHBoxLayout;
     label = new QLabel(tr("Default value:"));
+    labels[TabContent::Label::DefaultValue] = label;
     leDefaultValue = new QLineEdit;
     connect(leDefaultValue, SIGNAL(textEdited(const QString &)), this,
             SLOT(contentChanged(const QString &)));
@@ -282,6 +296,9 @@ void TabContent::setSelectedItem(const XanteItem &item)
             }
         }
     }
+
+    /* We can notify changes now */
+    mayNotify = true;
 }
 
 void TabContent::updateSelectedItem(XanteItem &item)
@@ -358,6 +375,9 @@ void TabContent::updateSelectedItem(XanteItem &item)
 
 void TabContent::clearCurrentData(void)
 {
+    /* And now we don't */
+    mayNotify = false;
+
     lwOptions->clear();
     leDescription->clear();
     leDefaultValue->clear();
@@ -375,19 +395,25 @@ void TabContent::clearCurrentData(void)
     leDefaultValue->setEnabled(false);
 
     cbDefaultValue->clear();
+    selectedLabels.clear();
+    selectedGroup.clear();
+
+    for (QVector<QLabel *>::iterator i = labels.begin(); i != labels.end(); ++i)
+        (*i)->setStyleSheet(QString(""));
+
+    for (QVector<QGroupBox *>::iterator i = groups.begin(); i != groups.end(); ++i)
+        (*i)->setStyleSheet(QString(""));
 }
 
-void TabContent::prepareDefaultValue(int type)
+void TabContent::prepareDefaultValue(enum XanteItem::Type type)
 {
-    enum XanteItem::Type t = (enum XanteItem::Type)type;
-
     leDefaultValue->setVisible(false);
     cbDefaultValue->setVisible(false);
     btDefaultValue->setVisible(false);
     dtDefaultValue->setVisible(false);
     dtDefaultValue->setCalendarPopup(false);
 
-    switch (t) {
+    switch (type) {
         case XanteItem::Type::RadioChecklist:
             cbDefaultValue->setVisible(true);
             break;
@@ -404,7 +430,7 @@ void TabContent::prepareDefaultValue(int type)
             break;
 
         default:
-            if (t == XanteItem::Type::Checklist)
+            if (type == XanteItem::Type::Checklist)
                 btDefaultValue->setVisible(true);
 
             leDefaultValue->setVisible(true);
@@ -412,16 +438,50 @@ void TabContent::prepareDefaultValue(int type)
     }
 }
 
-void TabContent::prepareWidgets(int type)
+void TabContent::prepareMandatoryFields(enum XanteItem::Type type)
 {
-    enum XanteItem::Type t = (enum XanteItem::Type)type;
+    if (XanteItem::needsMenuReference(type))
+        selectedLabels.append(labels[TabContent::Label::ReferencedMenu]);
+
+    if (XanteItem::needsDescription(type))
+        selectedLabels.append(labels[TabContent::Label::Description]);
+
+    if (XanteItem::needsSettings(type)) {
+        selectedLabels.append(labels[TabContent::Label::Block]);
+        selectedLabels.append(labels[TabContent::Label::Entry]);
+    }
+
+    if (XanteItem::needsDefaultValue(type))
+        selectedLabels.append(labels[TabContent::Label::DefaultValue]);
+
+    if (XanteItem::needsStringLengthRange(type))
+        selectedLabels.append(labels[TabContent::Label::StringLength]);
+
+    if (XanteItem::needsMinRange(type))
+        selectedLabels.append(labels[TabContent::Label::Min]);
+
+    if (XanteItem::needsMaxRange(type))
+        selectedLabels.append(labels[TabContent::Label::Max]);
+
+    if (XanteItem::needsOptions(type))
+        selectedGroup.append(groups[TabContent::GroupBox::OptionsList]);
+}
+
+void TabContent::prepareWidgets(enum XanteItem::Type type)
+{
     bool showFloatField = false;
 
     /*
      * Set which type of Widget we're going to use to adjust the item's
      * default value.
      */
-    prepareDefaultValue(t);
+    prepareDefaultValue(type);
+
+    /*
+     * Adjust the QLabels which are going to be in different color as the
+     * mandatory fields.
+     */
+    prepareMandatoryFields(type);
 
     /*
      * Adjusts how the rows will be selected inside the list of options for
@@ -432,19 +492,19 @@ void TabContent::prepareWidgets(int type)
     else
         lwOptions->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-    cbReferencedMenu->setEnabled(XanteItem::needsMenuReference(t));
-    leDescription->setEnabled(XanteItem::needsDescription(t));
-    leDefaultValue->setEnabled(XanteItem::needsDefaultValue(t) &&
+    cbReferencedMenu->setEnabled(XanteItem::needsMenuReference(type));
+    leDescription->setEnabled(XanteItem::needsDescription(type));
+    leDefaultValue->setEnabled(XanteItem::needsDefaultValue(type) &&
                                (type != XanteItem::Type::Checklist));
 
-    lwOptions->setEnabled(XanteItem::needsOptions(t));
-    gOptionsList->setEnabled(XanteItem::needsOptions(t));
-    gSettings->setEnabled(XanteItem::needsSettings(t));
-    btAdd->setEnabled(XanteItem::needsOptions(t));
-    btDel->setEnabled(XanteItem::needsOptions(t));
-    btDefaultValue->setEnabled(XanteItem::needsOptions(t));
+    lwOptions->setEnabled(XanteItem::needsOptions(type));
+    gOptionsList->setEnabled(XanteItem::needsOptions(type));
+    gSettings->setEnabled(XanteItem::needsSettings(type));
+    btAdd->setEnabled(XanteItem::needsOptions(type));
+    btDel->setEnabled(XanteItem::needsOptions(type));
+    btDefaultValue->setEnabled(XanteItem::needsOptions(type));
 
-    if (t == XanteItem::Type::InputFloat)
+    if (type == XanteItem::Type::InputFloat)
         showFloatField = true;
 
     dsbMin->setVisible(showFloatField);
@@ -452,11 +512,13 @@ void TabContent::prepareWidgets(int type)
     sbMin->setVisible(!showFloatField);
     sbMax->setVisible(!showFloatField);
 
-    dsbMin->setEnabled(XanteItem::needsMinRange(t));
-    dsbMax->setEnabled(XanteItem::needsMaxRange(t));
-    sbMin->setEnabled(XanteItem::needsMinRange(t));
-    sbMax->setEnabled(XanteItem::needsMaxRange(t));
-    sbStringLength->setEnabled(XanteItem::needsStringLengthRange(t));
+    dsbMin->setEnabled(XanteItem::needsMinRange(type));
+    dsbMax->setEnabled(XanteItem::needsMaxRange(type));
+    sbMin->setEnabled(XanteItem::needsMinRange(type));
+    sbMax->setEnabled(XanteItem::needsMaxRange(type));
+    sbStringLength->setEnabled(XanteItem::needsStringLengthRange(type));
+
+    handleNewSettings();
 }
 
 void TabContent::addOption(void)
@@ -504,6 +566,27 @@ void TabContent::notifyChange(void)
 void TabContent::contentChanged(const QString &value)
 {
     Q_UNUSED(value);
-    notifyChange();
+
+    if (mayNotify)
+        notifyChange();
+}
+
+
+/*
+ * Since we received this notification we must update the color of the mandatory
+ * fields so the user may notice them.
+ */
+void TabContent::handleNewSettings(void)
+{
+    QList<QLabel *>::iterator i;
+    QList<QGroupBox *>::iterator ii;
+
+    for (i = selectedLabels.begin(); i != selectedLabels.end(); ++i)
+        (*i)->setStyleSheet(QString("QLabel { color : %1 }")
+                                     .arg(config.mandatoryFieldColor()));
+
+    for (ii = selectedGroup.begin(); ii != selectedGroup.end(); ++ii)
+        (*ii)->setStyleSheet(QString("QGroupBox { color : %1 }")
+                                     .arg(config.mandatoryFieldColor()));
 }
 

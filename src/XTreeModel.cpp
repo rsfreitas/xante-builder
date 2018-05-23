@@ -235,3 +235,8 @@ void XTreeModel::setupModelData(XTreeItem *parent)
     }
 }
 
+QModelIndexList XTreeModel::getPersistentIndexList(void)
+{
+    return this->persistentIndexList();
+}
+

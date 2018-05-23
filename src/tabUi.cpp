@@ -25,8 +25,8 @@
 
 #include "xante_builder.hpp"
 
-TabUi::TabUi(QWidget *parent)
-    : QWidget(parent)
+TabUi::TabUi(const XanteBuilderConfig &config, QWidget *parent)
+    : QWidget(parent), config(config)
 {
     QHBoxLayout *h = new QHBoxLayout;
 
@@ -351,13 +351,11 @@ void TabUi::clearCurrentData(void)
     leBrief->clear();
 }
 
-void TabUi::prepareWidgets(int type)
+void TabUi::prepareWidgets(enum XanteItem::Type type)
 {
-    enum XanteItem::Type t = (enum XanteItem::Type)type;
-
-    lwOptions->setEnabled(XanteItem::needsOptions(t));
-    btAdd->setEnabled(XanteItem::needsOptions(t));
-    btDel->setEnabled(XanteItem::needsOptions(t));
+    lwOptions->setEnabled(XanteItem::needsOptions(type));
+    btAdd->setEnabled(XanteItem::needsOptions(type));
+    btDel->setEnabled(XanteItem::needsOptions(type));
 }
 
 void TabUi::addOption(void)

@@ -26,31 +26,20 @@
 #ifndef _XDIALOGITEM_HPP
 #define _XDIALOGITEM_HPP          1
 
-#include <QWidget>
-#include <QVector>
-#include <QTableWidget>
+#include <QtWidgets>
+#include <xante/libxante.h>
 
-class QLineEdit;
-class QComboBox;
-class QGroupBox;
-class QCheckBox;
-class QRadioButton;
-class QHBoxLayout;
-class QListWidget;
-class QVBoxLayout;
-class QSpinBox;
-
+class TabSpreadsheet;
+class TabMixedform;
 class XanteProject;
-class XanteItem;
-class XanteMenu;
-class XanteJTF;
+class XanteBuilderConfig;
 
 class XDialogItem : public QWidget
 {
     Q_OBJECT
 
     public:
-        XDialogItem(QWidget *parent = 0);
+        XDialogItem(const XanteBuilderConfig &config, QWidget *parent = 0);
         ~XDialogItem() {}
         void setCurrentProject(int selectedMenuIndex,
                                int selectedItemIndex);
@@ -62,20 +51,27 @@ class XDialogItem : public QWidget
     private slots:
         void prepareWidgetsForCurrentItem(int type);
         void dataChanged(void);
+        void handleNewSettings(void);
 
     signals:
         void treeViewNeedsUpdate();
         void projectHasChanges();
+        void newSettings(void);
 
     private:
-        int currentMenuIndex = -1, currentItemIndex = -1;
+        const XanteBuilderConfig &config;
+        int currentMenuIndex = -1, currentItemIndex = -1, spreadsheetTabKey = -1,
+            mixedformTabKey = -1;
 
         /* UI */
         QTabWidget *tabItem;
+        TabSpreadsheet *spreadsheet;
+        TabMixedform *mixedform;
         QMap<int, QWidget *> tabs;
 
         bool updateXanteItem(void);
         XanteItem createXanteItemFromWidgets(XanteJTF &jtf, const XanteMenu &menu);
+        void updateSpreadsheetTab(enum XanteItem::Type type);
 };
 
 #endif

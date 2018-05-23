@@ -26,26 +26,30 @@
 #ifndef _TABMIXEDFORM_HPP
 #define _TABMIXEDFORM_HPP          1
 
-#include <QWidget>
+#include <QtWidgets>
+#include <xante/libxante.h>
 #include "tabBase.hpp"
 
-class XanteItem;
+class XanteBuilderConfig;
 
 class TabMixedform : public QWidget, public TabBase
 {
     Q_OBJECT
 
     public:
-        TabMixedform(QWidget *parent = 0);
+        TabMixedform(const XanteBuilderConfig &config, QWidget *parent = 0);
         ~TabMixedform() {}
 
         void setSelectedItem(const XanteItem &item);
         void updateSelectedItem(XanteItem &item);
         void clearCurrentData(void);
-        void prepareWidgets(int type);
+        void prepareWidgets(enum XanteItem::Type type);
 
     signals:
         void dataChanged(void);
+
+    private:
+        const XanteBuilderConfig &config;
 };
 
 #endif

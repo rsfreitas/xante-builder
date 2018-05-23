@@ -30,7 +30,7 @@ XanteProject *XMainWindow::project = nullptr;
 XMainWindow::XMainWindow()
 {
     config = new XanteBuilderConfig(APP_NAME);
-    dialog = new XMainDialog(this);
+    dialog = new XMainDialog(*config, this);
     connect(dialog, SIGNAL(projectHasChanges()), this, SLOT(projectChanged()));
     createMenu();
     statusBar()->showMessage(APP_NAME);
@@ -315,6 +315,8 @@ void XMainWindow::projectChanged()
 void XMainWindow::systemSettings()
 {
     XDialogSystemSettings dlg(*config, this);
-    dlg.exec();
+
+    if ((dlg.exec() == 0) && editingProject)
+        emit newSettings();
 }
 

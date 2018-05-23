@@ -41,7 +41,6 @@ SOURCES += $$CURRENT_ROOT_PATH/src/main.cpp                 \
         $$CURRENT_ROOT_PATH/src/XDialogItem.cpp             \
         $$CURRENT_ROOT_PATH/src/XDialogJTFInfo.cpp          \
         $$CURRENT_ROOT_PATH/src/XDialogItemList.cpp         \
-        $$CURRENT_ROOT_PATH/src/XanteUtils.cpp              \
         $$CURRENT_ROOT_PATH/src/XDialogSystemSettings.cpp   \
         $$CURRENT_ROOT_PATH/src/settings.cpp                \
         $$CURRENT_ROOT_PATH/src/tabContent.cpp              \

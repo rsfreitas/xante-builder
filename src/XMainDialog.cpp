@@ -25,13 +25,16 @@
 
 #include "xante_builder.hpp"
 
-XMainDialog::XMainDialog(QWidget *parent)
-    : QWidget(parent)
+XMainDialog::XMainDialog(const XanteBuilderConfig &config, QWidget *parent)
+    : QWidget(parent), config(config)
 {
-    dialogItem = new XDialogItem(this);
+    dialogItem = new XDialogItem(config, this);
     dialogItem->setEnabled(false);
-    dialogMenu = new XDialogMenu(this);
+    dialogMenu = new XDialogMenu(config, this);
     dialogMenu->setEnabled(false);
+
+    connect(parent, SIGNAL(newSettings()), this,
+            SLOT(handleNewSettings()));
 
     tree = new XTreeView(this);
     connect(tree, SIGNAL(itemSelected()), this, SLOT(dialogItemSelected()));
@@ -141,7 +144,7 @@ void XMainDialog::controlProjectWidgets(bool enable)
 void XMainDialog::updateTreeView()
 {
     XTreeModel *model = new XTreeModel(true, this);
-    tree->setModel(model);
+    tree->redraw(model);
 }
 
 void XMainDialog::projectChanged()
@@ -153,5 +156,10 @@ void XMainDialog::saveCurrentState(void)
 {
     dialogItem->saveCurrentState();
     dialogMenu->saveCurrentState();
+}
+
+void XMainDialog::handleNewSettings(void)
+{
+    emit newSettings();
 }
 

@@ -27,22 +27,27 @@
 #define _TABEVENTS_HPP          1
 
 #include <QtWidgets>
+#include <xante/libxante.h>
 #include "tabBase.hpp"
 
-class XanteItem;
+class XanteBuilderConfig;
 
 class TabEvents : public QWidget, public TabBase
 {
     Q_OBJECT
 
     public:
-        TabEvents(QWidget *parent = 0);
+        TabEvents(const XanteBuilderConfig &config, QWidget *parent = 0);
         ~TabEvents() {}
 
         void setSelectedItem(const XanteItem &item);
         void updateSelectedItem(XanteItem &item);
         void clearCurrentData(void);
-        void prepareWidgets(int type);
+        void prepareWidgets(enum XanteItem::Type type);
+
+    private slots:
+        void contentChanged(QTableWidgetItem *item);
+        void selectionChanged(void);
 
     signals:
         void dataChanged(void);
@@ -50,9 +55,19 @@ class TabEvents : public QWidget, public TabBase
     private:
         QTableWidget *tbEvents;
         QStringList rowLabels;
+        const XanteBuilderConfig &config;
 
         /* Holds current XanteItem's events */
         QList<int> events;
+
+        /* Says if we can notify any change */
+        bool mayNotify = false;
+
+        /* We hold a copy of the current selected item to do some validations */
+        XanteItem oldItem;
+
+        void notifyChange(void);
+        void adjustRowFlags(int row, bool editEnable);
 };
 
 #endif

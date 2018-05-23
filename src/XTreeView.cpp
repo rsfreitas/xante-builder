@@ -84,41 +84,55 @@ void XTreeView::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::RightButton)
         menu->exec(event->globalPos());
-    else {
-        QModelIndex index = indexAt(event->pos()),
-                    parentIndex = index.parent();
-
-        currentSelectedMenu = -1;
-        currentSelectedItem = -1;
-
-        if (parentIndex.isValid()) {
-            selectedLine = XTreeView::SelectedLine::ItemLine;
-            currentSelectedMenu = parentIndex.row();
-            currentSelectedItem = index.row();
-        } else if (index.isValid()) {
-            selectedLine = XTreeView::SelectedLine::MenuLine;
-            currentSelectedMenu = index.row();
-        } else
-            selectedLine = XTreeView::SelectedLine::None;
-
+    else
         QTreeView::mousePressEvent(event);
+}
+
+void XTreeView::keyPressEvent(QKeyEvent *event)
+{
+    switch (event->key()) {
+        case Qt::Key_Return:
+        case Qt::Key_Space:
+            displaySelectedItem(currentIndex());
+            break;
     }
+
+    QTreeView::keyPressEvent(event);
 }
 
 void XTreeView::displaySelectedItem(QModelIndex index)
 {
     QModelIndex parentIndex = index.parent();
+    int lastSelectedMenu = currentSelectedMenu,
+        lastSelectedItem = currentSelectedItem;
 
     /* Did we select an item? */
     if (parentIndex.isValid()) {
         currentSelectedMenu = parentIndex.row();
         currentSelectedItem = index.row();
+        selectedLine = XTreeView::SelectedLine::ItemLine;
+
+        if ((currentSelectedMenu == lastSelectedMenu) &&
+            (currentSelectedItem == lastSelectedItem))
+        {
+            return;
+        }
+
         emit itemSelected();
     } else if (index.isValid()) { /* Or a menu? */
         currentSelectedMenu = index.row();
         currentSelectedItem = -1;
+        selectedLine = XTreeView::SelectedLine::MenuLine;
+
+        if ((currentSelectedMenu == lastSelectedMenu) &&
+            (currentSelectedItem == lastSelectedItem))
+        {
+            return;
+        }
+
         emit menuSelected();
-    }
+    } else
+        selectedLine = XTreeView::SelectedLine::None;
 }
 
 void XTreeView::addMenu()
@@ -270,5 +284,40 @@ void XTreeView::emitSignalToUpdate(void)
 {
     emit treeViewNeedsUpdate();
     emit projectHasChanges();
+}
+
+void XTreeView::redraw(QAbstractItemModel *model)
+{
+    QStringList st = saveState();
+
+    setModel(model);
+    restoreState(st);
+}
+
+QStringList XTreeView::saveState(void)
+{
+    XTreeModel *m = dynamic_cast<XTreeModel *>(model());
+    QStringList state;
+
+    foreach (QModelIndex index, m->getPersistentIndexList()) {
+        if (isExpanded(index))
+            state << index.data(Qt::DisplayRole).toString();
+    }
+
+    return state;
+}
+
+void XTreeView::restoreState(QStringList state)
+{
+    QAbstractItemModel *m = model();
+
+    foreach (QString item, state) {
+        QModelIndexList Items = m->match(m->index(0, 0),
+                                         Qt::DisplayRole,
+                                         QVariant::fromValue(item));
+
+        if (!Items.isEmpty())
+            setExpanded(Items.first(), true);
+    }
 }
 

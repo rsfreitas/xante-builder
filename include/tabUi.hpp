@@ -27,23 +27,23 @@
 #define _TABUI_HPP          1
 
 #include <QtWidgets>
-
+#include <xante/libxante.h>
 #include "tabBase.hpp"
 
-class XanteItem;
+class XanteBuilderConfig;
 
 class TabUi : public QWidget, public TabBase
 {
     Q_OBJECT
 
     public:
-        TabUi(QWidget *parent = 0);
+        TabUi(const XanteBuilderConfig &config, QWidget *parent = 0);
         ~TabUi() {}
 
         void setSelectedItem(const XanteItem &item);
         void updateSelectedItem(XanteItem &item);
         void clearCurrentData(void);
-        void prepareWidgets(int type);
+        void prepareWidgets(enum XanteItem::Type type);
 
     private slots:
         void addOption(void);
@@ -61,6 +61,8 @@ class TabUi : public QWidget, public TabBase
         QListWidget *lwOptions;
         QLineEdit *leTitle, *leBtnOk, *leBtnCancel, *leBtnExtra, *leBtnHelp,
                   *leDescription, *leBrief;
+
+        const XanteBuilderConfig &config;
 
         QVBoxLayout *createExtraFeaturesWidgets(void);
         QGroupBox *createBtnLabelsWidgets(void);

@@ -36,16 +36,18 @@ class XTreeView : public QTreeView
 
     public:
         int currentSelectedMenu = 0;
-        int currentSelectedItem = 0;
+        int currentSelectedItem = -1;
 
         XTreeView(QWidget *parent = 0);
         ~XTreeView();
 
         void controlDialogActions(bool enable);
+        void redraw(QAbstractItemModel *model);
 
     protected:
         void mousePressEvent(QMouseEvent *event);
         void mouseDoubleClickEvent(QMouseEvent *event);
+        void keyPressEvent(QKeyEvent *event);
 
     private slots:
         void addMenu();
@@ -78,6 +80,9 @@ class XTreeView : public QTreeView
         void createRightClickMenu(void);
         void displaySelectedItem(QModelIndex index);
         void emitSignalToUpdate(void);
+
+        QStringList saveState(void);
+        void restoreState(QStringList state);
 };
 
 #endif
